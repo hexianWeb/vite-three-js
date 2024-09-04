@@ -20,7 +20,7 @@ export default class Three {
     this.canvas = canvas;
 
     this.scene = new THREE.Scene();
-
+    this.scene.background = new THREE.Color('#bfe3dd');
     this.camera = new THREE.PerspectiveCamera(
       75,
       device.width / device.height,
@@ -61,6 +61,7 @@ export default class Three {
     this.setDebug();
     this.setLights();
     this.setObject();
+    this.setEnv();
     this.render();
     this.setResize();
   }
@@ -68,7 +69,8 @@ export default class Three {
   setDebug() {
     const parameters = {
       power: 0.3,
-      roundFrequency: 1
+      roundFrequency: 1,
+      durationTime: 3
     };
     this.shaderUniforms = {
       progress: { type: 'f', value: 0 },
@@ -86,7 +88,7 @@ export default class Three {
       })
       .on('change', ({ value }) => {
         this.shaderMaterial.uniforms.uProgress.value = value;
-        this.depthMesh.uniforms.uProgress.value = value;
+        this.depthMaterial.uniforms.uProgress.value = value;
       });
 
     pane
@@ -98,17 +100,30 @@ export default class Three {
       })
       .on('change', ({ value }) => {
         this.shaderMaterial.uniforms.uRoundFrequency.value = value;
-        this.depthMesh.uniforms.uRoundFrequency.value = value;
+        this.depthMaterial.uniforms.uRoundFrequency.value = value;
       });
     this.scene.add(new THREE.AxesHelper(5));
 
     // 添加 GSAP 动画按钮
+    // const DURATION_TIME = 3;
+    pane.addBinding(parameters, 'durationTime', {
+      min: 0,
+      max: 10,
+      step: 0.5,
+      label: '动画时长'
+    });
     pane.addButton({ title: '周期动画' }).on('click', () => {
       gsap.to(this.shaderUniforms.uProgress, {
         value: 1,
-        duration: 1,
+        duration: parameters.durationTime,
+        ease: 'power2.inOut',
         onComplete: () => {
-          gsap.to(this.shaderUniforms.uProgress, { value: 0, duration: 1 });
+          gsap.to(this.shaderUniforms.uProgress, {
+            value: 0,
+            // duration: 1,
+            ease: 'power2.inOut',
+            duration: parameters.durationTime
+          });
         }
       });
     });
@@ -119,9 +134,16 @@ export default class Three {
     this.scene.add(this.ambientLight);
 
     // 添加 一个聚光灯
-    const light = new THREE.SpotLight(0xff_ff_ff, 200, 9, Math.PI / 6.5, 0.15);
-    light.position.set(0, 5, 5);
-    light.target.position.set(0, 2, 0);
+    const light = new THREE.SpotLight(
+      0xff_ff_ff,
+      3,
+      9,
+      Math.PI / 6.5,
+      0.01,
+      0.51
+    );
+    light.position.set(-5, 3, 2);
+    light.target.position.set(0, 0, 0);
     light.castShadow = true;
     light.shadow.camera.near = 0.1;
     light.shadow.camera.far = 7;
@@ -136,34 +158,70 @@ export default class Three {
   }
 
   setObject() {
-    this.geometry = new THREE.IcosahedronGeometry(1, 9).toNonIndexed();
+    // this.geometry = new THREE.IcosahedronGeometry(1, 9).toNonIndexed();
     // this.geometry = new THREE.SphereGeometry(2, 32, 32).toNonIndexed();
     this.loader.load('./model/lion.glb', ({ scene }) => {
-      // console.log(scene);
       this.geometry = scene.children[0].geometry.toNonIndexed();
-      this.geometry.computeVertexNormals();
-      this.geometry.computeFaceNormals();
-      this.geometry.computeBoundingSphere();
+      const mesh = this.setGeometry(this.geometry);
+      mesh.rotation.set(0, 0, 0);
+      this.scene.add(mesh);
     });
-    // 计算包围球
-    this.geometry.computeBoundingSphere();
+    // 添加地板
+    let floorGeometry = new THREE.PlaneGeometry(10, 10);
+    let floorMaterial = new THREE.MeshStandardMaterial({
+      color: '#fff',
+      // shininess: 0,
+      side: THREE.DoubleSide
+    });
+    let floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.1;
+    floor.receiveShadow = true;
+    this.scene.add(floor);
+  }
+
+  setGeometry(geometry) {
+    geometry.computeBoundingSphere();
+
+    console.log(geometry);
+
     // 获取 几何体的高度
-    let height = Math.floor(this.geometry.boundingSphere.radius * 2);
+    let height = Math.floor(geometry.boundingSphere.radius * 2);
 
     this.shaderUniforms.uHeight = { type: 'f', value: height };
 
     // 自定义着色器材质
     this.shaderMaterial = new CustomShaderMaterial({
-      baseMaterial: THREE.MeshStandardMaterial,
+      // baseMaterial: THREE.MeshStandardMaterial,
+      baseMaterial: THREE.MeshPhysicalMaterial,
       vertexShader: vertex,
       fragmentShader: fragment,
       silent: true, // Disables the default warning if true
       uniforms: this.shaderUniforms,
       flatShading: true,
       side: THREE.FrontSide,
-      color: 0xff_00_ff
+      color: '#fff',
+      // metalness: 0.5,
+      metalness: 0,
+      roughness: 0,
+      envMapIntensity: 3
+      // transmission: 1,
+      // ior: 1.5
     });
-    let length = this.geometry.attributes.position.count;
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    this.pmremGenerator.compileEquirectangularShader();
+    this.envMap = new THREE.TextureLoader().load('./envmap.jpg', (texture) => {
+      this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
+      this.envMap.ColorSpace = THREE.SRGBColorSpace;
+      this.shaderMaterial.envMap = this.envMap;
+    });
+    this.pmremGenerator.dispose();
+    // new THREE.TextureLoader().load('./envmap.jpg', (texture) => {
+    //   this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
+    //   this.envMap.ColorSpace = THREE.SRGBColorSpace;
+    //   this.shaderMaterial.envMap = this.envMap;
+    // });
+    let length = geometry.attributes.position.count;
 
     let randomsArray = new Float32Array(length);
     let centersArray = new Float32Array(length * 3);
@@ -177,19 +235,19 @@ export default class Three {
       // 计算出 this.geometry 中每个三角形的重心
 
       // 顶点 A
-      let x = this.geometry.attributes.position.array[index * 3];
-      let y = this.geometry.attributes.position.array[index * 3 + 1];
-      let z = this.geometry.attributes.position.array[index * 3 + 2];
+      let x = geometry.attributes.position.array[index * 3];
+      let y = geometry.attributes.position.array[index * 3 + 1];
+      let z = geometry.attributes.position.array[index * 3 + 2];
 
       // 顶点B
-      let x1 = this.geometry.attributes.position.array[index * 3 + 3];
-      let y1 = this.geometry.attributes.position.array[index * 3 + 4];
-      let z1 = this.geometry.attributes.position.array[index * 3 + 5];
+      let x1 = geometry.attributes.position.array[index * 3 + 3];
+      let y1 = geometry.attributes.position.array[index * 3 + 4];
+      let z1 = geometry.attributes.position.array[index * 3 + 5];
 
       // 顶点C
-      let x2 = this.geometry.attributes.position.array[index * 3 + 6];
-      let y2 = this.geometry.attributes.position.array[index * 3 + 7];
-      let z2 = this.geometry.attributes.position.array[index * 3 + 8];
+      let x2 = geometry.attributes.position.array[index * 3 + 6];
+      let y2 = geometry.attributes.position.array[index * 3 + 7];
+      let z2 = geometry.attributes.position.array[index * 3 + 8];
 
       // 计算重心
       let center = new THREE.Vector3(x, y, z)
@@ -209,21 +267,19 @@ export default class Three {
     }
 
     // 填入 attribute
-    this.geometry.setAttribute(
+    geometry.setAttribute(
       'aRandom',
       new THREE.BufferAttribute(randomsArray, 1)
     );
 
-    this.geometry.setAttribute(
+    geometry.setAttribute(
       'aCenter',
       new THREE.BufferAttribute(centersArray, 3)
     );
 
-    console.log(this.geometry.attributes);
-
-    this.mesh = new THREE.Mesh(this.geometry, this.shaderMaterial);
-    this.mesh.translateY(height / 2);
-    this.depthMesh = new CustomShaderMaterial({
+    const mesh = new THREE.Mesh(geometry, this.shaderMaterial);
+    // mesh.translateY(height / 2);
+    this.depthMaterial = new CustomShaderMaterial({
       baseMaterial: THREE.MeshDepthMaterial,
       vertexShader: vertex,
       fragmentShader: fragment,
@@ -231,39 +287,22 @@ export default class Three {
       uniforms: this.shaderUniforms,
       depthPacking: THREE.RGBADepthPacking
     });
-    this.mesh.customDepthMaterial = this.depthMesh;
+    mesh.customDepthMaterial = this.depthMaterial;
 
-    this.mesh.castShadow = true;
-    this.mesh.receiveShadow = true;
-    this.scene.add(this.mesh);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
 
-    // 添加地板
-    let floorGeometry = new THREE.PlaneGeometry(10, 10);
-    let floorMaterial = new THREE.MeshStandardMaterial({
-      color: '#fff',
-      // shininess: 0,
-      side: THREE.DoubleSide
-    });
-    let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -1;
-    floor.receiveShadow = true;
-    this.scene.add(floor);
+    return mesh;
   }
 
-  // setGeometry(geometry) {
-  //   geometry.computeVertexNormals();
-  //   geometry.computeFaceNormals();
-  //   geometry.computeBoundingSphere();
-
-  //   let height = Math.floor(geometry.boundingSphere.radius * 2);
-
-  // }
+  setEnv() {
+    // this.renderer.clearColor = new THREE.Color('#fff');
+  }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
     // 材质的 uniforms 值更新
-    this.shaderMaterial.uniforms.uTime.value = elapsedTime;
+    // this.shaderMaterial.uniforms.uTime.value = elapsedTime;
 
     // this.mesh.rotation.x = 0.2 * elapsedTime;
     // this.mesh.rotation.y = 0.1 * elapsedTime;
