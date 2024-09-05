@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { Pane } from 'tweakpane';
 
+import { MeshReflectorMaterial } from '../mesh-reflector-material';
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
 
@@ -60,8 +61,9 @@ export default class Three {
 
     this.setDebug();
     this.setLights();
+    this.setFloor();
     this.setObject();
-    this.setEnv();
+    // this.setEnv();
     this.render();
     this.setResize();
   }
@@ -136,7 +138,7 @@ export default class Three {
     // 添加 一个聚光灯
     const light = new THREE.SpotLight(
       0xff_ff_ff,
-      3,
+      1.5,
       9,
       Math.PI / 6.5,
       0.01,
@@ -158,32 +160,67 @@ export default class Three {
   }
 
   setObject() {
-    // this.geometry = new THREE.IcosahedronGeometry(1, 9).toNonIndexed();
-    // this.geometry = new THREE.SphereGeometry(2, 32, 32).toNonIndexed();
     this.loader.load('./model/lion.glb', ({ scene }) => {
       this.geometry = scene.children[0].geometry.toNonIndexed();
       const mesh = this.setGeometry(this.geometry);
       mesh.rotation.set(0, 0, 0);
       this.scene.add(mesh);
     });
-    // 添加地板
-    let floorGeometry = new THREE.PlaneGeometry(10, 10);
-    let floorMaterial = new THREE.MeshStandardMaterial({
-      color: '#fff',
-      // shininess: 0,
-      side: THREE.DoubleSide
+  }
+
+  setFloor() {
+    // 加载地板贴图
+    new THREE.TextureLoader().load('./map.jpg', (woodfloorDiffuse) => {
+      // 规定重复次数
+      woodfloorDiffuse.wrapS = THREE.RepeatWrapping;
+      woodfloorDiffuse.wrapT = THREE.RepeatWrapping;
+      woodfloorDiffuse.repeat.set(10, 10);
+      // 添加地板
+      let floorGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+      let temporaryMaterial = new THREE.MeshBasicMaterial({
+        map: woodfloorDiffuse
+      });
+      this.floor = new THREE.Mesh(floorGeometry, temporaryMaterial);
+
+      this.floor.material = new MeshReflectorMaterial(
+        this.renderer,
+        this.camera,
+        this.scene,
+        this.floor,
+        {
+          mixBlur: 1.4,
+          mixStrength: 6,
+          resolution: 256,
+          blur: [1024, 1024],
+          minDepthThreshold: 0,
+          maxDepthThreshold: 6.68,
+          depthScale: 11.4,
+          depthToBlurRatioBias: 0.9,
+          mirror: 0,
+          distortion: 1,
+          mixContrast: 0.97,
+          reflectorOffset: 0,
+          bufferSamples: 8,
+          planeNormal: new THREE.Vector3(0, 0, 1)
+        }
+      );
+      this.floor.material.setValues({
+        map: woodfloorDiffuse,
+        emissiveMap: woodfloorDiffuse,
+        emissive: new THREE.Color(0xff_ff_ff),
+        emissiveIntensity: 0.2,
+        envMapIntensity: 1.08,
+        roughness: 1
+      });
+      this.floor.rotation.x = -Math.PI / 2;
+      this.floor.position.y = -0.1;
+      this.floor.receiveShadow = true;
+      this.scene.add(this.floor);
     });
-    let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.1;
-    floor.receiveShadow = true;
-    this.scene.add(floor);
   }
 
   setGeometry(geometry) {
     geometry.computeBoundingSphere();
-
-    console.log(geometry);
 
     // 获取 几何体的高度
     let height = Math.floor(geometry.boundingSphere.radius * 2);
@@ -295,17 +332,12 @@ export default class Three {
     return mesh;
   }
 
-  setEnv() {
-    // this.renderer.clearColor = new THREE.Color('#fff');
-  }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
-    // 材质的 uniforms 值更新
-    // this.shaderMaterial.uniforms.uTime.value = elapsedTime;
-
-    // this.mesh.rotation.x = 0.2 * elapsedTime;
-    // this.mesh.rotation.y = 0.1 * elapsedTime;
+    if (this.floor) {
+      this.floor.material.update();
+    }
 
     this.renderer.render(this.scene, this.camera);
     this.controls.update();

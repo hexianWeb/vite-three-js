@@ -27,6 +27,7 @@
   "dependencies": {
     "@vitejs/plugin-legacy": "^5.4.1",
     "gsap": "^3.12.5",
+    "postprocessing": "^6.36.1",
     "three": "^0.167.1",
     "three-custom-shader-material": "^5.4.0",
     "tweakpane": "^4.0.4"

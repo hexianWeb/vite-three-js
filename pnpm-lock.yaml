@@ -14,6 +14,9 @@ importers:
       gsap:
         specifier: ^3.12.5
         version: 3.12.5
+      postprocessing:
+        specifier: ^6.36.1
+        version: 6.36.1(three@0.167.1)
       three:
         specifier: ^0.167.1
         version: 0.167.1
@@ -2589,6 +2592,11 @@ packages:
   postcss@8.4.41:
     resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
     engines: {node: ^10 || ^12 || >=14}
+
+  postprocessing@6.36.1:
+    resolution: {integrity: sha512-V4THKWPZjRUC40OiTWhlzJCWyEkRYeAvMtYVdpi2pcQxAD2qTDm48UB2tZRTW+QdAw80P8Ut7IeKV6J1Gvac9w==}
+    peerDependencies:
+      three: '>= 0.157.0 < 0.169.0'
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -5831,6 +5839,10 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.0.1
       source-map-js: 1.2.0
+
+  postprocessing@6.36.1(three@0.167.1):
+    dependencies:
+      three: 0.167.1
 
   prelude-ls@1.2.1: {}
 
