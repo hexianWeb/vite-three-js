@@ -40,6 +40,4 @@ void main() {
 
   // csm_Position = rotateAroundPoint(csm_Position, vec3(0.0, 1.0, 0.0), (1.0 - uProgress)*1.5 * (1.0-localProgress)*0.5 * PI * uRoundFrequency,vec3(.0,0.0,0.0));
   csm_Position = rotate(csm_Position, vec3(0.0, 1.0, 0.0), (1.0 - uProgress)*1.5 * (1.0-localProgress)*0.5 * PI * uRoundFrequency);
-  // csm_Position = csm_PositionRaw.xyz;
-  // gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }

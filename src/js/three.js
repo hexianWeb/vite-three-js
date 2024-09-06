@@ -21,7 +21,7 @@ export default class Three {
     this.canvas = canvas;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#bfe3dd');
+    this.scene.background = new THREE.Color('#ffffff');
     this.camera = new THREE.PerspectiveCamera(
       75,
       device.width / device.height,
@@ -36,7 +36,7 @@ export default class Three {
     //   0.1,
     //   100
     // );
-    this.camera.position.set(3, 3, 3);
+    this.camera.position.set(-0.7, 0.5, 0.5);
     this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -50,11 +50,15 @@ export default class Three {
     // 允许阴影
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.controls = new OrbitControls(this.camera, this.canvas);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-
+    // this.controls.enableDamping = true;
+    // this.controls.dampingFactor = 0.05;
+    this.controls.target.set(0.16, 0.43, 0.31);
+    this.controls.update();
     this.clock = new THREE.Clock();
 
     this.loader = new GLTFLoader();
@@ -64,6 +68,7 @@ export default class Three {
     this.setFloor();
     this.setObject();
     // this.setEnv();
+    this.setFog();
     this.render();
     this.setResize();
   }
@@ -136,41 +141,40 @@ export default class Three {
     this.scene.add(this.ambientLight);
 
     // 添加 一个聚光灯
-    const light = new THREE.SpotLight(
+    this.spotLight = new THREE.SpotLight(
       0xff_ff_ff,
-      1.5,
+      6.5,
       9,
-      Math.PI / 6.5,
+      // Math.PI / 6.5,
+      Math.PI / 2,
       0.01,
       0.51
     );
-    light.position.set(-5, 3, 2);
-    light.target.position.set(0, 0, 0);
-    light.castShadow = true;
-    light.shadow.camera.near = 0.1;
-    light.shadow.camera.far = 7;
-    light.shadow.mapSize.width = 2048;
-    light.shadow.mapSize.height = 2048;
-    light.shadow.bias = 0.0001;
-
+    this.spotLight.position.set(-1.5, 3, 2);
+    this.spotLight.target.position.set(0, 0, 0);
+    this.spotLight.castShadow = true;
+    this.spotLight.shadow.camera.near = 0.1;
+    this.spotLight.shadow.camera.far = 7;
+    this.spotLight.shadow.mapSize.width = 2048;
+    this.spotLight.shadow.mapSize.height = 2048;
+    this.spotLight.shadow.bias = 0.0001;
     // 添加 spotlightHelper
-    const spotlightHelper = new THREE.SpotLightHelper(light);
+    const spotlightHelper = new THREE.SpotLightHelper(this.spotLight);
     this.scene.add(spotlightHelper);
-    this.scene.add(light);
+    this.scene.add(this.spotLight);
   }
 
   setObject() {
     this.loader.load('./model/lion.glb', ({ scene }) => {
       this.geometry = scene.children[0].geometry.toNonIndexed();
-      const mesh = this.setGeometry(this.geometry);
-      mesh.rotation.set(0, 0, 0);
-      this.scene.add(mesh);
+      this.mesh = this.setGeometry(this.geometry);
+      this.scene.add(this.mesh);
     });
   }
 
   setFloor() {
     // 加载地板贴图
-    new THREE.TextureLoader().load('./map.jpg', (woodfloorDiffuse) => {
+    new THREE.TextureLoader().load('./white.jpg', (woodfloorDiffuse) => {
       // 规定重复次数
       woodfloorDiffuse.wrapS = THREE.RepeatWrapping;
       woodfloorDiffuse.wrapT = THREE.RepeatWrapping;
@@ -214,11 +218,14 @@ export default class Three {
       });
       this.floor.rotation.x = -Math.PI / 2;
       this.floor.position.y = -0.1;
-      this.floor.receiveShadow = true;
+      this.floor.receiveShadow = false;
       this.scene.add(this.floor);
     });
   }
 
+  setFog() {
+    this.scene.fog = new THREE.Fog(0xFF_FF_FF, 1, 3);
+  }
   setGeometry(geometry) {
     geometry.computeBoundingSphere();
 
@@ -229,7 +236,6 @@ export default class Three {
 
     // 自定义着色器材质
     this.shaderMaterial = new CustomShaderMaterial({
-      // baseMaterial: THREE.MeshStandardMaterial,
       baseMaterial: THREE.MeshPhysicalMaterial,
       vertexShader: vertex,
       fragmentShader: fragment,
@@ -237,27 +243,21 @@ export default class Three {
       uniforms: this.shaderUniforms,
       flatShading: true,
       side: THREE.FrontSide,
-      color: '#fff',
+      emissive: '#fff',
+      emissiveIntensity: 0.19
       // metalness: 0.5,
-      metalness: 0,
-      roughness: 0,
-      envMapIntensity: 3
-      // transmission: 1,
-      // ior: 1.5
+      // metalness: 0.35,
+      // roughness: 0.9
+      // envMapIntensity: 0
     });
-    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
-    this.pmremGenerator.compileEquirectangularShader();
-    this.envMap = new THREE.TextureLoader().load('./envmap.jpg', (texture) => {
-      this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-      this.envMap.ColorSpace = THREE.SRGBColorSpace;
-      this.shaderMaterial.envMap = this.envMap;
-    });
-    this.pmremGenerator.dispose();
-    // new THREE.TextureLoader().load('./envmap.jpg', (texture) => {
+    // this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    // this.pmremGenerator.compileEquirectangularShader();
+    // this.envMap = new THREE.TextureLoader().load('./envmap.jpg', (texture) => {
     //   this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
     //   this.envMap.ColorSpace = THREE.SRGBColorSpace;
     //   this.shaderMaterial.envMap = this.envMap;
     // });
+    // this.pmremGenerator.dispose();
     let length = geometry.attributes.position.count;
 
     let randomsArray = new Float32Array(length);
@@ -340,7 +340,9 @@ export default class Three {
     }
 
     this.renderer.render(this.scene, this.camera);
-    this.controls.update();
+    // this.controls.update();
+    // console.log(this.camera.position);
+
     requestAnimationFrame(this.render.bind(this));
   }
 

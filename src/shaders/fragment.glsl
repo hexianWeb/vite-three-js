@@ -5,7 +5,7 @@ varying vec3 vViewDir;
 
 void main() {
   // If localProgress is less than 0.1, discard the fragment
-  // if (vLocalProgress > 0.99999991) {
+  // if (vLocalProgress < 0.05) {
   //   discard;
   // }
   // 如果当前顶点的法线和视线方向的夹角小于30度，则不绘制该片元
@@ -14,5 +14,5 @@ void main() {
     discard;
   }
 
-  // csm_DiffuseColor = vec4(0.0,0.0, 0.0, 1.0);
+  // csm_DiffuseColor = vec4(1.0,1.0, 1.0, 1.0);
 }
