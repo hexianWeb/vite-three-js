@@ -63,8 +63,8 @@ export default class Three {
 
     this.loader = new GLTFLoader();
 
-    this.setDebug();
     this.setLights();
+    this.setDebug();
     this.setFloor();
     this.setObject();
     // this.setEnv();
@@ -109,7 +109,6 @@ export default class Three {
         this.shaderMaterial.uniforms.uRoundFrequency.value = value;
         this.depthMaterial.uniforms.uRoundFrequency.value = value;
       });
-    this.scene.add(new THREE.AxesHelper(5));
 
     // 添加 GSAP 动画按钮
     // const DURATION_TIME = 3;
@@ -134,6 +133,10 @@ export default class Three {
         }
       });
     });
+    // this.scene.add(new THREE.AxesHelper(5));
+    // // 添加 spotlightHelper
+    // const spotlightHelper = new THREE.SpotLightHelper(this.spotLight);
+    // this.scene.add(spotlightHelper);
   }
 
   setLights() {
@@ -143,7 +146,7 @@ export default class Three {
     // 添加 一个聚光灯
     this.spotLight = new THREE.SpotLight(
       0xff_ff_ff,
-      6.5,
+      5.5,
       9,
       // Math.PI / 6.5,
       Math.PI / 2,
@@ -158,9 +161,7 @@ export default class Three {
     this.spotLight.shadow.mapSize.width = 2048;
     this.spotLight.shadow.mapSize.height = 2048;
     this.spotLight.shadow.bias = 0.0001;
-    // 添加 spotlightHelper
-    const spotlightHelper = new THREE.SpotLightHelper(this.spotLight);
-    this.scene.add(spotlightHelper);
+
     this.scene.add(this.spotLight);
   }
 
@@ -244,7 +245,7 @@ export default class Three {
       flatShading: true,
       side: THREE.FrontSide,
       emissive: '#fff',
-      emissiveIntensity: 0.19
+      emissiveIntensity: 0.25
       // metalness: 0.5,
       // metalness: 0.35,
       // roughness: 0.9
