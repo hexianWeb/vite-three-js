@@ -12,6 +12,7 @@ import { Pane } from 'tweakpane';
 
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
+import { MeshReflectorMaterial } from './shaders/MeshReflectorMaterial';
 
 const device = {
   width: window.innerWidth,
@@ -85,6 +86,7 @@ export default class Three {
     this.render();
     this.setDebug();
     this.setResize();
+    // this.setFloor();
   }
 
   setDebug() {
@@ -193,6 +195,58 @@ export default class Three {
 
     this.cubeGroup.rotateX(Math.PI / 4);
     this.cubeGroup.rotateZ(Math.PI / 4);
+  }
+
+  setFloor() {
+    // 加载地板贴图
+    new THREE.TextureLoader().load('./map.jpg', (woodfloorDiffuse) => {
+      // 规定重复次数
+      woodfloorDiffuse.wrapS = THREE.RepeatWrapping;
+      woodfloorDiffuse.wrapT = THREE.RepeatWrapping;
+      woodfloorDiffuse.repeat.set(10, 10);
+      // 添加地板
+      let floorGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+      let temporaryMaterial = new THREE.MeshBasicMaterial({
+        map: woodfloorDiffuse
+        // color: 'red'
+      });
+      this.floor = new THREE.Mesh(floorGeometry, temporaryMaterial);
+
+      this.floor.material = new MeshReflectorMaterial(
+        this.renderer,
+        this.camera,
+        this.scene,
+        this.floor,
+        {
+          mixBlur: 1.4,
+          mixStrength: 6,
+          resolution: 256,
+          blur: [1024, 1024],
+          minDepthThreshold: 0,
+          maxDepthThreshold: 6.68,
+          depthScale: 11.4,
+          depthToBlurRatioBias: 0.9,
+          mirror: 0,
+          distortion: 1,
+          mixContrast: 0.97,
+          reflectorOffset: 0,
+          bufferSamples: 8,
+          planeNormal: new THREE.Vector3(0, 0, 1)
+        }
+      );
+      this.floor.material.setValues({
+        map: woodfloorDiffuse,
+        emissiveMap: woodfloorDiffuse,
+        emissive: new THREE.Color(0xff_ff_ff),
+        emissiveIntensity: 0.2,
+        envMapIntensity: 1.08,
+        roughness: 1
+      });
+      this.floor.rotation.x = -Math.PI / 2;
+      this.floor.position.y = -2;
+      this.floor.receiveShadow = true;
+      this.scene.add(this.floor);
+    });
   }
 
   setCursor(event) {
