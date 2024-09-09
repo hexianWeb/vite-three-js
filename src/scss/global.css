@@ -1,0 +1,13 @@
+@charset "UTF-8";
+/* 引用本地字体*/
+@font-face {
+  font-family: 'Times New Roman';
+  src: url("/font/RomanUncialModern.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Times New Roman';
+  font-weight: 400;
+}

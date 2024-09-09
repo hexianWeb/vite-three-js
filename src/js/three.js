@@ -86,39 +86,36 @@ export default class Three {
       uRoundFrequency: { type: 'f', value: 1 }
     };
     const pane = new Pane();
-    pane
-      .addBinding(parameters, 'power', {
-        min: 0,
-        max: 1,
-        step: 0.01,
-        label: '变化强度'
-      })
-      .on('change', ({ value }) => {
-        this.shaderMaterial.uniforms.uProgress.value = value;
-        this.depthMaterial.uniforms.uProgress.value = value;
-      });
+    const f1 = pane.addFolder({ title: 'Shader' });
+    f1.addBinding(parameters, 'power', {
+      min: 0,
+      max: 1,
+      step: 0.01,
+      label: '变化强度'
+    }).on('change', ({ value }) => {
+      this.shaderMaterial.uniforms.uProgress.value = value;
+      this.depthMaterial.uniforms.uProgress.value = value;
+    });
 
-    pane
-      .addBinding(parameters, 'roundFrequency', {
-        min: 0,
-        max: 10,
-        step: 0.5,
-        label: '转动周期'
-      })
-      .on('change', ({ value }) => {
-        this.shaderMaterial.uniforms.uRoundFrequency.value = value;
-        this.depthMaterial.uniforms.uRoundFrequency.value = value;
-      });
+    f1.addBinding(parameters, 'roundFrequency', {
+      min: 0,
+      max: 10,
+      step: 0.5,
+      label: '转动周期'
+    }).on('change', ({ value }) => {
+      this.shaderMaterial.uniforms.uRoundFrequency.value = value;
+      this.depthMaterial.uniforms.uRoundFrequency.value = value;
+    });
 
     // 添加 GSAP 动画按钮
     // const DURATION_TIME = 3;
-    pane.addBinding(parameters, 'durationTime', {
+    f1.addBinding(parameters, 'durationTime', {
       min: 0,
       max: 10,
       step: 0.5,
       label: '动画时长'
     });
-    pane.addButton({ title: '周期动画' }).on('click', () => {
+    f1.addButton({ title: '周期动画' }).on('click', () => {
       gsap.to(this.shaderUniforms.uProgress, {
         value: 1,
         duration: parameters.durationTime,
@@ -133,6 +130,50 @@ export default class Three {
         }
       });
     });
+    // 添加对 spotlight 的控制
+    const soptLightPane = pane.addFolder({ title: '聚光灯' });
+    soptLightPane.addBinding(this.spotLight.position, 'x', {
+      min: -10,
+      max: 10,
+      step: 0.1,
+      label: 'x'
+    });
+    soptLightPane.addBinding(this.spotLight.position, 'y', {
+      min: -10,
+      max: 10,
+      step: 0.1,
+      label: 'y'
+    });
+    soptLightPane.addBinding(this.spotLight.position, 'z', {
+      min: -10,
+      max: 10,
+      step: 0.1,
+      label: 'z'
+    });
+    soptLightPane.addBinding(this.spotLight, 'intensity', {
+      min: 0,
+      max: 10,
+      step: 0.1,
+      label: '强度'
+    });
+    soptLightPane.addBinding(this.spotLight, 'angle', {
+      min: 0,
+      max: Math.PI / 2,
+      step: 0.01,
+      label: '角度'
+    });
+    soptLightPane.addBinding(this.spotLight, 'penumbra', {
+      min: 0,
+      max: 1,
+      step: 0.01,
+      label: '扩散'
+    });
+    soptLightPane.addBinding(this.spotLight, 'decay', {
+      min: 0,
+      max: 2,
+      step: 0.01,
+      label: '衰减'
+    });
     // this.scene.add(new THREE.AxesHelper(5));
     // // 添加 spotlightHelper
     // const spotlightHelper = new THREE.SpotLightHelper(this.spotLight);
@@ -144,16 +185,8 @@ export default class Three {
     this.scene.add(this.ambientLight);
 
     // 添加 一个聚光灯
-    this.spotLight = new THREE.SpotLight(
-      0xff_ff_ff,
-      5.5,
-      9,
-      // Math.PI / 6.5,
-      Math.PI / 2,
-      0.01,
-      0.51
-    );
-    this.spotLight.position.set(-1.5, 3, 2);
+    this.spotLight = new THREE.SpotLight(0xff_ff_ff, 7.5, 9, 0.38, 0.61, 0.5);
+    this.spotLight.position.set(-0.9, 1.5, 1.5);
     this.spotLight.target.position.set(0, 0, 0);
     this.spotLight.castShadow = true;
     this.spotLight.shadow.camera.near = 0.1;
@@ -225,7 +258,7 @@ export default class Three {
   }
 
   setFog() {
-    this.scene.fog = new THREE.Fog(0xFF_FF_FF, 1, 3);
+    this.scene.fog = new THREE.Fog(0xff_ff_ff, 1, 3);
   }
   setGeometry(geometry) {
     geometry.computeBoundingSphere();
