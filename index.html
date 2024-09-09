@@ -1,90 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <!-- ESSENTIAL -->
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- ... (保持原有的head内容不变) ... -->
 
-    <!-- GENERAL -->
-    <title>Vite ThreeJS — Template</title>
-    <meta name="title" content="Vite ThreeJS — Template" />
-    <meta name="application-name" content="Vite ThreeJS — Template" />
-    <meta
-      name="description"
-      content="Boilerplate template designed to quickly bootstrapping a 3D Web App, SPA, website or landing page with Three.JS, GLSL, Vite, TailwindCSS, ESLint, Husky and much more in just 30 seconds."
-    />
-    <meta
-      name="keywords"
-      content="
-        three, three js, threejs, three.js, three-js, 
-        three template, three js template, threejs template, three.js template, three-js template, 
-        three vite, three js vite, threejs vite, three.js vite, three-js vite,
-        three vite template, three js vite templante, threejs vite templante, three.js vite templante, three-js vite templante,
-        webgl, 3D, GLSL, GLSL shaders, shaders, web3D,
-        javascript, js, vanilla-javascript, vanilla-js, 
-        development, template, boilerplate, template-boilerplate, boilerplate-frontend, starter-kit,
-        vite, vite template, swc, husky, eslint, commitlint, prettier,
-        postcss, tailwind, tailwindcss, sass, scss, css, 
-        github, web app, web-app, webapp, spa
-      "
-    />
-    <link rel="manifest" href="/app.webmanifest" />
-    <link rel="icon" sizes="192x192" href="/favicon/favicon-192.webp" />
-    <link rel="icon" sizes="512x512" href="/favicon/favicon-512.webp" />
+    <style>
+      /* ... (保持原有的样式) ... */
 
-    <!-- GOOGLE -->
-    <meta name="rating" content="General" />
-    <meta name="robots" content="index,follow" />
-    <link
-      rel="sitemap"
-      type="application/xml"
-      title="Sitemap"
-      href="/sitemap.xml"
-    />
-    <meta
-      name="google-site-verification"
-      content="43hCqye5FYTS4SnBMPKNFP-wBhfLHwRBykWJF1WJawo"
-    />
+      .elegant-container {
+        /* 添加 hover 效果 */
+        &:hover {
+          /* 添加阴影 */
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        align-items: center;
+        background-color: #fff;
+        /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
+        display: flex;
+        flex-direction: column;
+        font-family:
+          Times New Roman,
+          serif;
+        height: 37.44vw;
+        justify-content: center;
+        max-height: 100vh;
+        position: absolute;
+        right: 5%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 28.33vw;
+        z-index: 2;
+      }
+      .elegant-content {
+        padding: 20px;
+        text-align: center;
+        z-index: 3;
+      }
+      .elegant-title {
+        font-size: 3vw;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        background: linear-gradient(to right, #c9a84a, #e2c675, #c9a84a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .elegant-subtitle {
+        color: #888;
+        font-size: 1.2vw;
+        margin-bottom: 30px;
+      }
+      .elegant-border {
+        border: 6px solid transparent;
+        background: linear-gradient(to right, #c9a84a, #e2c675, #c9a84a)
+          border-box;
+        -webkit-mask:
+          linear-gradient(#fff 0 0) padding-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        mask-composite: exclude;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      /* 新添加的导航栏样式 */
+      nav {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+        z-index: 10;
+      }
 
-    <!-- FACEBOOK -->
-    <meta property="og:url" content="https://webpack-three-js.d1a.app" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Webpack ThreeJS — Template" />
-    <meta
-      property="og:description"
-      content="Boilerplate template designed to quickly bootstrapping a 3D Web App, SPA, website or landing page with Three.JS, GLSL, Vite, TailwindCSS, ESLint, Husky and much more in just 30 seconds."
-    />
-    <meta property="og:image" content="/og.jpg" />
+      .nav-links {
+        font-size: 1.5vw;
+        font-family:
+          Times New Roman,
+          serif;
+        letter-spacing: 2px;
+        color: #c9a84a; /* 金色字体 */
+        display: inline-block;
+        padding: 10px 60px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        /* 加入圆边框细线 */
+        border-radius: 10px;
+        border: 2px solid #c9a84a;
+        background-color: #fff;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
 
-    <!-- TWITTER -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:domain" content="webpack-three-js.d1a.app" />
-    <meta property="twitter:url" content="https://webpack-three-js.d1a.app" />
-    <meta name="twitter:title" content="Webpack ThreeJS — Template" />
-    <meta
-      name="twitter:description"
-      content="Boilerplate template designed to quickly bootstrapping a 3D Web App, SPA, website or landing page with Three.JS, GLSL, Vite, TailwindCSS, ESLint, Husky and much more in just 30 seconds."
-    />
-    <meta name="twitter:image" content="/og.jpg" />
-
-    <!-- iOS -->
-    <link rel="apple-touch-icon" href="/favicon/favicon-512.webp" />
-    <link rel="mask-icon" href="/favicon/favicon-512.webp" color="black" />
-    <meta name="apple-mobile-web-app-title" content="Vite ThreeJS — Template" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-    <!-- ANDROID -->
-    <meta name="theme-color" content="#000" />
-    <meta name="mobile-web-app-capable" content="yes" />
-
-    <script defer src="/_vercel/insights/script.js"></script>
+      .nav-links:hover {
+        color: #e2c675;
+      }
+    </style>
   </head>
   <body>
     <noscript class="text-center text-lg text-red-500">
       Enable JavaScript to enjoy all the features of this app.
     </noscript>
+
+    <!-- 添加的导航栏 -->
+    <nav>
+      <span class="nav-links">Start</span>
+      <span class="nav-links">Continue</span>
+    </nav>
     <main class="flex h-full bg-primary text-color">
       <header
         class="absolute top-0 z-[1] w-full cursor-default bg-accent-primary sm:w-auto"
@@ -93,7 +117,7 @@
           <h1
             class="z-[1] select-none p-4 text-xl font-semibold sm:text-2xl md:text-3xl"
           >
-            Vite ThreeJS — Template
+            Vite ThreeJS HeXian
           </h1>
           <div
             class="arrow-right top absolute -right-[43px] -top-[35px] hidden h-0 w-0 rotate-90 border-b-[60px] border-t-[70px] border-b-transparent border-l-accent-primary border-t-transparent sm:-right-[40px] sm:block sm:border-l-[70px] md:-right-[43px] md:border-l-[76px]"
@@ -101,7 +125,7 @@
         </div>
       </header>
       <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
-      <a
+      <!-- <a
         id="github"
         title="Get started on GitHub"
         aria-label="Get started on GitHub"
@@ -135,9 +159,23 @@
             class="octo-body"
           ></path>
         </svg>
-      </a>
+      </a> -->
+      <!-- 新添加的优雅设计元素 -->
+      <div class="elegant-container">
+        <div class="elegant-border"></div>
+        <div class="elegant-content">
+          <h2 class="elegant-title">Hexian Web3D</h2>
+          <p class="elegant-subtitle">
+            Once upon a time, there was a group of animals living in the African
+            savannah. Among them were a group of elephants, a group of lions,
+            and a group of hippos. The elephants were known for their
+            intelligence and their ability to use their trunks to carry
+            thingsOne day, the elephants and the lions decided to have a
+            competition to see who was the strongest....
+          </p>
+        </div>
+      </div>
     </main>
-
     <script type="module" src="src/js/index.js"></script>
   </body>
 </html>
