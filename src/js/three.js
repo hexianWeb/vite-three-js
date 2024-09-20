@@ -1,8 +1,10 @@
-import * as T from 'three';
+import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import fragment from '../shaders/fragment.glsl';
+import simulationFragment from '../shaders/simulation/simFragment.glsl';
+import simulationVertex from '../shaders/simulation/simVertex.glsl';
 import vertex from '../shaders/vertex.glsl';
 
 const device = {
@@ -15,9 +17,9 @@ export default class Three {
   constructor(canvas) {
     this.canvas = canvas;
 
-    this.scene = new T.Scene();
+    this.scene = new THREE.Scene();
 
-    this.camera = new T.PerspectiveCamera(
+    this.camera = new THREE.PerspectiveCamera(
       75,
       device.width / device.height,
       0.1,
@@ -26,7 +28,7 @@ export default class Three {
     this.camera.position.set(0, 0, 2);
     this.scene.add(this.camera);
 
-    this.renderer = new T.WebGLRenderer({
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
       antialias: true,
@@ -37,42 +39,188 @@ export default class Three {
 
     this.controls = new OrbitControls(this.camera, this.canvas);
 
-    this.clock = new T.Clock();
+    this.clock = new THREE.Clock();
 
+    this.size = 128;
+
+    this.setFBO();
     this.setLights();
     this.setGeometry();
     this.render();
     this.setResize();
   }
 
+  // 创建渲染 FBO 渲染画布
+  getRenderTarget() {
+    return new THREE.WebGLRenderTarget(device.width, device.height, {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBAFormat,
+      type: THREE.FloatType
+    });
+  }
+
+  setFBO() {
+    this.fbo = this.getRenderTarget();
+    this.fbo1 = this.getRenderTarget();
+
+    this.fboScene = new THREE.Scene();
+    this.fboCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+    this.fboCamera.z = 0.5;
+    this.fboCamera.lookAt(0, 0, 0);
+
+    let geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+    this.data = new Float32Array(this.size * this.size * 4);
+
+    for (let index_ = 0; index_ < this.size; index_++) {
+      for (let index__ = 0; index__ < this.size; index__++) {
+        let index = (index_ + index__ * this.size) * 4;
+        let theta = Math.random() * Math.PI * 2;
+        let r = 0.5 + 0.5 * Math.random();
+        this.data[index + 0] = r * Math.cos(theta);
+        this.data[index + 1] = r * Math.sin(theta);
+        this.data[index + 2] = 1;
+        this.data[index + 3] = 1;
+      }
+    }
+
+    this.fboTexture = new THREE.DataTexture(
+      this.data,
+      this.size,
+      this.size,
+      THREE.RGBAFormat,
+      THREE.FloatType
+    );
+    this.fboTexture.needsUpdate = true;
+    this.fboTexture.minFilter = THREE.NearestFilter;
+    this.fboTexture.magFilter = THREE.NearestFilter;
+
+    this.fboMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uPosition: {
+          value: this.fboTexture
+        },
+        uInfo: {
+          value: undefined
+        },
+        time: { value: 0 }
+      },
+      vertexShader: simulationVertex,
+      fragmentShader: simulationFragment
+    });
+
+    this.info = new Float32Array(this.size * this.size * 4);
+
+    for (let index_ = 0; index_ < this.size; index_++) {
+      for (let index__ = 0; index__ < this.size; index__++) {
+        let index = (index_ + index__ * this.size) * 4;
+        this.info[index + 0] = 0.5 + Math.random();
+        this.info[index + 1] = 0.5 + Math.random();
+        this.info[index + 2] = 1;
+        this.info[index + 3] = 1;
+      }
+    }
+    this.infoTexture = new THREE.DataTexture(
+      this.info,
+      this.size,
+      this.size,
+      THREE.RGBAFormat,
+      THREE.FloatType
+    );
+    this.infoTexture.needsUpdate = true;
+    this.infoTexture.minFilter = THREE.NearestFilter;
+    this.infoTexture.magFilter = THREE.NearestFilter;
+
+    this.fboMaterial.uniforms.uInfo = { value: this.infoTexture };
+    this.fboMesh = new THREE.Mesh(geometry, this.fboMaterial);
+    this.fboScene.add(this.fboMesh);
+
+    this.renderer.setRenderTarget(this.fbo);
+    this.renderer.render(this.fboScene, this.fboCamera);
+    this.renderer.setRenderTarget(this.fbo1);
+    this.renderer.render(this.fboScene, this.fboCamera);
+  }
+
   setLights() {
-    this.ambientLight = new T.AmbientLight(new T.Color(1, 1, 1, 1));
+    this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
     this.scene.add(this.ambientLight);
   }
 
   setGeometry() {
-    this.planeGeometry = new T.PlaneGeometry(1, 1, 128, 128);
-    this.planeMaterial = new T.ShaderMaterial({
-      side: T.DoubleSide,
-      wireframe: true,
-      fragmentShader: fragment,
-      vertexShader: vertex,
-      uniforms: {
-        progress: { type: 'f', value: 0 }
+    this.count = this.size * this.size;
+    this.positions = new Float32Array(this.count * 3);
+    this.uv = new Float32Array(this.count * 2);
+
+    for (let index_ = 0; index_ < this.size; index_++) {
+      for (let index__ = 0; index__ < this.size; index__++) {
+        let index = index_ + index__ * this.size;
+        this.positions[index * 3 + 0] = Math.random() * 2 - 1;
+        this.positions[index * 3 + 1] = Math.random() * 2 - 1;
+        this.positions[index * 3 + 2] = 0;
+        this.uv[index * 2 + 0] = index_ / (this.size - 1);
+        this.uv[index * 2 + 1] = index__ / (this.size - 1);
       }
+    }
+
+    this.bufferGeometry = new THREE.BufferGeometry();
+    this.bufferGeometry.setAttribute(
+      'position',
+      new THREE.BufferAttribute(this.positions, 3)
+    );
+    this.bufferGeometry.setAttribute(
+      'uv',
+      new THREE.BufferAttribute(this.uv, 2)
+    );
+
+    this.bufferShaderMaterial = new THREE.ShaderMaterial({
+      extensions: {
+        derivatives: '#extension GL_OES_standard_derivatives : enable'
+      },
+      side: THREE.DoubleSide,
+      uniforms: {
+        uPosition: {
+          value: new THREE.Uniform(null)
+        },
+        uTime: { value: new THREE.Uniform(0) }
+      },
+      vertexShader: vertex,
+      fragmentShader: fragment
     });
 
-    this.planeMesh = new T.Mesh(this.planeGeometry, this.planeMaterial);
-    this.scene.add(this.planeMesh);
+    this.bufferShaderMaterial.uniforms.uPosition.value = this.fboTexture;
+    this.points = new THREE.Points(
+      this.bufferGeometry,
+      this.bufferShaderMaterial
+    );
+
+    this.scene.add(this.points);
+
+    // // 创建一个 红色 basic 材质的立方体
+    // const geometry = new THREE.BoxGeometry(1, 1, 1);
+    // const material = new THREE.MeshBasicMaterial({ color: 0xFF_00_00 });
+    // const cube = new THREE.Mesh(geometry, material);
+    // this.scene.add(cube);
   }
 
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
-    this.planeMesh.rotation.x = 0.2 * elapsedTime;
-    this.planeMesh.rotation.y = 0.1 * elapsedTime;
+    this.bufferShaderMaterial.uniforms.uTime.value = elapsedTime;
+    this.fboMaterial.uniforms.time.value = elapsedTime;
 
+    this.fboMaterial.uniforms.uPosition.value = this.fbo1.texture;
+    this.bufferShaderMaterial.uniforms.uPosition.value = this.fbo.texture;
+
+    // 进一步计算 fbo 缓冲区
+    this.renderer.setRenderTarget(this.fbo);
+    this.renderer.render(this.fboScene, this.fboCamera);
+    this.renderer.setRenderTarget(null);
     this.renderer.render(this.scene, this.camera);
+
+    // ping pong 交换 fbo 缓冲区
+    [this.fbo, this.fbo1] = [this.fbo1, this.fbo];
+    // this.renderer.setRenderTarget(null);
+    // this.renderer.render(this.fboScene, this.fboCamera);
     requestAnimationFrame(this.render.bind(this));
   }
 
