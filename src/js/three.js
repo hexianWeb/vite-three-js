@@ -25,7 +25,7 @@ export default class Three {
       0.1,
       100
     );
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 0, 4);
     this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -41,8 +41,9 @@ export default class Three {
 
     this.clock = new THREE.Clock();
 
-    this.size = 128;
+    this.size = 256;
 
+    this.scene.add(new THREE.AxesHelper(2));
     this.setFBO();
     this.setLights();
     this.setGeometry();
@@ -154,8 +155,8 @@ export default class Three {
     for (let index_ = 0; index_ < this.size; index_++) {
       for (let index__ = 0; index__ < this.size; index__++) {
         let index = index_ + index__ * this.size;
-        this.positions[index * 3 + 0] = Math.random() * 2 - 1;
-        this.positions[index * 3 + 1] = Math.random() * 2 - 1;
+        this.positions[index * 3 + 0] = Math.random();
+        this.positions[index * 3 + 1] = Math.random();
         this.positions[index * 3 + 2] = 0;
         this.uv[index * 2 + 0] = index_ / (this.size - 1);
         this.uv[index * 2 + 1] = index__ / (this.size - 1);
@@ -176,7 +177,9 @@ export default class Three {
       extensions: {
         derivatives: '#extension GL_OES_standard_derivatives : enable'
       },
+      transparent: true,
       side: THREE.DoubleSide,
+      // blending: THREE.AdditiveBlending,
       uniforms: {
         uPosition: {
           value: new THREE.Uniform(null)
