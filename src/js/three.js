@@ -43,7 +43,6 @@ export default class Three {
 
     this.size = 256;
 
-    this.scene.add(new THREE.AxesHelper(2));
     this.setFBO();
     this.setLights();
     this.setGeometry();

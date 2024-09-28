@@ -1,0 +1,29 @@
+@charset "UTF-8";
+/*
+引入本地字体 格式为ttf
+  */
+@font-face {
+  font-family: 'HengShanMaoXing';
+  src: url("/HengShanMaoXing-1.ttf");
+}
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'HengShanMaoXing', cursive;
+}
+
+.chinese-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 96px;
+  font-weight: bold;
+  color: #fff;
+  z-index: 99;
+}

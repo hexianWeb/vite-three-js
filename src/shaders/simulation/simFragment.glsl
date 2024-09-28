@@ -31,7 +31,7 @@ float taylorInvSqrt(float r) {
 }
 
 vec4 grad4(float j, vec4 ip) {
-    const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
+    const vec4 ones = vec4(1.0, 1.0,1.0, -1.0);
     vec4 p, s;
 
     p.xyz = floor(fract(vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
@@ -137,12 +137,12 @@ void main() {
 
     float angle = atan(pos.y, pos.x) - info.x * .1 * mix(.5, 1., circlularFroce);
 
-    float targetRaduis = mix(info.x, 1.8, 0.5 + 0.45 * sin(angle * 2.0 + time * 0.5));
+    float targetRaduis = mix(info.x, 1.8, 0.5 + 0.3 * sin(angle * 2.0 + time * 0.5));
     raduis += (targetRaduis - raduis) * mix(.2, .5, circlularFroce);
 
     vec3 transfromedPos = vec3(cos(angle) * raduis, sin(angle) * raduis, 0.);
 
-    pos.xy += (transfromedPos.xy - pos.xy) * .05;
+    pos.xy += (transfromedPos.xy - pos.xy) * .07;
 
     pos.xy += curl(pos * 4.0, time * 0.1, 0.1).xy * 0.003;
     gl_FragColor = vec4(pos.xy, 1., 1.);
