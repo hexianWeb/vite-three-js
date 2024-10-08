@@ -25,6 +25,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pmndrs/vanilla": "^1.19.3",
     "@vitejs/plugin-legacy": "^5.4.1",
     "gsap": "^3.12.5",
     "postcss-import": "^16.1.0",

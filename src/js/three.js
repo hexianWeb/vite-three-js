@@ -8,11 +8,10 @@ import {
   RoundedBoxGeometry,
   UnrealBloomPass
 } from 'three/examples/jsm/Addons.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { Pane } from 'tweakpane';
 
-import fragment from '../shaders/fragment.glsl';
-import vertex from '../shaders/vertex.glsl';
-import { MeshReflectorMaterial } from './shaders/MeshReflectorMaterial';
+import { MeshTransmissionMaterial } from './mesh-transmission-material';
 
 const device = {
   width: window.innerWidth,
@@ -21,8 +20,8 @@ const device = {
 };
 
 const bloomPassParameters = {
-  strength: 0.35,
-  radius: 0.13,
+  strength: 0.15,
+  radius: 0.1,
   threshold: 0.77
 };
 
@@ -36,7 +35,7 @@ export default class Three {
     this.canvas = canvas;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#bfe3dd');
+    this.scene.background = new THREE.Color('#ececec');
 
     this.camera = new THREE.PerspectiveCamera(
       25,
@@ -78,17 +77,27 @@ export default class Three {
     this.pointer = new THREE.Vector2();
     // 默认颜色
     this.selectColor = colorOptions[0].value;
-    this.setLights();
-
+    this.setEnv();
     this.setMouseMove();
     this.setGeometry();
     this.setPassProcess();
     this.render();
     this.setDebug();
     this.setResize();
-    // this.setFloor();
   }
 
+  setEnv() {
+    const environmentLoader = new RGBELoader();
+    environmentLoader.load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/dancing_hall_1k.hdr',
+      (resource) => {
+        this.scene.environment = resource;
+        this.scene.environment.mapping = THREE.EquirectangularReflectionMapping;
+        this.scene.environmentIntensity = 0.5;
+        this.scene.background = this.scene.environment;
+      }
+    );
+  }
   setDebug() {
     const axesHelper = new THREE.AxesHelper(10);
     this.scene.add(axesHelper);
@@ -145,15 +154,6 @@ export default class Three {
     });
   }
 
-  setLights() {
-    this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
-    this.scene.add(this.ambientLight);
-
-    this.spotLight = new THREE.SpotLight(0xB9_CE_F0, 1.9, 0, 0.15, 1, 0);
-    this.spotLight.position.set(-10, 20, 20);
-    this.scene.add(this.spotLight);
-  }
-
   setGeometry() {
     this.cubeGroup = new THREE.Group();
     this.scene.add(this.cubeGroup);
@@ -168,26 +168,63 @@ export default class Three {
     for (let x = 0; x < this.stride; x++) {
       for (let y = 0; y < this.stride; y++) {
         for (let z = 0; z < this.stride; z++) {
-          this.positions.push([
+          const position = [
             x + x * this.gap - this.center,
             y + y * this.gap - this.center,
             z + z * this.gap - this.center
-          ]);
+          ];
+
+          this.positions.push(position);
 
           const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.15);
-          const material = new THREE.MeshLambertMaterial({
-            // transparent: true,
-            // opacity: 0.85
+          const material = new THREE.MeshBasicMaterial({
+            color: '#fff'
           });
           const cube = new THREE.Mesh(geometry, material);
-          cube.castShadow = true;
-          cube.receiveShadow = true;
-          cube.position.set(
-            this.positions.at(-1)[0],
-            this.positions.at(-1)[1],
-            this.positions.at(-1)[2]
-          );
+          cube.castShadow = false;
+          cube.receiveShadow = false;
 
+          cube.material = Object.assign(new MeshTransmissionMaterial(1), {
+            clearcoat: 1,
+            clearcoatRoughness: 0,
+            transmission: 1,
+            chromaticAberration: 0.03,
+            anisotrophicBlur: 0.1,
+            // Set to > 0 for diffuse roughness
+            roughness: 0.05,
+            thickness: 0,
+            ior: 1.5,
+            // Set to > 0 for animation
+            distortion: 0.1,
+            distortionScale: 0.2,
+            temporalDistortion: 0.2
+          });
+          cube.material.color.set(new THREE.Color('#fff'));
+          // 使用 this.positions.at(-1) 确保获取的是数组
+          const lastPosition = this.positions.at(-1);
+          if (Array.isArray(lastPosition)) {
+            cube.position.set(
+              lastPosition[0],
+              lastPosition[1],
+              lastPosition[2]
+            );
+          } else {
+            console.error('Position is not an array:', lastPosition);
+          }
+
+          const smallGeometry = new RoundedBoxGeometry(
+            0.81,
+            0.81,
+            0.81,
+            2,
+            0.005
+          );
+          const smallMaterial = new THREE.MeshBasicMaterial({
+            color: '#4242FF'
+          });
+          const smallMesh = new THREE.Mesh(smallGeometry, smallMaterial);
+          smallMesh.position.set(0, 0, 0);
+          cube.add(smallMesh);
           this.cubeGroup.add(cube);
         }
       }
@@ -195,58 +232,6 @@ export default class Three {
 
     this.cubeGroup.rotateX(Math.PI / 4);
     this.cubeGroup.rotateZ(Math.PI / 4);
-  }
-
-  setFloor() {
-    // 加载地板贴图
-    new THREE.TextureLoader().load('./map.jpg', (woodfloorDiffuse) => {
-      // 规定重复次数
-      woodfloorDiffuse.wrapS = THREE.RepeatWrapping;
-      woodfloorDiffuse.wrapT = THREE.RepeatWrapping;
-      woodfloorDiffuse.repeat.set(10, 10);
-      // 添加地板
-      let floorGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
-      let temporaryMaterial = new THREE.MeshBasicMaterial({
-        map: woodfloorDiffuse
-        // color: 'red'
-      });
-      this.floor = new THREE.Mesh(floorGeometry, temporaryMaterial);
-
-      this.floor.material = new MeshReflectorMaterial(
-        this.renderer,
-        this.camera,
-        this.scene,
-        this.floor,
-        {
-          mixBlur: 1.4,
-          mixStrength: 6,
-          resolution: 256,
-          blur: [1024, 1024],
-          minDepthThreshold: 0,
-          maxDepthThreshold: 6.68,
-          depthScale: 11.4,
-          depthToBlurRatioBias: 0.9,
-          mirror: 0,
-          distortion: 1,
-          mixContrast: 0.97,
-          reflectorOffset: 0,
-          bufferSamples: 8,
-          planeNormal: new THREE.Vector3(0, 0, 1)
-        }
-      );
-      this.floor.material.setValues({
-        map: woodfloorDiffuse,
-        emissiveMap: woodfloorDiffuse,
-        emissive: new THREE.Color(0xff_ff_ff),
-        emissiveIntensity: 0.2,
-        envMapIntensity: 1.08,
-        roughness: 1
-      });
-      this.floor.rotation.x = -Math.PI / 2;
-      this.floor.position.y = -2;
-      this.floor.receiveShadow = true;
-      this.scene.add(this.floor);
-    });
   }
 
   setCursor(event) {
@@ -293,15 +278,15 @@ export default class Three {
       const col = Math.max(0.5, distanceIntensity) / 1.5;
       const mov = 1 + Math.sin(elapsedTime * 2 + 500 * count);
 
-      cube.material.color.set(
-        distance > this.displacement * 1.1
-          ? new THREE.Color(col / 2, col * 2.5, col * 4)
-          : new THREE.Color(
-            col * this.selectColor.r,
-            col * this.selectColor.g,
-            col * this.selectColor.b
-          ) //红色
-      );
+      // cube.material.color.set(
+      //   distance > this.displacement * 1.1
+      //     ? new THREE.Color(col / 2, col * 2.5, col * 4)
+      //     : new THREE.Color(
+      //       col * this.selectColor.r,
+      //       col * this.selectColor.g,
+      //       col * this.selectColor.b
+      //     ) //红色
+      // );
 
       cube.position.lerp(
         distance > this.displacement * 1.1
@@ -319,16 +304,14 @@ export default class Three {
     this.controls.update();
     // 让 controls 随时间沿世界 Y 轴周期运动
 
-    // 使用四元数旋转，将旋转应用到 cubeGroup
+    // 使用四元数旋转，将旋转应用到 cubeGroup 设定旋转速率与帧数相关
     this.cubeGroup.quaternion.premultiply(
       new THREE.Quaternion().setFromAxisAngle(
         this.worldYAxis,
         Math.sin(elapsedTime) * 0.015
       )
     );
-    // this.cubeGroup.position.set(0, Math.sin(elapsedTime) * 0.5 + 2, 0);
 
-    // this.renderer.render(this.scene, this.camera);
     this.composer.render();
     requestAnimationFrame(this.render.bind(this));
   }
