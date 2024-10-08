@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
   EffectComposer,
   OutputPass,
@@ -43,7 +44,7 @@ export default class Three {
       0.1,
       100
     );
-    this.camera.position.set(15, 15, 15);
+    this.camera.position.set(15, 13, 15);
 
     this.scene.add(this.camera);
 
@@ -94,7 +95,7 @@ export default class Three {
         this.scene.environment = resource;
         this.scene.environment.mapping = THREE.EquirectangularReflectionMapping;
         this.scene.environmentIntensity = 0.5;
-        this.scene.background = this.scene.environment;
+        // this.scene.background = this.scene.environment;
       }
     );
   }
@@ -156,6 +157,8 @@ export default class Three {
 
   setGeometry() {
     this.cubeGroup = new THREE.Group();
+    this.cubeGroup.name = 'cubeGroup';
+    this.cubeGroup.position.set(4, 0, -3);
     this.scene.add(this.cubeGroup);
 
     this.gap = 0.1;
@@ -164,72 +167,78 @@ export default class Three {
     this.intensity = 1;
     this.positions = [];
     this.center = this.stride / 2 - this.stride * this.gap + this.gap;
+    const matcapLoader = new THREE.ImageLoader();
+    matcapLoader.load('./660505_F2B090_DD4D37_AA1914-64px.png', (image) => {
+      const matcap = new THREE.Texture(image);
+      matcap.needsUpdate = true;
+      for (let x = 0; x < this.stride; x++) {
+        for (let y = 0; y < this.stride; y++) {
+          for (let z = 0; z < this.stride; z++) {
+            const position = [
+              x + x * this.gap - this.center,
+              y + y * this.gap - this.center,
+              z + z * this.gap - this.center
+            ];
 
-    for (let x = 0; x < this.stride; x++) {
-      for (let y = 0; y < this.stride; y++) {
-        for (let z = 0; z < this.stride; z++) {
-          const position = [
-            x + x * this.gap - this.center,
-            y + y * this.gap - this.center,
-            z + z * this.gap - this.center
-          ];
+            this.positions.push(position);
 
-          this.positions.push(position);
+            const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.15);
+            const material = new THREE.MeshBasicMaterial({
+              color: '#fff'
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.castShadow = false;
+            cube.receiveShadow = false;
 
-          const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.15);
-          const material = new THREE.MeshBasicMaterial({
-            color: '#fff'
-          });
-          const cube = new THREE.Mesh(geometry, material);
-          cube.castShadow = false;
-          cube.receiveShadow = false;
+            cube.material = Object.assign(new MeshTransmissionMaterial(1), {
+              clearcoat: 1,
+              clearcoatRoughness: 0,
+              transmission: 1,
+              chromaticAberration: 0.03,
+              anisotrophicBlur: 0.1,
+              // Set to > 0 for diffuse roughness
+              roughness: 0.075,
+              thickness: 0.075,
+              ior: 1.49,
+              // Set to > 0 for animation
+              distortion: 0.1,
+              distortionScale: 0.2,
+              temporalDistortion: 0.2
+            });
+            cube.material.color.set(new THREE.Color('#fff'));
+            cube.material.side = THREE.DoubleSide;
+            cube.material.flatShading = true;
+            // 使用 this.positions.at(-1) 确保获取的是数组
+            const lastPosition = this.positions.at(-1);
+            if (Array.isArray(lastPosition)) {
+              cube.position.set(
+                lastPosition[0],
+                lastPosition[1],
+                lastPosition[2]
+              );
+            } else {
+              console.error('Position is not an array:', lastPosition);
+            }
 
-          cube.material = Object.assign(new MeshTransmissionMaterial(1), {
-            clearcoat: 1,
-            clearcoatRoughness: 0,
-            transmission: 1,
-            chromaticAberration: 0.03,
-            anisotrophicBlur: 0.1,
-            // Set to > 0 for diffuse roughness
-            roughness: 0.05,
-            thickness: 0,
-            ior: 1.5,
-            // Set to > 0 for animation
-            distortion: 0.1,
-            distortionScale: 0.2,
-            temporalDistortion: 0.2
-          });
-          cube.material.color.set(new THREE.Color('#fff'));
-          // 使用 this.positions.at(-1) 确保获取的是数组
-          const lastPosition = this.positions.at(-1);
-          if (Array.isArray(lastPosition)) {
-            cube.position.set(
-              lastPosition[0],
-              lastPosition[1],
-              lastPosition[2]
+            const smallGeometry = new RoundedBoxGeometry(
+              0.89,
+              0.89,
+              0.89,
+              2,
+              0.075
             );
-          } else {
-            console.error('Position is not an array:', lastPosition);
+            const smallMaterial = new THREE.MeshMatcapMaterial({
+              matcap: matcap,
+              flatShading: true
+            });
+            const smallMesh = new THREE.Mesh(smallGeometry, smallMaterial);
+            smallMesh.position.set(0, 0, 0);
+            cube.add(smallMesh);
+            this.cubeGroup.add(cube);
           }
-
-          const smallGeometry = new RoundedBoxGeometry(
-            0.81,
-            0.81,
-            0.81,
-            2,
-            0.005
-          );
-          const smallMaterial = new THREE.MeshBasicMaterial({
-            color: '#4242FF'
-          });
-          const smallMesh = new THREE.Mesh(smallGeometry, smallMaterial);
-          smallMesh.position.set(0, 0, 0);
-          cube.add(smallMesh);
-          this.cubeGroup.add(cube);
         }
       }
-    }
-
+    });
     this.cubeGroup.rotateX(Math.PI / 4);
     this.cubeGroup.rotateZ(Math.PI / 4);
   }
@@ -237,10 +246,11 @@ export default class Three {
   setCursor(event) {
     // 监听 mousemove 事件，获取鼠标在 3D 世界中的位置
 
-    this.pointer = new THREE.Vector2(
-      (event.clientX / device.width) * 2 - 1,
-      -(event.clientY / device.height) * 2 + 1
-    );
+    // this.pointer = new THREE.Vector2(
+    //   (event.clientX / device.width) * 2 - 1,
+    //   -(event.clientY / device.height) * 2 + 1
+    // );
+    this.pointer = new THREE.Vector2(0, 0);
   }
 
   setPassProcess() {
@@ -292,12 +302,12 @@ export default class Three {
         distance > this.displacement * 1.1
           ? this.originPosition
           : this.tempPosition
-            .copy(this.originPosition)
-            .add(
-              this.direction.multiplyScalar(
-                distanceIntensity * this.intensity + mov / 4
-              )
-            ),
+              .copy(this.originPosition)
+              .add(
+                this.direction.multiplyScalar(
+                  distanceIntensity * this.intensity + mov / 4
+                )
+              ),
         0.2
       );
     }
@@ -308,7 +318,7 @@ export default class Three {
     this.cubeGroup.quaternion.premultiply(
       new THREE.Quaternion().setFromAxisAngle(
         this.worldYAxis,
-        Math.sin(elapsedTime) * 0.015
+        Math.sin(elapsedTime) * 0.0035
       )
     );
 
