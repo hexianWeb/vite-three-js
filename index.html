@@ -80,30 +80,139 @@
     <meta name="mobile-web-app-capable" content="yes" />
 
     <script defer src="/_vercel/insights/script.js"></script>
+    <style>
+    .radial-gradient-bg {
+      background: radial-gradient(
+        ellipse at center 45%,
+        rgba(255, 182, 193, 1) 0%,
+        rgb(253, 197, 205) 30%,
+        rgb(250, 222, 226) 65%,
+        rgb(250, 238, 238) 100%
+      );
+      background-size: 100% 92%; /* 调整这里的百分比来控制椭圆的扁平程度 */
+      background-repeat: repeat-y;
+    }
+
+
+
+        .glass-effect {
+          backdrop-filter: blur(8px);
+          background-color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
   </head>
   <body>
     <noscript class="text-center text-lg text-red-500">
       Enable JavaScript to enjoy all the features of this app.
     </noscript>
-    <main class="flex h-full bg-primary text-color">
+    <main class="flex h-full bg-primary text-color ">
       <header
         class="absolute top-0 z-[1] w-full cursor-default bg-accent-primary sm:w-auto"
       >
         <div class="relative flex justify-center">
           <h1
-            class="z-[1] select-none p-4 text-xl font-semibold sm:text-2xl md:text-3xl"
+            class="z-[1] select-none p-4 text-xl font-semibold sm:text-2xl md:text-3xl text-white-600"
           >
-            Vite ThreeJS — Template
+            Vite ThreeJS — hexian
           </h1>
           <div
             class="arrow-right top absolute -right-[43px] -top-[35px] hidden h-0 w-0 rotate-90 border-b-[60px] border-t-[70px] border-b-transparent border-l-accent-primary border-t-transparent sm:-right-[40px] sm:block sm:border-l-[70px] md:-right-[43px] md:border-l-[76px]"
           ></div>
         </div>
       </header>
-      <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
+
+        <!-- Canvas background -->
+        <canvas id="canvas" class="absolute z-10 h-full w-full"></canvas>
+
+        <!-- Overlay content -->
+        <div class="absolute inset-0 z-1 pointer-events-none">
+          <!-- Background layers -->
+          <div class="absolute inset-0 radial-gradient-bg"></div>
+          <div class="absolute inset-0 glass-effect"></div>
+
+          <!-- Content container -->
+          <div class="relative h-full flex flex-col">
+            <!-- Navigation -->
+            <nav class="p-12">
+              <ul class="flex justify-center space-x-14 tracking-widest">
+                <li><a href="#" class="text-red-600 font-bold text-xl">Home</a></li>
+                <li><a href="#" class="text-gray-800 font-bold hover:text-red-600 transition-colors text-xl">About Us</a></li>
+                <li><a href="#" class="text-gray-800 font-bold hover:text-red-600 transition-colors text-xl">Contact Us</a></li>
+              </ul>
+            </nav>
+
+            <!-- Main content -->
+            <div class="flex-grow flex items-center">
+              <div class="w-2/3 h-2/3 m-auto pl-16  tracking-widest py-24">
+                <!-- Title -->
+                <h1 class="text-6xl font-bold text-gray-900 mt-8">
+                  Build an AI Driven Future
+                  <br />
+                  for Your Business
+                </h1>
+                <!-- SubTitle -->
+                <div class="text-3xl text-gray-700 mt-16">
+                  Bring custom AI practice to any of your business
+                  <br />
+                  processes, on premises.
+                </div>
+                <!-- buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-24">
+                  <button class="px-12 py-3 bg-red-600 text-white rounded-full font-medium hover:bg-yellow-400 transition-colors mr-12 text-xl">
+                    Get it for your business 🚀
+                  </button>
+                  <button class="px-12 py-3 bg-red-200 text-red-600 rounded-full font-medium hover:bg-slate-200 transition-colors text-xl">
+                    Discover more 🔍
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Down arrow at the bottom of the page -->
+            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </div>
+        </div>
 
     </main>
 
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+			varying vec2 vUv;
+
+			void main() {
+
+				vUv = uv;
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+
+			uniform sampler2D baseTexture;
+			uniform sampler2D bloomTexture;
+
+			varying vec2 vUv;
+
+			void main() {
+
+        vec4 base_color = texture2D(baseTexture,vUv);
+        vec4 bloom_color = texture2D(bloomTexture, vUv);
+
+        float lum = 0.21 * bloom_color.r + 0.71 * bloom_color.g + 0.07 * bloom_color.b;
+        //gl_FragColor = vec4(base_color.rgb* + bloom_color.rgb, max(base_color.a, lum));
+        gl_FragColor = base_color;
+
+			}
+
+		</script>
     <script type="module" src="src/js/index.js"></script>
   </body>
 </html>

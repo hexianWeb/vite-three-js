@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
   EffectComposer,
   OutputPass,
   RenderPass,
   RoundedBoxGeometry,
+  ShaderPass,
   UnrealBloomPass
 } from 'three/examples/jsm/Addons.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
@@ -36,23 +36,22 @@ export default class Three {
     this.canvas = canvas;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#ececec');
 
     this.camera = new THREE.PerspectiveCamera(
       25,
       device.width / device.height,
       0.1,
-      100
+      1000
     );
-    this.camera.position.set(15, 13, 15);
+    this.camera.position.set(13, 0, 19);
 
     this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      alpha: true,
       antialias: true,
-      preserveDrawingBuffer: true
+      preserveDrawingBuffer: false,
+      alpha: true
     });
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
@@ -60,7 +59,9 @@ export default class Three {
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-
+    this.controls.enablePan = false;
+    this.controls.enableDamping = false;
+    this.controls.enableRotate = false;
     this.clock = new THREE.Clock();
 
     // cursor 光标定义鼠标在 3D 世界中的位置
@@ -78,34 +79,72 @@ export default class Three {
     this.pointer = new THREE.Vector2();
     // 默认颜色
     this.selectColor = colorOptions[0].value;
-    this.setEnv();
-    this.setMouseMove();
-    this.setGeometry();
-    this.setPassProcess();
-    this.render();
-    this.setDebug();
-    this.setResize();
+
+    this.init();
   }
 
-  setEnv() {
-    const environmentLoader = new RGBELoader();
-    environmentLoader.load(
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/dancing_hall_1k.hdr',
-      (resource) => {
-        this.scene.environment = resource;
-        this.scene.environment.mapping = THREE.EquirectangularReflectionMapping;
-        this.scene.environmentIntensity = 0.5;
-        // this.scene.background = this.scene.environment;
-      }
-    );
+  loadAssets() {
+    const loadEnvironment = () => {
+      return new Promise((resolve, reject) => {
+        const environmentLoader = new RGBELoader();
+        environmentLoader.load(
+          'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/dancing_hall_1k.hdr',
+          (resource) => {
+            resolve(resource);
+          },
+          undefined,
+          (error) => reject(error)
+        );
+      });
+    };
+
+    const loadMatcap = () => {
+      return new Promise((resolve, reject) => {
+        const matcapLoader = new THREE.TextureLoader();
+        matcapLoader.load(
+          './660505_F2B090_DD4D37_AA1914-64px.png',
+          (matcap) => {
+            matcap.needsUpdate = true;
+            // Save or use the texture as needed
+            resolve(matcap);
+          },
+          undefined,
+          (error) => reject(error)
+        );
+      });
+    };
+
+    return Promise.all([loadEnvironment(), loadMatcap()]);
   }
+
+  async init() {
+    // this.setEnv();
+    this.loadAssets()
+      .then(([environment, matcap]) => {
+        this.setEnv(environment);
+        this.setMouseMove();
+        this.setGeometry(matcap);
+        this.setBackground(matcap);
+        // this.setPassProcess(baseTexture);
+        this.render();
+        this.setDebug();
+        this.setResize();
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error loading assets:', error);
+      });
+  }
+  setEnv(environment) {
+    this.scene.environment = environment;
+    this.scene.environment.mapping = THREE.EquirectangularReflectionMapping;
+    this.scene.environmentIntensity = 0.7;
+    this.scene.environmentRotation = new THREE.Euler(0, Math.PI + 0.5, 0.1);
+  }
+
   setDebug() {
-    const axesHelper = new THREE.AxesHelper(10);
-    this.scene.add(axesHelper);
-
-    const spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
-    this.scene.add(spotLightHelper);
-
+    // const axesHelper = new THREE.AxesHelper(10);
+    // this.scene.add(axesHelper);
     const pane = new Pane();
     const f1 = pane.addFolder({
       title: 'Bloom Pass'
@@ -155,7 +194,43 @@ export default class Three {
     });
   }
 
-  setGeometry() {
+  // 创建一些小立方体随机漂浮在场景中
+  setBackground(matcap) {
+    let backgroundGroup = new THREE.Group();
+    backgroundGroup.name = 'backgroundGroup';
+    this.scene.add(backgroundGroup);
+    const smallGeometry = new RoundedBoxGeometry(0.5, 0.5, 0.5, 8, 0.075);
+
+    const smallMaterial = new THREE.MeshMatcapMaterial({
+      matcap: matcap,
+      flatShading: false
+    });
+
+    const WALL = -5;
+    // 随机生成多个立方体
+    for (let index = 0; index < 40; index++) {
+      const cube = new THREE.Mesh(smallGeometry, smallMaterial);
+
+      // 圆形平面上立方体的随机位置，Y 轴保持 0，位于 X0Z 平面上
+      const x = WALL * (Math.random() * 2 - 1) * 2;
+      const z = WALL - x;
+      const yRange =
+        Math.random() > 0.5
+          ? 2.5 + Math.random() * 2.7
+          : -6.2 + Math.random() * 2.7;
+      const position = new THREE.Vector3(x, yRange, z);
+      cube.position.copy(position);
+
+      // 随机旋转立方体
+      cube.rotation.x = Math.random() * Math.PI;
+      cube.rotation.y = Math.random() * Math.PI;
+      cube.rotation.z = Math.random() * Math.PI;
+
+      // 将立方体添加到 Group 中
+      backgroundGroup.add(cube);
+    }
+  }
+  setGeometry(matcap) {
     this.cubeGroup = new THREE.Group();
     this.cubeGroup.name = 'cubeGroup';
     this.cubeGroup.position.set(4, 0, -3);
@@ -167,108 +242,113 @@ export default class Three {
     this.intensity = 1;
     this.positions = [];
     this.center = this.stride / 2 - this.stride * this.gap + this.gap;
-    const matcapLoader = new THREE.ImageLoader();
-    matcapLoader.load('./660505_F2B090_DD4D37_AA1914-64px.png', (image) => {
-      const matcap = new THREE.Texture(image);
-      matcap.needsUpdate = true;
-      for (let x = 0; x < this.stride; x++) {
-        for (let y = 0; y < this.stride; y++) {
-          for (let z = 0; z < this.stride; z++) {
-            const position = [
-              x + x * this.gap - this.center,
-              y + y * this.gap - this.center,
-              z + z * this.gap - this.center
-            ];
 
-            this.positions.push(position);
+    const smallGeometry = new RoundedBoxGeometry(0.85, 0.85, 0.85, 2, 0.075);
 
-            const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.15);
-            const material = new THREE.MeshBasicMaterial({
-              color: '#fff'
-            });
-            const cube = new THREE.Mesh(geometry, material);
-            cube.castShadow = false;
-            cube.receiveShadow = false;
+    const smallMaterial = new THREE.MeshMatcapMaterial({
+      matcap: matcap,
+      flatShading: true
+    });
+    for (let x = 0; x < this.stride; x++) {
+      for (let y = 0; y < this.stride; y++) {
+        for (let z = 0; z < this.stride; z++) {
+          const position = [
+            x + x * this.gap - this.center,
+            y + y * this.gap - this.center,
+            z + z * this.gap - this.center
+          ];
 
-            cube.material = Object.assign(new MeshTransmissionMaterial(1), {
-              clearcoat: 1,
-              clearcoatRoughness: 0,
-              transmission: 1,
-              chromaticAberration: 0.03,
-              anisotrophicBlur: 0.1,
-              // Set to > 0 for diffuse roughness
-              roughness: 0.075,
-              thickness: 0.075,
-              ior: 1.49,
-              // Set to > 0 for animation
-              distortion: 0.1,
-              distortionScale: 0.2,
-              temporalDistortion: 0.2
-            });
-            cube.material.color.set(new THREE.Color('#fff'));
-            cube.material.side = THREE.DoubleSide;
-            cube.material.flatShading = true;
-            // 使用 this.positions.at(-1) 确保获取的是数组
-            const lastPosition = this.positions.at(-1);
-            if (Array.isArray(lastPosition)) {
-              cube.position.set(
-                lastPosition[0],
-                lastPosition[1],
-                lastPosition[2]
-              );
-            } else {
-              console.error('Position is not an array:', lastPosition);
-            }
+          this.positions.push(position);
 
-            const smallGeometry = new RoundedBoxGeometry(
-              0.89,
-              0.89,
-              0.89,
-              2,
-              0.075
+          const geometry = new RoundedBoxGeometry(1, 1, 1, 2, 0.15);
+          const material = Object.assign(new MeshTransmissionMaterial(1), {
+            clearcoat: 1,
+            clearcoatRoughness: 0,
+            transmission: 1,
+            chromaticAberration: 0.03,
+            anisotrophicBlur: 0.1,
+            roughness: 0.075,
+            thickness: 0.075,
+            ior: 1.49,
+            distortion: 0.1,
+            distortionScale: 0.2,
+            temporalDistortion: 0.2
+          });
+          const cube = new THREE.Mesh(geometry, material);
+          cube.castShadow = false;
+          cube.receiveShadow = false;
+
+          cube.material.color.set(new THREE.Color('#fff'));
+          cube.material.side = THREE.DoubleSide;
+          cube.material.flatShading = true;
+          // 使用 this.positions.at(-1) 确保获取的是数组
+          const lastPosition = this.positions.at(-1);
+          if (Array.isArray(lastPosition)) {
+            cube.position.set(
+              lastPosition[0],
+              lastPosition[1],
+              lastPosition[2]
             );
-            const smallMaterial = new THREE.MeshMatcapMaterial({
-              matcap: matcap,
-              flatShading: true
-            });
-            const smallMesh = new THREE.Mesh(smallGeometry, smallMaterial);
-            smallMesh.position.set(0, 0, 0);
-            cube.add(smallMesh);
-            this.cubeGroup.add(cube);
+          } else {
+            console.error('Position is not an array:', lastPosition);
           }
+
+          const smallMesh = new THREE.Mesh(smallGeometry, smallMaterial);
+          smallMesh.position.set(0, 0, 0);
+          cube.add(smallMesh);
+          this.cubeGroup.add(cube);
         }
       }
-    });
-    this.cubeGroup.rotateX(Math.PI / 4);
+    }
+    this.cubeGroup.rotateX(Math.PI / 6);
     this.cubeGroup.rotateZ(Math.PI / 4);
   }
 
   setCursor(event) {
     // 监听 mousemove 事件，获取鼠标在 3D 世界中的位置
 
-    // this.pointer = new THREE.Vector2(
-    //   (event.clientX / device.width) * 2 - 1,
-    //   -(event.clientY / device.height) * 2 + 1
-    // );
-    this.pointer = new THREE.Vector2(0, 0);
+    this.pointer = new THREE.Vector2(
+      ((event.clientX - device.width / 3.5) / device.width) * 2 - 1,
+      -(event.clientY / device.height) * 2 + 1
+    );
+    // this.pointer = new THREE.Vector2(0, 0);
   }
 
-  setPassProcess() {
-    this.composer = new EffectComposer(this.renderer);
+  setPassProcess(baseTexture) {
     const renderScene = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderScene);
-
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(device.width, device.height),
       bloomPassParameters.strength,
       bloomPassParameters.radius,
       bloomPassParameters.threshold
     );
-    this.composer.addPass(this.bloomPass);
+    this.bloomComposer = new EffectComposer(this.renderer);
+    this.bloomComposer.renderToScreen = false;
+    this.bloomComposer.addPass(renderScene);
+    this.bloomComposer.addPass(this.bloomPass);
+
+    // 混合透明背景
+    const mixPass = new ShaderPass(
+      new THREE.ShaderMaterial({
+        uniforms: {
+          baseTexture: { value: baseTexture },
+          bloomTexture: { value: this.bloomComposer.renderTarget2.texture }
+        },
+        vertexShader: document.querySelector('#vertexshader').textContent,
+        fragmentShader: document.querySelector('#fragmentshader').textContent,
+        defines: {}
+      }),
+      'baseTexture'
+    );
+    mixPass.needsSwap = false;
 
     const outputPass = new OutputPass();
 
-    this.composer.addPass(outputPass);
+    this.finalComposer = new EffectComposer(this.renderer);
+    // this.finalComposer.renderToScreen = true;
+    this.finalComposer.addPass(renderScene);
+    this.finalComposer.addPass(mixPass);
+    this.finalComposer.addPass(outputPass);
   }
 
   render() {
@@ -288,15 +368,15 @@ export default class Three {
       const col = Math.max(0.5, distanceIntensity) / 1.5;
       const mov = 1 + Math.sin(elapsedTime * 2 + 500 * count);
 
-      // cube.material.color.set(
-      //   distance > this.displacement * 1.1
-      //     ? new THREE.Color(col / 2, col * 2.5, col * 4)
-      //     : new THREE.Color(
-      //       col * this.selectColor.r,
-      //       col * this.selectColor.g,
-      //       col * this.selectColor.b
-      //     ) //红色
-      // );
+      cube.material.color.set(
+        distance > this.displacement * 1.1
+          ? new THREE.Color(1, 1, 1)
+          : new THREE.Color(
+            col * this.selectColor.r,
+            col * this.selectColor.g,
+            col * this.selectColor.b
+          ) //红色
+      );
 
       cube.position.lerp(
         distance > this.displacement * 1.1
@@ -322,7 +402,7 @@ export default class Three {
       )
     );
 
-    this.composer.render();
+    this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
   }
   setMouseMove() {
@@ -341,8 +421,5 @@ export default class Three {
 
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
-
-    this.composer.setSize(device.width, device.height);
-    this.composer.setPixelRatio(Math.min(device.pixelRatio, 2));
   }
 }
