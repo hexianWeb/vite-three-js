@@ -194,13 +194,21 @@ export default class Three {
 
   loadModel() {
     const loader = new OBJLoader();
-    loader.load('/Whale_Model.obj', (object) => {
-      this.whale = object.children[0];
-      this.whale.geometry.scale(0.3, 0.3, 0.3);
-      this.whale.geometry.translate(0, -2, 0);
-      this.whale.geometry.rotateY(0.2);
-      this._dots();
-    });
+    // loader.load('/Whale_Model.obj', (object) => {
+    //   this.whale = object.children[0];
+    //   this.whale.geometry.scale(0.3, 0.3, 0.3);
+    //   this.whale.geometry.translate(0, -2, 0);
+    //   this.whale.geometry.rotateY(0.2);
+    //   this._dots();
+    // });
+    this.whale = new THREE.Mesh(
+      new THREE.BoxGeometry(10, 10, 10),
+      new THREE.MeshBasicMaterial({ color: 0xff_00_00 })
+    );
+    this.whale.geometry.scale(0.3, 0.3, 0.3);
+    this.whale.geometry.translate(0, -2, 0);
+    this.whale.geometry.rotateY(0.2);
+    this._dots();
   }
 
   setupPostProcessing() {
@@ -231,13 +239,13 @@ export default class Three {
     this.group.rotation.y += 0.001;
 
     if (timeStamp - this.previousTimeStamp > 30) {
-      for (const l of this.lines) {
-        if (this.sparkles.length < 35_000) {
-          this._nextDot(l);
-          this._nextDot(l);
+      for (const line of this.lines) {
+        if (this.sparkles.length < 10_000) {
+          this._nextDot(line);
+          this._nextDot(line);
         }
-        const temporaryVertices = new Float32Array(l.coordinates);
-        l.geometry.setAttribute(
+        const temporaryVertices = new Float32Array(line.coordinates);
+        line.geometry.setAttribute(
           'position',
           new THREE.BufferAttribute(temporaryVertices, 3)
         );
@@ -246,9 +254,9 @@ export default class Three {
       this.previousTimeStamp = timeStamp;
     }
     let temporarySparklesArray = [];
-    for (const s of this.sparkles) {
-      s.update();
-      temporarySparklesArray.push(s.x, s.y, s.z);
+    for (const sparkle of this.sparkles) {
+      sparkle.update();
+      temporarySparklesArray.push(sparkle.x, sparkle.y, sparkle.z);
     }
 
     this.sparklesGeometry.setAttribute(
@@ -311,9 +319,13 @@ export default class Three {
   _updateSparklesGeometry() {
     let temporarySparklesArraySizes = [];
     let temporarySparklesArrayColors = [];
-    for (const s of this.sparkles) {
-      temporarySparklesArraySizes.push(s.size);
-      temporarySparklesArrayColors.push(s.color.r, s.color.g, s.color.b);
+    for (const sparkle of this.sparkles) {
+      temporarySparklesArraySizes.push(sparkle.size);
+      temporarySparklesArrayColors.push(
+        sparkle.color.r,
+        sparkle.color.g,
+        sparkle.color.b
+      );
     }
     this.sparklesGeometry.setAttribute(
       'color',
