@@ -5,7 +5,7 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OBJLoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, OBJLoader } from 'three/examples/jsm/Addons.js';
 
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
@@ -122,10 +122,14 @@ export default class Three {
       new THREE.Color('#0476d9').multiplyScalar(0.8)
     ];
 
+    // 新增axesHlper
+    const axesHelper = new THREE.AxesHelper(10);
+    this.scene.add(axesHelper);
+
     this.setLights();
     this.setPoints();
     this.setStar();
-    this.loadModel();
+    this.loadOBJModel();
     this.setupPostProcessing();
     this.render();
     this.setResize();
@@ -192,23 +196,27 @@ export default class Three {
     this.scene.add(this.galaxyPoints);
   }
 
-  loadModel() {
+  loadGLTFModel() {
+    const loader = new GLTFLoader();
+    loader.load('/whale.glb', ({ scene }) => {
+      const object = scene;
+      this.whale = object.children[0];
+
+      this.whale.geometry.scale(0.3, 0.3, 0.3);
+      this.whale.geometry.translate(0, -2, 0);
+      this.whale.geometry.rotateY(0.2);
+      this._dotsUp();
+    });
+  }
+  loadOBJModel() {
     const loader = new OBJLoader();
-    // loader.load('/Whale_Model.obj', (object) => {
-    //   this.whale = object.children[0];
-    //   this.whale.geometry.scale(0.3, 0.3, 0.3);
-    //   this.whale.geometry.translate(0, -2, 0);
-    //   this.whale.geometry.rotateY(0.2);
-    //   this._dots();
-    // });
-    this.whale = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 10, 10),
-      new THREE.MeshBasicMaterial({ color: 0xff_00_00 })
-    );
-    this.whale.geometry.scale(0.3, 0.3, 0.3);
-    this.whale.geometry.translate(0, -2, 0);
-    this.whale.geometry.rotateY(0.2);
-    this._dots();
+    loader.load('/Whale_Model.obj', (object) => {
+      this.whale = object.children[0];
+      this.whale.geometry.scale(0.3, 0.3, 0.3);
+      this.whale.geometry.translate(0, -2, 0);
+      this.whale.geometry.rotateY(0.2);
+      this._dotsUp();
+    });
   }
 
   setupPostProcessing() {
@@ -235,12 +243,9 @@ export default class Three {
 
     this.galaxyPoints.rotation.y += 0.0005;
 
-    this.group.rotation.x = Math.sin(timeStamp * 0.0003) * 0.1;
-    this.group.rotation.y += 0.001;
-
     if (timeStamp - this.previousTimeStamp > 30) {
       for (const line of this.lines) {
-        if (this.sparkles.length < 10_000) {
+        if (this.sparkles.length < 35_000) {
           this._nextDot(line);
           this._nextDot(line);
         }
@@ -277,8 +282,10 @@ export default class Three {
     this.composer.render();
   }
 
-  _dots() {
-    this.sampler = new MeshSurfaceSampler(this.whale).build();
+  _dotsUp() {
+    this.sampler = new MeshSurfaceSampler(this.whale)
+      // .setWeightAttribute('color_1')
+      .build();
 
     for (let index = 0; index < 6; index++) {
       const linesMesh = new THREE.Line(
@@ -290,7 +297,6 @@ export default class Three {
       this.lines.push(linesMesh);
       this.group.add(linesMesh);
     }
-    // requestAnimationFrame(this.render.bind(this));
   }
 
   _nextDot(line) {
