@@ -1,6 +1,7 @@
-import * as T from 'three';
+import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
@@ -15,45 +16,76 @@ export default class Three {
   constructor(canvas) {
     this.canvas = canvas;
 
-    this.scene = new T.Scene();
+    this.scene = new THREE.Scene();
 
-    this.camera = new T.PerspectiveCamera(
+    this.camera = new THREE.PerspectiveCamera(
       75,
       device.width / device.height,
       0.1,
       100
     );
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(2, 2, 2);
     this.scene.add(this.camera);
 
-    this.renderer = new T.WebGLRenderer({
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
       antialias: true,
       preserveDrawingBuffer: true
     });
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
 
     this.controls = new OrbitControls(this.camera, this.canvas);
 
-    this.clock = new T.Clock();
+    this.clock = new THREE.Clock();
+
+    this.loader = new GLTFLoader();
 
     this.setLights();
     this.setGeometry();
+    this.setObject();
     this.render();
     this.setResize();
   }
 
   setLights() {
-    this.ambientLight = new T.AmbientLight(new T.Color(1, 1, 1, 1));
+    this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
     this.scene.add(this.ambientLight);
   }
 
+  setObject() {
+    const bakedTexture = new THREE.TextureLoader().load('./baked.png');
+    bakedTexture.flipY = false;
+    bakedTexture.colorSpace = THREE.SRGBColorSpace;
+    const bakedMaterial = new THREE.MeshBasicMaterial({
+      map: bakedTexture
+    });
+
+    const poleLightMaterial = new THREE.MeshBasicMaterial({
+      color: '#fefefd'
+    });
+
+    this.loader.load('./threejsblend.glb', ({ scene }) => {
+      scene.children.find((child) => child.name === 'baked').material =
+        bakedMaterial;
+      this.scene.add(scene);
+      scene.children.find((child) => child.name === 'poleLightA').material =
+        poleLightMaterial;
+      this.scene.add(scene);
+      scene.children.find((child) => child.name === 'poleLightB').material =
+        poleLightMaterial;
+      scene.children.find((child) => child.name === 'portalLight').material =
+        poleLightMaterial;
+      this.scene.add(scene);
+    });
+  }
+
   setGeometry() {
-    this.planeGeometry = new T.PlaneGeometry(1, 1, 128, 128);
-    this.planeMaterial = new T.ShaderMaterial({
-      side: T.DoubleSide,
+    this.planeGeometry = new THREE.PlaneGeometry(1, 1, 128, 128);
+    this.planeMaterial = new THREE.ShaderMaterial({
+      side: THREE.DoubleSide,
       wireframe: true,
       fragmentShader: fragment,
       vertexShader: vertex,
@@ -62,7 +94,8 @@ export default class Three {
       }
     });
 
-    this.planeMesh = new T.Mesh(this.planeGeometry, this.planeMaterial);
+    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+    this.planeMesh.visible = false;
     this.scene.add(this.planeMesh);
   }
 
