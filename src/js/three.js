@@ -42,7 +42,8 @@ export default class Three {
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
     // 开启阴影渲染
     this.renderer.shadowMap.enabled = true;
-
+    // 设定透明 background
+    this.renderer.setClearColor(0x00_00_00, 0);
     this.controls = new OrbitControls(this.camera, this.canvas);
 
     this.clock = new THREE.Clock();
@@ -72,23 +73,23 @@ export default class Three {
   setDebug() {
     this.uniforms = {
       uTime: new THREE.Uniform(0),
-      uPositionFrequency: new THREE.Uniform(0.46),
+      uPositionFrequency: new THREE.Uniform(0.6),
       uTimeFrequency: new THREE.Uniform(0.95),
       uNoiseFrequency: new THREE.Uniform(0.5),
       uNoiseTimeFrequency: new THREE.Uniform(0.3),
       uNoiseStrength: new THREE.Uniform(2.3),
       uColor: new THREE.Uniform(new THREE.Color('#fff')),
-      uStrength: new THREE.Uniform(0.015),
+      uStrength: new THREE.Uniform(0.115),
       colorA: new THREE.Uniform(new THREE.Color('#fff')), // New colorA uniform
       colorB: new THREE.Uniform(new THREE.Color('#fff')) // New colorB uniform
     };
     this.materialParams = {
-      metalness: 0.22,
-      roughness: 0.1,
+      metalness: 0.08,
+      roughness: 0.22,
       color: new THREE.Color('#fff'),
       transmission: 1,
-      ior: 1.5,
-      thickness: 0.1
+      ior: 1.6,
+      thickness: 1.44
     };
 
     const pane = new Pane();
@@ -203,7 +204,7 @@ export default class Three {
 
     materialParametersFolder
       .addBinding(this.materialParams, 'ior', {
-        step: 0.01,
+        step: 0.1,
         min: 1,
         max: 2.5
       })
@@ -216,7 +217,7 @@ export default class Three {
       .addBinding(this.materialParams, 'thickness', {
         step: 0.01,
         min: 0,
-        max: 1
+        max: 10
       })
       .on('change', ({ value }) => {
         this.sphereMaterial.thickness = value; // Update thickness in real-time
@@ -240,13 +241,15 @@ export default class Three {
     rgbeLoader.load(hdrPath, (texture) => {
       const environmentMap =
         pmremGenerator.fromEquirectangular(texture).texture;
-      this.scene.background = environmentMap;
+      // this.scene.background = environmentMap;
       this.scene.environment = environmentMap;
       this.scene.environmentIntensity = 0.5;
     });
   }
 
   setGeometry() {
+    const textureLoader = new THREE.TextureLoader();
+    const matcap = textureLoader.load('./matcap.png');
     // 利用 csm 创建一个基于物理材质的球体
     let sphereGeometry = new THREE.IcosahedronGeometry(2.5, 64);
     sphereGeometry.center();
@@ -282,9 +285,9 @@ export default class Three {
     this.sphereMesh.receiveShadow = true;
     this.sphereMesh.customDepthMaterial = depthMaterial;
 
-    const insideSphereGeometry = new THREE.CapsuleGeometry(1.6, 1.8, 4, 8);
-    const insideSphereMaterial = new THREE.MeshBasicMaterial({
-      color: '#0000ff'
+    const insideSphereGeometry = new THREE.CapsuleGeometry(1.2, 0.9, 4, 8);
+    const insideSphereMaterial = new THREE.MeshMatcapMaterial({
+      matcap: matcap
     });
     this.insideSphereMesh = new THREE.Mesh(
       insideSphereGeometry,
@@ -297,10 +300,10 @@ export default class Three {
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
-    this.uniforms.uTime.value = elapsedTime;
+    this.uniforms.uTime.value = Math.cos(elapsedTime) * 1.5;
 
-    this.sphereMesh.rotation.x = 0.2 * elapsedTime;
-    this.sphereMesh.rotation.y = 0.1 * elapsedTime;
+    // this.sphereMesh.rotation.x = 0.2 * elapsedTime;
+    // this.sphereMesh.rotation.y = 0.1 * elapsedTime;
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
