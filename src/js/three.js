@@ -50,18 +50,6 @@ export default class Three {
 
     this.loader = new GLTFLoader();
 
-    // 新建一个 axesHelper 辅助线
-    const axesHelper = new THREE.AxesHelper(5);
-    this.scene.add(axesHelper);
-
-    // 在z 为 -2 的位置创建一个平面
-    const planeGeometry = new THREE.PlaneGeometry(10, 10);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff' });
-    this.planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-    this.planeMesh.receiveShadow = true;
-    this.planeMesh.position.set(0, -1, -4);
-    this.scene.add(this.planeMesh);
-
     this.setDebug();
     this.setLights();
     this.setEnv('./lake_pier_2k.hdr');
@@ -301,9 +289,6 @@ export default class Three {
     const elapsedTime = this.clock.getElapsedTime();
 
     this.uniforms.uTime.value = Math.cos(elapsedTime) * 1.5;
-
-    // this.sphereMesh.rotation.x = 0.2 * elapsedTime;
-    // this.sphereMesh.rotation.y = 0.1 * elapsedTime;
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
