@@ -1,4 +1,4 @@
-import * as T from 'three';
+import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -11,22 +11,23 @@ const device = {
   pixelRatio: window.devicePixelRatio
 };
 
+const imgUrls = ['./img/01.jpg', './img/02.jpg', './img/03.jpg'];
 export default class Three {
   constructor(canvas) {
     this.canvas = canvas;
 
-    this.scene = new T.Scene();
+    this.scene = new THREE.Scene();
 
-    this.camera = new T.PerspectiveCamera(
-      75,
+    this.camera = new THREE.PerspectiveCamera(
+      60,
       device.width / device.height,
-      0.1,
-      100
+      1,
+      10_000
     );
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 0, 900);
     this.scene.add(this.camera);
 
-    this.renderer = new T.WebGLRenderer({
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
       antialias: true,
@@ -37,41 +38,54 @@ export default class Three {
 
     this.controls = new OrbitControls(this.camera, this.canvas);
 
-    this.clock = new T.Clock();
+    this.clock = new THREE.Clock();
+
+    this.textures = imgUrls;
 
     this.setLights();
-    this.setGeometry();
+    this.setGroup();
     this.render();
     this.setResize();
   }
 
   setLights() {
-    this.ambientLight = new T.AmbientLight(new T.Color(1, 1, 1, 1));
+    this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
     this.scene.add(this.ambientLight);
   }
 
-  setGeometry() {
-    this.planeGeometry = new T.PlaneGeometry(1, 1, 128, 128);
-    this.planeMaterial = new T.ShaderMaterial({
-      side: T.DoubleSide,
-      wireframe: true,
-      fragmentShader: fragment,
-      vertexShader: vertex,
-      uniforms: {
-        progress: { type: 'f', value: 0 }
-      }
-    });
+  setGroup() {
+    this.group = new THREE.Group();
+    this.scene.add(this.group);
 
-    this.planeMesh = new T.Mesh(this.planeGeometry, this.planeMaterial);
+    this.planeGeometry = new THREE.PlaneGeometry(1920, 1080, 1, 1);
+    this.planeMaterials = [];
+    // 载入图片
+    const textureLoader = new THREE.TextureLoader();
+    this.textures = this.textures.map((url) => textureLoader.load(url));
+    let maskTexture = textureLoader.load('./img/mask.png');
+    // 生成 3 层 layer
+    for (let _index = 0; _index < this.textures.length; _index++) {
+      let singlePictureGroup = new THREE.Group();
+      this.group.add(singlePictureGroup);
+      for (let __index = 0; __index < 3; __index++) {
+        const material = new THREE.MeshBasicMaterial({
+          map: this.textures[_index],
+          transparent: true,
+          alphaMap: __index !== 2 && maskTexture
+        });
+        this.planeMaterials.push(material);
+        let planeMesh = new THREE.Mesh(this.planeGeometry, material);
+        planeMesh.position.set(2500 * _index, 0, __index * -150);
+        singlePictureGroup.add(planeMesh);
+      }
+    }
+
+    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.planeMaterials[0]);
     this.scene.add(this.planeMesh);
   }
 
   render() {
     const elapsedTime = this.clock.getElapsedTime();
-
-    this.planeMesh.rotation.x = 0.2 * elapsedTime;
-    this.planeMesh.rotation.y = 0.1 * elapsedTime;
-
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
   }
