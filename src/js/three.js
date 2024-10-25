@@ -1,6 +1,7 @@
-import * as T from 'three';
+import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
@@ -15,18 +16,29 @@ export default class Three {
   constructor(canvas) {
     this.canvas = canvas;
 
-    this.scene = new T.Scene();
+    this.scene = new THREE.Scene();
 
-    this.camera = new T.PerspectiveCamera(
-      75,
+    // 场景相机
+    this.camera = new THREE.PerspectiveCamera(
+      65,
       device.width / device.height,
-      0.1,
+      0.01,
       100
     );
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 0, 1.35);
     this.scene.add(this.camera);
 
-    this.renderer = new T.WebGLRenderer({
+    // 构建一个专门提供给 depthTexture 的 深度相机
+    this.depthCamera = new THREE.PerspectiveCamera(
+      65,
+      device.width / device.height,
+      0.7,
+      1.35
+    );
+    this.depthCamera.position.set(0, 0, 1.35);
+    this.scene.add(this.depthCamera);
+
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
       antialias: true,
@@ -37,43 +49,107 @@ export default class Three {
 
     this.controls = new OrbitControls(this.camera, this.canvas);
 
-    this.clock = new T.Clock();
+    this.clock = new THREE.Clock();
 
-    this.setLights();
-    this.setGeometry();
+    // this.setLights();
+    this.setDepthTexture();
+    this.setObjects();
     this.render();
     this.setResize();
   }
 
   setLights() {
-    this.ambientLight = new T.AmbientLight(new T.Color(1, 1, 1, 1));
+    this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
     this.scene.add(this.ambientLight);
   }
 
-  setGeometry() {
-    this.planeGeometry = new T.PlaneGeometry(1, 1, 128, 128);
-    this.planeMaterial = new T.ShaderMaterial({
-      side: T.DoubleSide,
-      wireframe: true,
-      fragmentShader: fragment,
-      vertexShader: vertex,
+  setDepthTexture() {
+    this.target = new THREE.WebGLRenderTarget(
+      device.width * device.pixelRatio,
+      device.height * device.pixelRatio
+    );
+    this.target.texture.minFilter = THREE.NearestFilter;
+    this.target.texture.magFilter = THREE.NearestFilter;
+    this.target.texture.generateMipmaps = false;
+    this.target.stencilBuffer = false;
+    this.target.depthTexture = new THREE.DepthTexture();
+    this.target.depthTexture.format = THREE.DepthFormat;
+    this.target.depthTexture.type = THREE.UnsignedShortType;
+  }
+
+  setObjects() {
+    const loader = new GLTFLoader();
+    this.material = new THREE.ShaderMaterial({
       uniforms: {
-        progress: { type: 'f', value: 0 }
+        time: new THREE.Uniform(0),
+        resolution: new THREE.Uniform(
+          new THREE.Vector2(device.width, device.height)
+        ),
+        depthTexture: { value: undefined },
+        cameraNear: new THREE.Uniform(this.depthCamera.near),
+        cameraFar: new THREE.Uniform(this.depthCamera.far)
+      },
+      vertexShader: vertex,
+      fragmentShader: fragment,
+      side: THREE.FrontSide,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+      alphaTest: 0.5,
+      extensions: {
+        derivatives: '#extension GL_OES_standard_derivatives : enable'
       }
     });
+    loader.load(
+      './model/human.glb',
+      (gltf) => {
+        this.model = gltf.scene;
+        this.model.position.set(0, 0, 0);
+        this.model.rotateY(-Math.PI);
 
-    this.planeMesh = new T.Mesh(this.planeGeometry, this.planeMaterial);
+        this.model.traverse((child) => {
+          if (child.type === 'Mesh') {
+            child.material = new THREE.MeshBasicMaterial({
+              color: 0xFF_FF_FF
+            });
+          }
+        });
+
+        this.scene.add(this.model);
+      },
+      (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+
+    // 创建一个 planeMesh 接受 depthTexture
+    this.planeMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1, 512, 512),
+      this.material
+    );
+    this.planeMesh.position.set(1, 0, 0);
     this.scene.add(this.planeMesh);
   }
 
   render() {
     const elapsedTime = this.clock.getElapsedTime();
+    this.material.uniforms.time.value = elapsedTime;
 
-    this.planeMesh.rotation.x = 0.2 * elapsedTime;
-    this.planeMesh.rotation.y = 0.1 * elapsedTime;
-
+    this.renderer.setRenderTarget(this.target);
+    this.renderer.render(this.scene, this.depthCamera);
+    this.renderer.setRenderTarget(null);
+    this.material.uniforms.depthTexture.value = this.target.depthTexture;
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
+    if (this.model) {
+      // 让model随着时间作周期运动
+      this.model.rotation.y = 0.6 * Math.cos(elapsedTime);
+      this.model.position.z = -0.5 + 0.5 * Math.sin(elapsedTime);
+    }
   }
 
   setResize() {
