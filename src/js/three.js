@@ -46,7 +46,7 @@ export default class Three {
     });
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
-
+    this.renderer.setClearColor(0xFF_FF_FF, 0);
     this.controls = new OrbitControls(this.camera, this.canvas);
 
     this.clock = new THREE.Clock();
@@ -135,6 +135,21 @@ export default class Three {
     this.scene.add(this.planeMesh);
   }
 
+  setLinePlane(count = 100) {
+    this.lineGroup = new THREE.Group();
+    for (let _index = 0; _index < count; _index++) {
+      const geometry = new THREE.PlaneGeometry(2, 0.005, 300, 1);
+      let y = [];
+      let length_ = this.geometry.attributes.position.array.length;
+      for (let __index = 0; __index < length_; __index += 3) {
+        y.push(_index / count);
+      }
+      geometry.setAttribute('ay', new THREE.Float32BufferAttribute(y, 1));
+      const material = this.material.clone();
+      let mesh = new THREE.Mesh(geometry, material);
+      // mesh.position.set(0,
+    }
+  }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
     this.material.uniforms.time.value = elapsedTime;
