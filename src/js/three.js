@@ -28,15 +28,15 @@ export default class Three {
       0.01,
       100
     );
-    this.camera.position.set(0, 0, 5);
+    this.camera.position.set(-1.7, 0, 3.15);
     this.scene.add(this.camera);
 
     // 构建一个专门提供给 depthTexture 的 深度相机
     // this.depthCamera = new THREE.PerspectiveCamera(
     //   65,
-    //   (device.width / device.height) ,
-    //   0.82,
-    //   1.1
+    //   device.width / device.height,
+    //   1.2,
+    //   2.5
     // );
     this.depthCamera = new THREE.OrthographicCamera(
       -1, // left
@@ -44,7 +44,7 @@ export default class Three {
       1, // top
       -1, // bottom
       0.7, // near
-      1.5 // far
+      1.25 // far
     );
     this.depthCamera.position.set(0, 0, 1.35);
     this.scene.add(this.depthCamera);
@@ -62,6 +62,9 @@ export default class Three {
 
     this.clock = new THREE.Clock();
 
+    // 添加一个坐标轴
+    const axisHelper = new THREE.AxesHelper(5);
+    this.scene.add(axisHelper);
     // this.setLights();
     this.setDepthTexture();
     this.setObjects();
@@ -103,18 +106,19 @@ export default class Three {
       },
       vertexShader: vertex,
       fragmentShader: fragment,
-      side: THREE.FrontSide,
+      side: THREE.DoubleSide,
       transparent: true,
       depthWrite: false,
-      depthTest: false,
+      depthTest: true,
       blending: THREE.AdditiveBlending,
       alphaTest: 0.5,
       extensions: {
         derivatives: '#extension GL_OES_standard_derivatives : enable'
       }
     });
+
     loader.load(
-      './model/human.glb',
+      './model/fo.glb',
       (gltf) => {
         this.model = gltf.scene;
         this.model.position.set(0, 0, 0);
@@ -123,6 +127,7 @@ export default class Three {
         this.model.traverse((child) => {
           if (child.type === 'Mesh') {
             child.material = new THREE.MeshBasicMaterial({
+              // color: '#111827'
               color: '#111827'
             });
           }
@@ -138,12 +143,38 @@ export default class Three {
       }
     );
 
+    loader.load(
+      './model/human.glb',
+      (gltf) => {
+        this.humanModel = gltf.scene;
+        this.humanModel.position.set(0, 0, 0);
+        this.humanModel.rotateY(-Math.PI);
+        this.humanModel.visible = true;
+        this.humanModel.traverse((child) => {
+          if (child.type === 'Mesh') {
+            child.material = new THREE.MeshBasicMaterial({
+              // color: '#111827'
+              color: '#111827'
+            });
+          }
+        });
+
+        this.scene.add(this.humanModel);
+      },
+      (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+
     // 创建一个 planeMesh 接受 depthTexture
     this.planeMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(5, 5, 1024, 1024),
+      new THREE.PlaneGeometry(5, 5, 512, 512),
       this.material
     );
-    this.planeMesh.position.set(1, 1, 0);
+    this.planeMesh.position.set(-1.25, 0, -0.25);
     this.scene.add(this.planeMesh);
   }
 
@@ -158,9 +189,10 @@ export default class Three {
         cameraNear: new THREE.Uniform(this.depthCamera.near),
         cameraFar: new THREE.Uniform(this.depthCamera.far)
       },
+      flatShading: true,
       vertexShader: lineVertex,
       fragmentShader: lineFragment,
-      side: THREE.FrontSide,
+      side: THREE.DoubleSide,
       transparent: true,
       depthWrite: false,
       depthTest: false,
@@ -187,7 +219,7 @@ export default class Three {
     }
     this.lineGroup.scale.set(5, 5, 5);
     this.lineGroup.position.set(-2.5, 0, 0);
-    this.scene.add(this.lineGroup);
+    // this.scene.add(this.lineGroup);
   }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
@@ -196,6 +228,7 @@ export default class Three {
 
     this.renderer.setRenderTarget(this.target);
     this.renderer.render(this.scene, this.depthCamera);
+    // eslint-disable-next-line unicorn/no-null
     this.renderer.setRenderTarget(null);
     this.material.uniforms.depthTexture.value = this.target.depthTexture;
     this.lineMaterial.uniforms.depthTexture.value = this.target.depthTexture;
@@ -203,9 +236,12 @@ export default class Three {
     requestAnimationFrame(this.render.bind(this));
     if (this.model) {
       // 让model随着时间作周期运动
-      // this.model.rotation.y = 0.6 * Math.cos(elapsedTime);
-      // this.model.position.z = -0.5 + 0.5 * Math.sin(elapsedTime);
+      this.model.rotation.y = 0.6 * Math.cos(elapsedTime);
+      this.model.position.z = -0.5 + 0.5 * Math.sin(elapsedTime);
+      this.humanModel.position.z =
+        -0.5 + 0.5 * Math.sin(elapsedTime + Math.PI / 4);
     }
+    console.log(this.camera.position);
   }
 
   setResize() {
