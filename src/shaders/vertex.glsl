@@ -1,7 +1,8 @@
 varying vec2 vUv;
+varying vec3 csm_vPosition;
+
 
 void main() {
   vUv = uv;
-
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  csm_vPosition = position;
 }
