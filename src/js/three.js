@@ -28,7 +28,7 @@ export default class Three {
       0.1,
       100
     );
-    this.camera.position.set(2, 2, 8);
+    this.camera.position.set(2, 2, 6.5);
     this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -72,11 +72,11 @@ export default class Three {
       colorB: new THREE.Uniform(new THREE.Color('#fff')) // New colorB uniform
     };
     this.materialParams = {
-      metalness: 0.08,
-      roughness: 0.22,
+      metalness: 0.07,
+      roughness: 0.18,
       color: new THREE.Color('#fff'),
       transmission: 1,
-      ior: 1.6,
+      ior: 1.9,
       thickness: 1.44
     };
 
@@ -236,6 +236,8 @@ export default class Three {
   }
 
   setGeometry() {
+    this.group = new THREE.Group();
+
     const textureLoader = new THREE.TextureLoader();
     const matcap = textureLoader.load('./matcap.png');
     // 利用 csm 创建一个基于物理材质的球体
@@ -281,8 +283,12 @@ export default class Three {
       insideSphereGeometry,
       insideSphereMaterial
     );
-    this.scene.add(this.insideSphereMesh);
-    this.scene.add(this.sphereMesh);
+    // this.scene.add(this.insideSphereMesh);
+    // this.scene.add(this.sphereMesh);
+    this.group.add(this.insideSphereMesh);
+    this.group.add(this.sphereMesh);
+    this.group.position.set(0, -1.1, 0);
+    this.scene.add(this.group);
   }
 
   render() {

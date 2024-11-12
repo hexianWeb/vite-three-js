@@ -85,7 +85,7 @@
     <noscript class="text-center text-lg text-red-500">
       Enable JavaScript to enjoy all the features of this app.
     </noscript>
-    <main class="flex h-full bg-white text-color">
+    <main class="flex h-full text-color pointer-events-none" style="background-color: #eeecf7;">
       <header
         class="absolute top-0 z-[1] w-full cursor-default bg-accent-primary sm:w-auto"
       >
@@ -100,10 +100,104 @@
           ></div>
         </div>
       </header>
-      <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
-      </a>
-    </main>
 
+      <nav class="pointer-events-auto fixed top-10 left-1/2 transform -translate-x-1/2 bg-white shadow-md py-4 px-8 rounded-full z-10 w-4/5">
+        <div class="flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-600 mr-10">Nexa AI</div>
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">Services</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">About us</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">Insights</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">Careers</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">News</a>
+                </div>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-gray-400 rounded-full mr-2"></span>
+                    <a href="#" class="text-gray-950 font-bold hover:text-blue-600">Contact us</a>
+                </div>
+            </div>
+            <div class="flex items-center ml-10 bg-blue-600  px-4 py-2 rounded-lg">
+                <a href="#" class=" text-white hover:bg-blue-700">Let's talk</a>
+                <span class="h-2 w-2 bg-white border border-gray-400 rounded-full ml-2"></span>
+            </div>
+        </div>
+    </nav>
+    <div class="flex flex-col items-center pt-20 w-full z-10 mt-20">
+      <h1 class="text-9xl font-normal text-center mb-4 text-gray-950 animate-fade-in">
+          Nexa AI
+          <svg t="1731396301220" class="inline-block h-[7.5rem] w-[7.5rem] mx-2 transform rotate-[-45deg]" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <path d="M512.113587 960.438359c-6.737448 0-13.475919-2.572592-18.618033-7.723915-10.29139-10.293437-10.29139-26.974351 0-37.265742l263.312034-263.572978c10.286274-10.296507 26.950815-10.296507 37.237089 0 10.29139 10.293437 10.29139 26.974351 0 37.268812L530.73469 952.715467C525.589506 957.865767 518.851035 960.438359 512.113587 960.438359zM933.441495 538.725688 90.788749 538.725688c-14.543228 0-26.336832-11.806907-26.336832-26.358321 0-14.558577 11.793604-26.360368 26.336832-26.360368l779.073708 0L493.495554 109.287055c-10.29139-10.296507-10.29139-26.974351 0-37.270858 10.286274-10.296507 26.950815-10.296507 37.239136 0l421.324838 421.715741c7.53665 7.538697 9.798157 18.868743 5.706979 28.725228C953.705004 532.299325 944.085926 538.725688 933.441495 538.725688z" fill="#272636"></path>
+        </svg>
+          Solutions
+      </h1>
+    </div>
+
+    <div class="fixed right-40 w-1/4 h-96 top-1/2 transform -translate-y-1/4 flex flex-col items-start space-y-6 p-4 pt-10 pointer-events-auto">
+        <a class="text-gray-950 text-lg font-semibold bg-opacity-70 rounded-3xl shadow-lg p-4 text-left ml-2 animate-float" style="animation-delay: 0s;">Customer Support Chatbots</a>
+        <a class="text-gray-950 text-lg font-semibold bg-opacity-70 rounded-3xl shadow-lg p-4 text-left animate-float" style="animation-delay: 0.5s;">Internal Document Search Systems</a>
+        <a class="text-gray-950 text-lg font-semibold bg-opacity-70 rounded-3xl shadow-lg p-4 text-left ml-2 animate-float" style="animation-delay: 1s;">Development of AI Applications</a>
+    </div>
+
+    <div class="fixed bottom-20 right-40 w-1/6 flex flex-col items-start space-y-4">
+        <p class="text-gray-500 text-lg">Solve your tasks and speed up processes by</p>
+        <span class="text-8xl font-normal text-gray-900 animate-bounce flex-1">60
+        <svg t="1731398110196" class="inline-block h-8 w-8 text-blue-600 animate-bounce -top-1/2"  fill="currentColor" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8548" width="200" height="200"><path d="M204.98 558.99l-93.99-93.98L512 64l401 401.01-93.99 93.98L512 251.97 204.98 558.99z m0 401.01l-93.99-93.99 401.01-401 401 401L819.02 960 512 652.98 204.98 960z" p-id="8549"></path></svg>
+        </span>
+    </div>
+    <canvas id="canvas" class="fixed z-[0] h-full w-full pointer-events-auto"></canvas>
+  </main>
     <script type="module" src="src/js/index.js"></script>
   </body>
+  <style>
+        @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .animate-fade-in {
+        animation: fade-in 1s ease-in-out;
+    }
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    .animate-bounce {
+        animation: bounce 1s infinite;
+    }
+    @keyframes float {
+        0% {
+            transform: translatey(0);
+        }
+        50% {
+            transform: translatey(-10px);
+        }
+        100% {
+            transform: translatey(0);
+        }
+    }
+    .animate-float {
+        animation: float 2s ease-in-out infinite;
+    }
+  </style>
 </html>
