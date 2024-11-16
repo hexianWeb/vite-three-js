@@ -4,9 +4,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { Pane } from 'tweakpane';
 
+import bgFragment from '../shaders/bg/fragment.glsl';
+import bgVertex from '../shaders/bg/vertex.glsl';
 import fragment from '../shaders/fragment.glsl';
 import vertex from '../shaders/vertex.glsl';
 
@@ -21,15 +26,26 @@ export default class Three {
     this.canvas = canvas;
 
     this.scene = new THREE.Scene();
-
+    this.bgScene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
       75,
       device.width / device.height,
       0.1,
       100
     );
-    this.camera.position.set(2, 2, 6.5);
-    this.scene.add(this.camera);
+    this.camera.position.set(0, 0, 6.5);
+    const frustumSize = 1;
+    // 生成正交相机
+    this.bgCamera = new THREE.OrthographicCamera(
+      frustumSize / device.pixelRatio / -2,
+      frustumSize / device.pixelRatio / 2,
+      frustumSize / device.pixelRatio / 2,
+      frustumSize / device.pixelRatio / -2,
+      -1000,
+      1000
+    );
+    this.bgCamera.position.set(0, 0, 2);
+    this.bgScene.add(this.bgCamera);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
@@ -37,11 +53,27 @@ export default class Three {
       antialias: true,
       preserveDrawingBuffer: true
     });
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1;
+
+    this.bgRenderTarget = new THREE.WebGLRenderTarget(
+      device.width,
+      device.height,
+      {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat,
+        precision: 'highp'
+      }
+    );
+    this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
+
     // 开启阴影渲染
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = false;
     // 设定透明 background
     this.renderer.setClearColor(0x00_00_00, 0);
     this.controls = new OrbitControls(this.camera, this.canvas);
@@ -51,14 +83,19 @@ export default class Three {
     this.loader = new GLTFLoader();
 
     this.setDebug();
-    this.setLights();
-    this.setEnv('./lake_pier_2k.hdr');
+    // this.setLights();
+    // this.setEnv('./lake_pier_2k.hdr');
+    this.setBackGround();
     this.setGeometry();
+    this.addRenderTargetPlane();
+    this.bgPostProcess();
     this.render();
     this.setResize();
   }
 
+  //#region
   setDebug() {
+    this.scene.add(new THREE.AxesHelper(3));
     this.uniforms = {
       uTime: new THREE.Uniform(0),
       uPositionFrequency: new THREE.Uniform(0.6),
@@ -211,9 +248,8 @@ export default class Three {
         this.sphereMaterial.thickness = value; // Update thickness in real-time
       });
   }
+  //#endregion
   setLights() {
-    // this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
-    // this.scene.add(this.ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xFF_FF_FF, 1);
     directionalLight.position.set(0, 0, 5);
     directionalLight.castShadow = true; // 启用阴影投射
@@ -229,7 +265,6 @@ export default class Three {
     rgbeLoader.load(hdrPath, (texture) => {
       const environmentMap =
         pmremGenerator.fromEquirectangular(texture).texture;
-      // this.scene.background = environmentMap;
       this.scene.environment = environmentMap;
       this.scene.environmentIntensity = 0.5;
     });
@@ -271,8 +306,8 @@ export default class Three {
       uniforms: this.uniforms
     });
     this.sphereMesh = new THREE.Mesh(sphereGeometry, this.sphereMaterial);
-    this.sphereMesh.castShadow = true;
-    this.sphereMesh.receiveShadow = true;
+    this.sphereMesh.castShadow = false;
+    this.sphereMesh.receiveShadow = false;
     this.sphereMesh.customDepthMaterial = depthMaterial;
 
     const insideSphereGeometry = new THREE.CapsuleGeometry(1.2, 0.9, 4, 8);
@@ -283,20 +318,108 @@ export default class Three {
       insideSphereGeometry,
       insideSphereMaterial
     );
-    // this.scene.add(this.insideSphereMesh);
-    // this.scene.add(this.sphereMesh);
     this.group.add(this.insideSphereMesh);
     this.group.add(this.sphereMesh);
     this.group.position.set(0, -1.1, 0);
     this.scene.add(this.group);
   }
 
+  setBackGround() {
+    this.params = {
+      smoothMin: 0.05,
+      leftLen: -1.5,
+      rightLen: 1.04,
+      xOffset: 0.5, // 新增 X 轴偏移
+      yOffset: 2 // 新增 Y 轴偏移
+    };
+
+    this.planeGeometry = new THREE.PlaneGeometry(1, 1, 16, 16);
+    this.planeMaterial = new THREE.ShaderMaterial({
+      side: THREE.DoubleSide,
+      wireframe: false,
+      fragmentShader: bgFragment,
+      vertexShader: bgVertex,
+      uniforms: {
+        uProgress: { type: 'f', value: 0 },
+        uTime: { type: 'f', value: 0 },
+        uResolution: {
+          type: 'v2', // Change to 'v2' for a vector
+          value: new THREE.Vector2(device.width / device.height, 1) // Set to width and height
+        },
+        uTexture: { type: 't', value: null },
+        uMatcap: {
+          value: new THREE.TextureLoader().load(
+            './img/EE4128_FC8E82_9A0704_BF0F05.png'
+          )
+        },
+        uCameraPosition: {
+          type: 'v3',
+          value: this.bgCamera.position
+        },
+        uSmoothMin: { type: 'f', value: this.params.smoothMin },
+        uMouse: { type: 'v2', value: new THREE.Vector2(0, 0) }, // Initialize uMouse
+        uLeftLength: { type: 'f', value: this.params.leftLen },
+        uRightLength: { type: 'f', value: this.params.rightLen },
+        uXoffset: { type: 'f', value: this.params.xOffset }, // 新增 X 轴偏移
+        uYoffset: { type: 'f', value: this.params.yOffset } // 新增 Y 轴偏移
+      }
+    });
+    this.planeMaterial.needsUpdate = true;
+    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+    this.bgScene.add(this.planeMesh);
+  }
+
+  addRenderTargetPlane() {
+    // Create a plane geometry
+    const planeGeometry = new THREE.PlaneGeometry(2, 2);
+
+    this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
+    // Create a basic material with the render target's texture
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: this.bgRenderTarget.texture
+    });
+
+    // Create the mesh
+    this.renderTargetPlaneMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    // Position the plane mesh appropriately
+    // Adjust the position based on your scene setup
+    this.renderTargetPlaneMesh.position.set(0, 0, 5); // Example position
+
+    // Add the mesh to the scene
+    this.scene.add(this.renderTargetPlaneMesh);
+  }
+  bgPostProcess() {
+    this.composer = new EffectComposer(this.renderer, this.bgRenderTarget);
+    const bgRenderPass = new RenderPass(this.bgScene, this.bgCamera);
+    const outputPass = new OutputPass();
+    this.composer.addPass(bgRenderPass);
+    this.composer.addPass(outputPass);
+  }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
     this.uniforms.uTime.value = Math.cos(elapsedTime) * 1.5;
+    this.planeMaterial.uniforms.uTime.value = elapsedTime;
+    // Render the background scene to the render target
+    this.renderer.setRenderTarget(this.bgRenderTarget);
+    this.renderer.clear();
+    this.renderer.render(this.bgScene, this.bgCamera);
 
-    this.renderer.render(this.scene, this.camera);
+    // Render the background scene using EffectComposer
+    // this.composer.render();
+    // Use the render target's texture as the background for the main scene
+    // this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
+    // this.scene.background = this.bgRenderTarget.texture;
+    // this.scene.background.colorSpace = THREE.SRGBColorSpace;
+    // this.scene.background.toneMapping = THREE.ACESFilmicToneMapping;
+    // Render the main scene
+    this.renderer.setRenderTarget(null); // Switch back to the default framebuffer
+    this.renderer.clear();
+    // this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.bgScene, this.bgCamera);
+    // this.composer.render();
+
     requestAnimationFrame(this.render.bind(this));
   }
 
@@ -313,5 +436,8 @@ export default class Three {
 
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
+
+    // Update the render target size
+    this.bgRenderTarget.setSize(device.width, device.height);
   }
 }
