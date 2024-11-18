@@ -9,6 +9,8 @@ uniform sampler2D uMatcap;
 uniform sampler2D uTexture;
 uniform vec3 uCameraPosition;
 uniform vec2 uMouse;
+uniform vec3 uColor;
+
 varying vec2 vUv;
 
 // 罗德里格斯旋转
@@ -32,9 +34,8 @@ float sdSphere(vec3 p, float s) {
 // 定义一个函数来计算扰动后的球体距离
 float sdMovingSphere(vec3 p, vec3 offset, float radius, float timeFactor, float phase, float yOffset) {
   // 将时间周期化
-  float loopTime = mod(uTime, 10.0); // 假设一个周期为10秒
   float timeOffset = sin(uTime * timeFactor + phase) * 0.1; // 基于周期化时间的扰动
-  vec3 position = p + offset + vec3(timeOffset, yOffset, 0.0);
+  vec3 position = p + offset + vec3(timeOffset, 0.0, 0.0);
   return sdSphere(position, radius);
 }
 
@@ -123,11 +124,11 @@ void main() {
     // 计算边缘高亮
     float edgeHighlight = 1.0 - smoothstep(0.4, 0.9, lightIntensity); // 控制高亮范围
     // 保持球体内部颜色不变，并在边缘应用高亮
-    color = mix(matcapColor, vec3(0.9137, 0.898, 0.898), edgeHighlight); // 使用插值实现高亮效果
+    color = mix(matcapColor, vec3(0.82), edgeHighlight); // 使用插值实现高亮效果
 
     gl_FragColor = vec4(color, 1.0);
-    gl_FragColor = sRGBTransferOETF( gl_FragColor );
   } else {
     gl_FragColor = vec4(vec3(0.0,0.0,0.0), 0.0);
   }
+  // gl_FragColor = sRGBTransferOETF( gl_FragColor );
 }

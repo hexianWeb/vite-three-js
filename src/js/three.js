@@ -2,7 +2,6 @@ import * as THREE from 'three';
 // eslint-disable-next-line import/no-unresolved
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
@@ -67,7 +66,8 @@ export default class Three {
         minFilter: THREE.LinearFilter,
         magFilter: THREE.LinearFilter,
         format: THREE.RGBAFormat,
-        precision: 'highp'
+        precision: 'highp',
+        colorSpace: THREE.LinearSRGBColorSpace
       }
     );
     this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
@@ -80,14 +80,12 @@ export default class Three {
 
     this.clock = new THREE.Clock();
 
-    this.loader = new GLTFLoader();
-
     this.setDebug();
-    // this.setLights();
-    // this.setEnv('./lake_pier_2k.hdr');
+    this.setLights();
+    this.setEnv('./lake_pier_2k.hdr');
     this.setBackGround();
     this.setGeometry();
-    this.addRenderTargetPlane();
+    // this.addRenderTargetPlane();
     this.bgPostProcess();
     this.render();
     this.setResize();
@@ -95,7 +93,7 @@ export default class Three {
 
   //#region
   setDebug() {
-    this.scene.add(new THREE.AxesHelper(3));
+    // this.scene.add(new THREE.AxesHelper(3));
     this.uniforms = {
       uTime: new THREE.Uniform(0),
       uPositionFrequency: new THREE.Uniform(0.6),
@@ -250,7 +248,7 @@ export default class Three {
   }
   //#endregion
   setLights() {
-    const directionalLight = new THREE.DirectionalLight(0xFF_FF_FF, 1);
+    const directionalLight = new THREE.DirectionalLight(0xff_ff_ff, 1);
     directionalLight.position.set(0, 0, 5);
     directionalLight.castShadow = true; // 启用阴影投射
     directionalLight.shadow.mapSize.width = 512;
@@ -260,7 +258,7 @@ export default class Three {
 
   setEnv(hdrPath) {
     const rgbeLoader = new RGBELoader();
-    // rgbeLoader.setDataType(THREE.UnsignedByteType);
+    rgbeLoader.setDataType(THREE.UnsignedByteType);
     const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     rgbeLoader.load(hdrPath, (texture) => {
       const environmentMap =
@@ -401,26 +399,16 @@ export default class Three {
 
     this.uniforms.uTime.value = Math.cos(elapsedTime) * 1.5;
     this.planeMaterial.uniforms.uTime.value = elapsedTime;
-    // Render the background scene to the render target
-    this.renderer.setRenderTarget(this.bgRenderTarget);
-    this.renderer.clear();
-    this.renderer.render(this.bgScene, this.bgCamera);
 
     // Render the background scene using EffectComposer
-    // this.composer.render();
+    this.composer.render();
     // Use the render target's texture as the background for the main scene
-    // this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
-    // this.scene.background = this.bgRenderTarget.texture;
-    // this.scene.background.colorSpace = THREE.SRGBColorSpace;
-    // this.scene.background.toneMapping = THREE.ACESFilmicToneMapping;
+    this.scene.background = this.bgRenderTarget.texture;
     // Render the main scene
     this.renderer.setRenderTarget(null); // Switch back to the default framebuffer
-    this.renderer.clear();
-    // this.renderer.render(this.scene, this.camera);
-    this.renderer.render(this.bgScene, this.bgCamera);
-    // this.composer.render();
 
     requestAnimationFrame(this.render.bind(this));
+    this.renderer.render(this.scene, this.camera);
   }
 
   setResize() {
