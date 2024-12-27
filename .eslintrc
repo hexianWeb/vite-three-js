@@ -57,8 +57,7 @@
         "trailingComma": "none",
         "bracketSpacing": true,
         "bracketSameLine": false,
-        "arrowParens": "always",
-        "endOfLine": "crlf"
+        "arrowParens": "always"
       }
     ],
     // end prettier
