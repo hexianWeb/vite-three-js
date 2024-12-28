@@ -4,7 +4,8 @@ import Camera from './camera.js';
 import Renderer from './renderer.js';
 import sources from './sources.js';
 import Debug from './utils/debug.js';
-import Resources from './Utils/resources.js';
+import IMouse from './utils/imouse.js';
+import Resources from './utils/resources.js';
 import Sizes from './utils/sizes.js';
 import Stats from './utils/stats.js';
 import Time from './utils/time.js';
@@ -26,9 +27,8 @@ export default class Experience {
 
     this.canvas = canvas;
 
-    // Panel
-    this.debug = new Debug();
-    this.stats = new Stats();
+    this.initPanel();
+
     this.sizes = new Sizes();
     this.time = new Time();
     this.scene = new THREE.Scene();
@@ -36,6 +36,7 @@ export default class Experience {
     this.renderer = new Renderer();
     this.resources = new Resources(sources);
     this.world = new World();
+    this.iMouse = new IMouse();
 
     this.sizes.on('resize', () => {
       this.resize();
@@ -45,6 +46,12 @@ export default class Experience {
       this.update();
     });
   }
+
+  initPanel() {
+    this.stats = new Stats();
+    this.debugger = new Debug();
+  }
+
   resize() {
     this.camera.resize();
     this.renderer.resize();
@@ -55,5 +62,6 @@ export default class Experience {
     this.renderer.update();
     this.world.update();
     this.stats.update();
+    this.iMouse.update;
   }
 }
