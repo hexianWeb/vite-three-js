@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import Experience from '../experience.js';
-import { getBound } from '../tools/misc.js';
+import Experience from '../../experience.js';
+import { getBound } from '../../tools/misc.js';
 
 /**
  * Center class for centering and aligning 3D objects

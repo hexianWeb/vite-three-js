@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import Experience from '../experience.js';
+import Experience from '../../experience.js';
 
 /**
  * Float class for creating floating animation effects on 3D objects
