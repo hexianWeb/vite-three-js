@@ -28,5 +28,6 @@ export default class Environment {
     this.environmentMap.texture.colorSpace = THREE.SRGBColorSpace;
 
     this.scene.environment = this.environmentMap.texture;
+    // this.scene.background = new THREE.Color('#444444');
   }
 }
