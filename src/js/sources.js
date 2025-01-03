@@ -50,5 +50,11 @@ export default [
     name: 'particles8',
     type: 'texture',
     path: 'textures/particles/8.png'
+  },
+  // 环境贴图
+  {
+    name: 'background',
+    type: 'texture',
+    path: 'textures/background/night.webp'
   }
 ];

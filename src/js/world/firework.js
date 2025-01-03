@@ -15,10 +15,9 @@ export default class Firework {
     this.debugActive = this.experience.debugger.active;
 
     this.params = {
-      uSize: 0.35,
-      uCount: 400,
-      uColor: '#ff0000', // Color
-      uProgress: 0
+      uSizeRange: { min: 10, max: 20 },
+      uCountRange: { min: 200, max: 600 },
+      uRadiusRange: { min: 40, max: 80 }
     };
 
     this.fireworks = []; // 存储所有烟花实例
@@ -26,24 +25,44 @@ export default class Firework {
     this.debuggerInit();
   }
 
-  createFirework(position = new THREE.Vector3(0, 0, 0), radius = 3) {
-    // 几何体
-    const positionsArray = new Float32Array(this.params.uCount * 3);
-    const sizesArray = new Float32Array(this.params.uCount);
-    const timeMultipliersArray = new Float32Array(this.params.uCount);
+  createFirework() {
+    const uCount =
+      Math.floor(
+        Math.random() *
+          (this.params.uCountRange.max - this.params.uCountRange.min + 1)
+      ) + this.params.uCountRange.min;
+    const uSize =
+      Math.random() *
+        (this.params.uSizeRange.max - this.params.uSizeRange.min) +
+      this.params.uSizeRange.min;
+    const uColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+    const radius =
+      Math.random() *
+        (this.params.uRadiusRange.max - this.params.uRadiusRange.min) +
+      this.params.uRadiusRange.min;
 
-    for (let index = 0; index < this.params.uCount; index++) {
+    const position = new THREE.Vector3(
+      (Math.random() - 2) * 200,
+      Math.random() * 50 + 50,
+      (Math.random() - 0.5) * 300
+    );
+
+    const positionsArray = new Float32Array(uCount * 3);
+    const sizesArray = new Float32Array(uCount);
+    const timeMultipliersArray = new Float32Array(uCount);
+
+    for (let index = 0; index < uCount; index++) {
       const index3 = index * 3;
       const spherical = new THREE.Spherical(
         radius,
         Math.random() * Math.PI,
         Math.random() * Math.PI * 2
       );
-      const position = new THREE.Vector3();
-      position.setFromSpherical(spherical);
-      positionsArray[index3] = position.x;
-      positionsArray[index3 + 1] = position.y;
-      positionsArray[index3 + 2] = position.z;
+      const particlePosition = new THREE.Vector3();
+      particlePosition.setFromSpherical(spherical);
+      positionsArray[index3] = particlePosition.x;
+      positionsArray[index3 + 1] = particlePosition.y;
+      positionsArray[index3 + 2] = particlePosition.z;
 
       sizesArray[index] = Math.random() * 0.5 + 0.5;
       timeMultipliersArray[index] = Math.random() + 1;
@@ -67,16 +86,15 @@ export default class Firework {
     //   Material
     const material = new THREE.ShaderMaterial({
       uniforms: {
-        uSize: new THREE.Uniform(this.params.uSize),
+        uSize: new THREE.Uniform(uSize),
         uResolution: new THREE.Uniform(
           new THREE.Vector2(this.deviceSize.width, this.deviceSize.height)
         ),
         uTexture: {
-          // eslint-disable-next-line unicorn/no-null
           value: null
         },
-        uColor: new THREE.Uniform(new THREE.Color(this.params.uColor)),
-        uProgress: new THREE.Uniform(this.params.uProgress)
+        uColor: new THREE.Uniform(uColor),
+        uProgress: new THREE.Uniform(0)
       },
       vertexShader: fireworkVertexShader,
       fragmentShader: fireworkFragmentShader,
@@ -84,11 +102,24 @@ export default class Firework {
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
-    //   Object3D
-    // Points
-    const texture = this.resources.items['particles4'];
+
+    // 随机选择纹理
+    const textureKeys = [
+      'particles1',
+      'particles2',
+      'particles3',
+      'particles4',
+      'particles5',
+      'particles6',
+      'particles7',
+      'particles8'
+    ];
+    const randomTextureKey =
+      textureKeys[Math.floor(Math.random() * textureKeys.length)];
+    const texture = this.resources.items[randomTextureKey];
     texture.flipY = false;
     material.uniforms.uTexture.value = texture;
+
     const fireworkPoints = new THREE.Points(geometry, material);
     fireworkPoints.position.copy(position);
     this.scene.add(fireworkPoints);
@@ -101,7 +132,8 @@ export default class Firework {
     // Animate
     gsap.to(firework.material.uniforms.uProgress, {
       value: 1,
-      duration: 3,
+      duration: 2 + Math.random(), // 随机持续时间
+      ease: 'power2.out',
       onComplete: () => this.destroy(firework)
     });
   }
@@ -109,19 +141,41 @@ export default class Firework {
   debuggerInit() {
     if (this.debugActive) {
       const folder = this.debug.addFolder({ title: 'Firework' });
-      folder.addBinding(this.params, 'uSize', {
-        min: 0.01,
-        max: 1,
-        step: 0.01
+      folder.addBinding(this.params.uSizeRange, 'min', {
+        min: 0.1,
+        max: 20,
+        step: 0.01,
+        label: 'Size Min'
       });
-
-      folder.addBinding(this.params, 'uColor', {
-        view: 'color'
+      folder.addBinding(this.params.uSizeRange, 'max', {
+        min: 20,
+        max: 40,
+        step: 0.01,
+        label: 'Size Max'
       });
-      folder.addBinding(this.params, 'uCount', {
-        min: 200,
+      folder.addBinding(this.params.uCountRange, 'min', {
+        min: 100,
         max: 1000,
-        step: 1
+        step: 10,
+        label: 'Count Min'
+      });
+      folder.addBinding(this.params.uCountRange, 'max', {
+        min: 100,
+        max: 1000,
+        step: 10,
+        label: 'Count Max'
+      });
+      folder.addBinding(this.params.uRadiusRange, 'min', {
+        min: 10,
+        max: 60,
+        step: 0.1,
+        label: 'Radius Min'
+      });
+      folder.addBinding(this.params.uRadiusRange, 'max', {
+        min: 80,
+        max: 100,
+        step: 1,
+        label: 'Radius Max'
       });
     }
   }
@@ -139,9 +193,11 @@ export default class Firework {
   resize() {
     this.deviceSize.width = window.innerWidth;
     this.deviceSize.height = window.innerHeight;
-    this.material.uniforms.uResolution.value.set(
-      this.deviceSize.width,
-      this.deviceSize.height
-    );
+    for (const firework of this.fireworks) {
+      firework.material.uniforms.uResolution.value.set(
+        this.deviceSize.width,
+        this.deviceSize.height
+      );
+    }
   }
 }

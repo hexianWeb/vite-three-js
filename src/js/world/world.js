@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 
-import Float from '../components/float.js';
 import Experience from '../experience.js';
-import Environment from './environment.js';
+import EnvironmentSphere from './environmentSphere.js';
 import Firework from './firework.js';
 
 export default class World {
@@ -10,6 +9,10 @@ export default class World {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
+
+    this.scene.add(new THREE.AxesHelper(50));
+
+    this.envSphere = new EnvironmentSphere();
 
     this.resources.on('ready', () => {
       this.firework = new Firework();
@@ -24,7 +27,6 @@ export default class World {
   }
   update() {
     if (this.float) {
-      console.log('update float');
       this.float.update();
     }
   }
