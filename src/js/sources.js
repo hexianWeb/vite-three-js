@@ -56,5 +56,11 @@ export default [
     name: 'background',
     type: 'texture',
     path: 'textures/background/night.webp'
+  },
+  //模型文件
+  {
+    name: 'burgerModel',
+    type: 'gltfModel',
+    path: 'model/burger-vertex.glb'
   }
 ];

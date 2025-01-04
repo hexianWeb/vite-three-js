@@ -44,7 +44,7 @@ export default class Firework {
     const position = new THREE.Vector3(
       (Math.random() - 2) * 200,
       Math.random() * 50 + 50,
-      (Math.random() - 0.5) * 300
+      (Math.random() - 0.5) * 600
     );
 
     const positionsArray = new Float32Array(uCount * 3);

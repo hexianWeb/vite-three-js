@@ -21,7 +21,8 @@ export default class Camera {
       1,
       1000
     );
-    this.instance.position.set(200, 4, 8);
+    // this.instance.position.set(200, 4, 8);
+    this.instance.position.set(2, 4, 8);
     this.scene.add(this.instance);
   }
 
@@ -43,8 +44,6 @@ export default class Camera {
   }
 
   update() {
-    console.log(this.instance.position);
-
     this.controls.update();
   }
 }

@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Experience from '../experience.js';
 import EnvironmentSphere from './environmentSphere.js';
 import Firework from './firework.js';
+import FireworkWithModel from './firework-with-model.js';
 
 export default class World {
   constructor() {
@@ -12,9 +13,10 @@ export default class World {
 
     this.scene.add(new THREE.AxesHelper(50));
 
-    this.envSphere = new EnvironmentSphere();
+    // this.envSphere = new EnvironmentSphere();
 
     this.resources.on('ready', () => {
+      this.fireworkWithModel = new FireworkWithModel();
       this.firework = new Firework();
       this.events();
     });
@@ -22,7 +24,14 @@ export default class World {
 
   events() {
     window.addEventListener('click', () => {
-      this.firework.createFirework();
+      this.fireworkWithModel.createFirework(
+        this.resources.items['burgerModel'].scene.children[0]
+      );
+      // this.firework.createFirework();
+      // this.firework.createFirework();
+      // this.firework.createFirework();
+      // this.firework.createFirework();
+      // this.firework.createFirework();
     });
   }
   update() {
