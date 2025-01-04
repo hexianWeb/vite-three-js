@@ -11,6 +11,12 @@ importers:
       '@vitejs/plugin-legacy':
         specifier: ^5.4.1
         version: 5.4.3(terser@5.37.0)(vite@5.4.11(@types/node@22.10.2)(sass@1.83.0)(terser@5.37.0))
+      cannon:
+        specifier: ^0.6.2
+        version: 0.6.2
+      gsap:
+        specifier: ^3.12.5
+        version: 3.12.5
       postcss-import:
         specifier: ^16.1.0
         version: 16.1.0(postcss@8.4.49)
@@ -1280,6 +1286,9 @@ packages:
   caniuse-lite@1.0.30001690:
     resolution: {integrity: sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w==}
 
+  cannon@0.6.2:
+    resolution: {integrity: sha512-n/7wWSXr8KOSvjad2x0fJHgpMepKjOKi+NdSnjfYyijoDBZnp4JQKgPcpv28jlXoWM+N9zVYU09J0A6Qxx+Y7w==}
+
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -1836,6 +1845,9 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  gsap@3.12.5:
+    resolution: {integrity: sha512-srBfnk4n+Oe/ZnMIOXt3gT605BX9x5+rh/prT2F1SsNJsU1XuMiP0E2aptW481OnonOGACZWBqseH5Z7csHxhQ==}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -4427,6 +4439,8 @@ snapshots:
 
   caniuse-lite@1.0.30001690: {}
 
+  cannon@0.6.2: {}
+
   chalk@4.1.2:
     dependencies:
       ansi-styles: 4.3.0
@@ -5130,6 +5144,8 @@ snapshots:
   gopd@1.2.0: {}
 
   graphemer@1.4.0: {}
+
+  gsap@3.12.5: {}
 
   has-bigints@1.1.0: {}
 

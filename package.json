@@ -26,6 +26,8 @@
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^5.4.1",
+    "cannon": "^0.6.2",
+    "gsap": "^3.12.5",
     "postcss-import": "^16.1.0",
     "three": "^0.167.1"
   },
