@@ -13,11 +13,16 @@ export default class IMouse {
 
     // Initialize mouse positions
     this.mouse = new THREE.Vector2(0, 0);
+    // Normalized mouse positions
+    this.normalizedMouse = new THREE.Vector2(0, 0);
+    // Mouse positions in DOM and screen coordinates
     this.mouseDOM = new THREE.Vector2(0, 0);
+    // Mouse positions relative to the center of the screen
     this.mouseScreen = new THREE.Vector2(0, 0);
+    // Previous mouse positions in DOM and screen coordinates
     this.prevMouseDOM = new THREE.Vector2(0, 0);
+    // Mouse position delta in DOM coordinates
     this.mouseDOMDelta = new THREE.Vector2(0, 0);
-
     // Mouse movement detection
     this.isMouseMoving = false;
     this.mouseMoveOffset = 4;
@@ -35,6 +40,20 @@ export default class IMouse {
     return new THREE.Vector2(x, this.sizes.height - y);
   }
 
+  /**
+   * Get mouse position normalized to the range [-1, 1]
+   * @param {number} x - Client X coordinate
+   * @param {number} y - Client Y coordinate
+   */
+  getNormalizedMouse(x, y) {
+    const mouse = this.getMouse(x, y);
+    const normalizedMouse = mouse.clone();
+    normalizedMouse.x /= this.sizes.width / 2;
+    normalizedMouse.y /= this.sizes.height / 2;
+    normalizedMouse.x -= 1;
+    normalizedMouse.y -= 1;
+    return normalizedMouse;
+  }
   /**
    * Get mouse position in DOM coordinates
    * @param {number} x - Client X coordinate
@@ -79,6 +98,10 @@ export default class IMouse {
       this.mouse = this.getMouse(event_.clientX, event_.clientY);
       this.mouseDOM = this.getMouseDOM(event_.clientX, event_.clientY);
       this.mouseScreen = this.getMouseScreen(event_.clientX, event_.clientY);
+      this.normalizedMouse = this.getNormalizedMouse(
+        event_.clientX,
+        event_.clientY
+      );
     });
   }
 
@@ -102,6 +125,10 @@ export default class IMouse {
     this.mouse = this.getMouse(touch.clientX, touch.clientY);
     this.mouseDOM = this.getMouseDOM(touch.clientX, touch.clientY);
     this.mouseScreen = this.getMouseScreen(touch.clientX, touch.clientY);
+    this.normalizedMouse = this.getNormalizedMouse(
+      touch.clientX,
+      touch.clientY
+    );
   }
 
   /**
