@@ -26,7 +26,7 @@ export default class Camera {
         this.frustumSize,
         -this.frustumSize,
         -1,
-        100
+        1000
       );
     } else {
       this.instance = new THREE.PerspectiveCamera(

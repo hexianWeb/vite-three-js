@@ -4,6 +4,7 @@ import Camera from './camera.js';
 import Renderer from './renderer.js';
 import sources from './sources.js';
 import Debug from './utils/debug.js';
+import IMouse from './utils/imouse.js';
 import Resources from './Utils/resources.js';
 import Sizes from './utils/sizes.js';
 import Stats from './utils/stats.js';
@@ -37,7 +38,10 @@ export default class Experience {
     this.renderer = new Renderer();
     this.resources = new Resources(sources);
     this.physics = new PhysicsWorld();
+    this.iMouse = new IMouse();
     this.world = new World();
+
+    this.initPanel();
 
     this.sizes.on('resize', () => {
       this.resize();
@@ -46,6 +50,10 @@ export default class Experience {
     this.time.on('tick', () => {
       this.update();
     });
+  }
+  initPanel() {
+    this.stats = new Stats();
+    this.debugger = new Debug();
   }
   resize() {
     this.camera.resize();
@@ -57,5 +65,9 @@ export default class Experience {
     this.renderer.update();
     this.world.update();
     this.stats.update();
+    this.iMouse.update();
+    if (this.physics) {
+      this.physics.update();
+    }
   }
 }
