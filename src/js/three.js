@@ -1,12 +1,25 @@
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
+  add,
+  cameraPosition,
+  cameraProjectionMatrix,
+  cameraViewMatrix,
   color,
   Fn,
   fog,
+  mul,
+  normalize,
+  normalWorld,
   positionLocal,
+  positionWorld,
   rangeFogFactor,
+  refract,
+  screenUV,
   sin,
+  sub,
+  texture,
+  thickness,
   time,
   uniform,
   uv,
@@ -32,9 +45,9 @@ export default class Three {
       75,
       device.width / device.height,
       0.1,
-      100
+      500
     );
-    this.camera.position.set(2, 2, 2);
+    this.camera.position.set(0, 0, 4.5);
     this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGPURenderer({
@@ -43,6 +56,9 @@ export default class Three {
     });
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
+
+    // RTT
+    this.bgScene = new THREE.RenderTarget(device.width, device.height);
 
     this.controls = new OrbitControls(this.camera, this.canvas);
 
@@ -59,22 +75,84 @@ export default class Three {
   setLights() {
     this.ambientLight = new THREE.AmbientLight(new THREE.Color(1, 1, 1, 1));
     this.scene.add(this.ambientLight);
+
+    this.directionalLight = new THREE.DirectionalLight(
+      new THREE.Color(1, 1, 1, 1),
+      1
+    );
+    this.directionalLight.position.set(0.5, 0, 0.866);
+    this.scene.add(this.directionalLight);
   }
 
   setObject() {
-    this.material = new THREE.NodeMaterial();
-    this.material.colorNode = Fn(() => {
-      return vec4(1, 0, 0, 1);
+    let sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(2, 32, 32),
+      new THREE.MeshPhysicalNodeMaterial({
+        color: new THREE.Color(1, 0, 0),
+        roughness: 0.5,
+        metalness: 0,
+        clearcoat: 1
+      })
+    );
+    sphere.position.set(0, 0, 0);
+    this.scene.add(sphere);
+
+    // glass Wall
+    this.glassWallGroup = new THREE.Group();
+    this.glassWallGroup.position.set(0, 0, 2);
+    this.scene.add(this.glassWallGroup);
+
+    this.glassMaterial = new THREE.NodeMaterial();
+    this.glassMaterial.colorNode = Fn(() => {
+      const eyeVector = normalize(cameraPosition.sub(positionWorld));
+      const iorRatio = 1 / 1.31;
+      const refractedVector = refract(
+        eyeVector.negate(),
+        normalize(normalWorld),
+        iorRatio
+      );
+
+      const refractedRayExit = positionWorld.add(mul(refractedVector, 0.3));
+
+      const ndcPos = cameraProjectionMatrix.mul(
+        cameraViewMatrix.mul(vec4(refractedRayExit, 1))
+      );
+
+      const refractCoords = vec2(ndcPos.xy.div(ndcPos.w)).toVar();
+
+      refractCoords.addAssign(1);
+      refractCoords.divAssign(2);
+      refractCoords.assign(vec2(refractCoords.x, refractCoords.y.oneMinus()));
+      return texture(this.bgScene.texture, refractCoords);
     })();
 
-    this.planeGeometry = new THREE.PlaneGeometry(2, 2);
-    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
-    this.scene.add(this.planeMesh);
+    this.glassMaterial2 = new THREE.MeshPhysicalNodeMaterial({
+      color: '#ffffff',
+      roughness: 0.1,
+      metalness: 0,
+      transmission: 1,
+      thickness: 0.1,
+      dispersion: 3,
+      ior: 1.31
+    });
+    let thick = 0.05;
+    const geometry = new THREE.CylinderGeometry(thick, thick, 4, 128, 32);
+    for (let index = 0; index < 100; index++) {
+      let glassColumn = new THREE.Mesh(geometry, this.glassMaterial);
+      // X轴排放
+      glassColumn.position.x = (index - 50) * thick * 2;
+      this.glassWallGroup.add(glassColumn);
+    }
   }
 
   render() {
     const elapsedTime = this.clock.getElapsedTime();
 
+    this.glassWallGroup.visible = false;
+    this.renderer.setRenderTarget(this.bgScene);
+    this.renderer.renderAsync(this.scene, this.camera);
+    this.glassWallGroup.visible = true;
+    this.renderer.setRenderTarget(null);
     this.renderer.renderAsync(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
   }
