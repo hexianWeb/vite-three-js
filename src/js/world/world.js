@@ -1,35 +1,42 @@
-import * as THREE from 'three';
-
 import Float from '../components/float.js';
 import Experience from '../experience.js';
+import Emoji from './emoji.js';
 import Environment from './environment.js';
+import GlassWall from './glass-wall.js';
+import Stage from './stage.js';
+import TextMesh from './text-mesh.js';
 
 export default class World {
   constructor() {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
-
+    this.camera = this.experience.camera.instance;
     this.float = new Float({ speed: 1.5, floatIntensity: 2 });
 
     // Environment
     this.resources.on('ready', () => {
       // Setup
       this.environment = new Environment();
+      this.sceneSetup = new Stage();
+      this.emoji = new Emoji();
     });
-    // Test mesh
-    const testMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0xFF_00_00 })
-    );
-    this.float.add(testMesh);
-    // this.scene.add(testMesh);
+
+    this.glassWall = new GlassWall();
   }
 
   update() {
     if (this.float) {
-      console.log('update float');
       this.float.update();
+    }
+    if (this.glassWall) {
+      this.glassWall.update();
+    }
+    if (this.text) {
+      this.text.update();
+    }
+    if (this.emoji) {
+      this.emoji.update();
     }
   }
 }

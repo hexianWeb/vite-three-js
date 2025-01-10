@@ -10,5 +10,20 @@ export default [
       'textures/environmentMap/pz.jpg',
       'textures/environmentMap/nz.jpg'
     ]
+  },
+  {
+    name: 'stage',
+    type: 'gltfModel',
+    path: 'glass-wall.glb'
+  },
+  {
+    name: 'emoji',
+    type: 'gltfModel',
+    path: 'emoji.glb'
+  },
+  {
+    name: 'fontSource',
+    type: 'font',
+    path: '/fonts/helvetiker_bold.typeface.json'
   }
 ];
