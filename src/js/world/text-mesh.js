@@ -6,10 +6,7 @@ import Float from '../components/float.js';
 import Experience from '../experience.js';
 
 export default class TextMesh {
-  constructor(
-    texts = ['three', 'is&the&best', 'library&of&webgl'],
-    font = 'fontSource2'
-  ) {
+  constructor(options = {}) {
     // Global variables
     this.experience = new Experience();
     this.scene = this.experience.scene;
@@ -18,12 +15,42 @@ export default class TextMesh {
     this.world = this.experience.physics.world;
     this.camera = this.experience.camera.instance;
 
+    // Default options
+    const defaultOptions = {
+      texts: ['three'],
+      font: 'fontSource',
+      position: new THREE.Vector3(-3, 10, 4),
+      rotation: new THREE.Euler(0, Math.PI / 6, 0),
+      fontOptions: {
+        size: 2.5,
+        height: 0.3,
+        curveSegments: 24,
+        bevelEnabled: true,
+        bevelThickness: 0.5,
+        bevelSize: 0.2,
+        bevelOffset: 0,
+        bevelSegments: 20
+      },
+      force: 25,
+      totalMass: 1
+    };
+
+    const { texts, font, position, rotation, fontOptions, force, totalMass } = {
+      ...defaultOptions,
+      ...options
+    };
+
     this.texts = texts;
+    this.font = font;
+    this.position = position;
+    this.rotation = rotation;
+    this.fontOptions = fontOptions;
+    this.force = force;
+    this.totalMass = totalMass;
+
     this.textGroups = [];
     this.offset = this.texts.length * 6 * 0.5; // Margin of 6
     this.raycaster = new THREE.Raycaster();
-    this.force = 25; // Force applied on click
-    this.totalMass = 1; // Total mass of the text block
     this.float = new Float({ speed: 1.5, floatIntensity: 2 });
     this.colors = [
       { from: new THREE.Color('#ff699f'), to: new THREE.Color('#a769ff') },
@@ -37,11 +64,11 @@ export default class TextMesh {
     ];
 
     this.resources.on('ready', () => {
-      const fontSource = this.resources.items[font];
+      const fontSource = this.resources.items[this.font];
       if (fontSource) {
         this.setupTextMeshes(fontSource);
         this.setConstraints();
-        this.events();
+        // this.events();
       } else {
         console.error('Font source not loaded');
       }
@@ -49,17 +76,8 @@ export default class TextMesh {
   }
 
   setupTextMeshes(fontSource) {
-    const fontOptions = {
-      font: fontSource,
-      size: 3,
-      height: 0.4,
-      curveSegments: 24,
-      bevelEnabled: true,
-      bevelThickness: 0.9,
-      bevelSize: 0.3,
-      bevelOffset: 0,
-      bevelSegments: 10
-    };
+    // Use this.fontOptions instead of hardcoded fontOptions
+    const fontOptions = { ...this.fontOptions, font: fontSource };
 
     const spaceOffset = 2;
 
@@ -167,6 +185,12 @@ export default class TextMesh {
 
     // Center the entire text block
     this.centerTextBlock();
+
+    // Apply position and rotation
+    for (const words of this.textGroups) {
+      words.position.add(this.position);
+      words.rotation.copy(this.rotation);
+    }
   }
 
   setConstraints() {
