@@ -1,8 +1,9 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 import Float from '../components/float.js';
 import Experience from '../experience.js';
 import Environment from './environment.js';
+import Model from './spider.js';
 
 export default class World {
   constructor() {
@@ -20,15 +21,16 @@ export default class World {
     // Test mesh
     const testMesh = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0xFF_00_00 })
+      new THREE.MeshStandardNodeMaterial({ color: '#ff622e' })
     );
-    this.float.add(testMesh);
-    // this.scene.add(testMesh);
+
+    this.spider = new Model();
+
+    this.scene.add(testMesh);
   }
 
   update() {
     if (this.float) {
-      console.log('update float');
       this.float.update();
     }
   }

@@ -1,5 +1,5 @@
 import CANNON from 'cannon';
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 import Float from '../components/float.js';

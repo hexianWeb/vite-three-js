@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 import Camera from './camera.js';
 import Renderer from './renderer.js';

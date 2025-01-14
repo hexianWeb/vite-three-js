@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 import Experience from './experience.js';
 
@@ -14,9 +14,10 @@ export default class Renderer {
   }
 
   setInstance() {
-    this.instance = new THREE.WebGLRenderer({
+    this.instance = new THREE.WebGPURenderer({
       canvas: this.canvas,
-      antialias: true
+      antialias: true,
+      forceWebGL: false
     });
     this.instance.toneMapping = THREE.CineonToneMapping;
     this.instance.toneMappingExposure = 1.75;
@@ -33,6 +34,6 @@ export default class Renderer {
   }
 
   update() {
-    this.instance.render(this.scene, this.camera.instance);
+    this.instance.renderAsync(this.scene, this.camera.instance);
   }
 }

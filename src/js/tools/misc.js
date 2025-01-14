@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 // 获取边界
 export const getBound = (object, precise = true) => {

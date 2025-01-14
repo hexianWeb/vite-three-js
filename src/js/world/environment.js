@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 
 import Experience from '../experience.js';
 
@@ -23,7 +23,7 @@ export default class Environment {
 
   setSunLight() {
     this.sunLightColor = '#ffffff';
-    this.sunLightIntensity = 8;
+    this.sunLightIntensity = 4;
     this.sunLight = new THREE.DirectionalLight(
       this.sunLightColor,
       this.sunLightIntensity
@@ -32,7 +32,7 @@ export default class Environment {
     this.sunLight.shadow.camera.far = 60;
     this.sunLight.shadow.mapSize.set(1024, 1024);
     this.sunLight.shadow.normalBias = 0.05;
-    this.sunLightPosition = new THREE.Vector3(18, 10, 4.5);
+    this.sunLightPosition = new THREE.Vector3(0, 2, 4.5);
     this.sunLight.position.copy(this.sunLightPosition);
     this.scene.add(this.sunLight);
 

@@ -1,5 +1,5 @@
-import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three/webgpu';
 
 import Experience from './experience.js';
 
@@ -13,8 +13,8 @@ export default class Camera {
     this.debug = this.experience.debug;
     this.debugActive = this.experience.debug.active;
 
-    this.position = new THREE.Vector3(4.79, 3.4, 17);
-    this.target = new THREE.Vector3(3.3, 3.4, -1.4);
+    this.position = new THREE.Vector3(0, 4, 3.05);
+    this.target = new THREE.Vector3(0, 3.9, 0.6);
 
     this.setInstance();
     this.setControls();
@@ -36,7 +36,7 @@ export default class Camera {
       );
     } else {
       this.instance = new THREE.PerspectiveCamera(
-        34,
+        25,
         this.sizes.width / this.sizes.height,
         0.1,
         100
