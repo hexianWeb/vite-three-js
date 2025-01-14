@@ -10,5 +10,10 @@ export default [
       'textures/environmentMap/pz.jpg',
       'textures/environmentMap/nz.jpg'
     ]
+  },
+  {
+    name: 'spiderMan',
+    type: 'gltfModel',
+    path: 'model/spiderman.glb'
   }
 ];
