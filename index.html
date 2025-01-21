@@ -95,15 +95,39 @@
           >
             Vite ThreeJS — Template
           </h1>
+
           <div
             class="arrow-right top absolute -right-[43px] -top-[35px] hidden h-0 w-0 rotate-90 border-b-[60px] border-t-[70px] border-b-transparent border-l-accent-primary border-t-transparent sm:-right-[40px] sm:block sm:border-l-[70px] md:-right-[43px] md:border-l-[76px]"
           ></div>
         </div>
       </header>
+      <div class="title">EARTH</div>
       <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
 
     </main>
 
     <script type="module" src="src/js/index.js"></script>
   </body>
+  <style>
+    .title {
+      font-family: Bellefair,serif;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%);
+      top: max(6vh,50% - 1em - 45vmin);
+      font-size: clamp(1.375rem,1.444vw + .833rem,2.188rem);
+      text-transform: uppercase;
+      letter-spacing: .5ch;
+      padding-left: .5ch;
+      font-weight: 400;
+      z-index: 1;
+      background: linear-gradient(to top,hsl(0,0%,20%),white 120%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 .8ch hsla(0,0%,100%,.35);
+    }
+  </style>
 </html>

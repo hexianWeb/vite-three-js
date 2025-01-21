@@ -50,10 +50,20 @@ export default class Environment {
   setEnvironmentMap() {
     this.environmentMap = {};
     this.environmentMap.intensity = 1;
-    this.environmentMap.texture = this.resources.items.environmentMapTexture;
+    this.environmentMap.texture = this.resources.items['envTexture'];
     this.environmentMap.texture.colorSpace = THREE.SRGBColorSpace;
-
+    this.environmentMap.texture.anisotropy = 32;
     this.scene.environment = this.environmentMap.texture;
+
+    const material = new THREE.MeshBasicMaterial({
+      map: this.environmentMap.texture,
+      side: THREE.BackSide // 确保从内部可见
+    });
+    // 创建一个大型球体几何体
+    const geometry = new THREE.SphereGeometry(10, 32, 32);
+    // 创建网格并添加到场景
+    this.starryBackground = new THREE.Mesh(geometry, material);
+    this.scene.add(this.starryBackground);
   }
 
   updateSunLightPosition() {
