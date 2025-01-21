@@ -2,8 +2,8 @@ import CANNON from 'cannon';
 import * as THREE from 'three';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
-import Float from '../components/float.js';
 import Experience from '../experience.js';
+import Float from './float.js';
 
 export default class TextMesh {
   constructor(options = {}) {
