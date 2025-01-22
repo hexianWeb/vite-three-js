@@ -5,6 +5,8 @@ import atmosphereVertexShader from '../../shaders/atmosphere/vertex.glsl';
 import earthFragmentShader from '../../shaders/earth/fragment.glsl';
 import earthVertexShader from '../../shaders/earth/vertex.glsl';
 import Experience from '../experience';
+import EarthMarker from './earthMarker';
+import Target360 from './target360';
 
 export default class Earth {
   constructor() {
@@ -17,6 +19,10 @@ export default class Earth {
     this.resources.on('ready', () => {
       this.addEarth();
       this.addAtmosphere();
+
+      // Add target360
+      this.target360 = new Target360();
+      this.earthMarker = new EarthMarker();
       this.debugInit();
     });
   }
@@ -112,6 +118,12 @@ export default class Earth {
   update() {
     if (this.earth) {
       this.earth.rotation.y += 0.001;
+    }
+    if (this.target360) {
+      // this.target360.update();
+    }
+    if (this.earthMarker) {
+      this.earthMarker.update();
     }
   }
 

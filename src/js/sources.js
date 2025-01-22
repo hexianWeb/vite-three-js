@@ -35,5 +35,10 @@ export default [
     name: 'envTexture',
     type: 'texture',
     path: 'img/earth/4k_stars.jpg'
+  },
+  {
+    name: 'hdriEnvTexture',
+    type: 'hdrTexture',
+    path: 'textures/hdr/zwartkops_curve_afternoon_4k.hdr'
   }
 ];
