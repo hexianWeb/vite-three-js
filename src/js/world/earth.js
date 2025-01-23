@@ -1,3 +1,4 @@
+import gsap from 'gsap';
 import * as THREE from 'three';
 
 import atmosphereFragmentShader from '../../shaders/atmosphere/fragment.glsl';
@@ -13,6 +14,7 @@ export default class Earth {
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
+    this.camera = this.experience.camera.instance;
     this.debug = this.experience.debug.ui;
     this.debugActive = this.experience.debug.active;
 
@@ -23,6 +25,13 @@ export default class Earth {
       // Add target360
       this.target360 = new Target360();
       this.earthMarker = new EarthMarker();
+      this.earthMarker.on('markerClicked', (argument1, argument2) =>
+        this.onMarkerClicked(argument1, argument2)
+      );
+      this.earth.add(this.earthMarker.markersGroup);
+      this.earthRotationFlag = {
+        value: false
+      };
       this.debugInit();
     });
   }
@@ -116,7 +125,7 @@ export default class Earth {
   }
 
   update() {
-    if (this.earth) {
+    if (this.earth && this.earthRotationFlag.value) {
       this.earth.rotation.y += 0.001;
     }
     if (this.target360) {
@@ -125,6 +134,61 @@ export default class Earth {
     if (this.earthMarker) {
       this.earthMarker.update();
     }
+  }
+
+  // 定义一个方法，当标记被点击时调用
+  onMarkerClicked(markerData, coords) {
+    // 使用console.log输出被点击标记的标题到控制台
+    this.rotateToMarker(coords.lat, coords.lng);
+  }
+
+  rotateToMarker(lat, lng) {
+    // 创建辅助对象，与createMarkers方法中的类似
+    const lonHelper = new THREE.Object3D();
+    const latHelper = new THREE.Object3D();
+    const positionHelper = new THREE.Object3D();
+    lonHelper.add(latHelper);
+    latHelper.add(positionHelper);
+    positionHelper.position.z = this.earth.geometry.parameters.radius;
+
+    // 设置经纬度
+    lonHelper.rotation.y = THREE.MathUtils.degToRad(lng) + Math.PI * 0.5;
+    latHelper.rotation.x = THREE.MathUtils.degToRad(-lat);
+
+    // 更新世界矩阵
+    lonHelper.updateWorldMatrix(true, false);
+
+    // 获取marker的世界位置
+    const markerWorldPosition = new THREE.Vector3();
+    positionHelper.getWorldPosition(markerWorldPosition);
+
+    // 计算从地球中心到marker的方向
+    const directionToMarker = markerWorldPosition
+      .clone()
+      .sub(this.earth.position)
+      .normalize();
+
+    // 定义一个固定的目标点，比如说(0, 0, -1)，即z轴负方向
+    const targetDirection = this.camera.position.clone().normalize();
+
+    // 创建四元数，表示从marker方向到目标方向的旋转
+    const rotationQuaternion = new THREE.Quaternion().setFromUnitVectors(
+      directionToMarker,
+      targetDirection
+    );
+
+    // 应用旋转
+    gsap.to(this.earth.quaternion, {
+      duration: 1,
+      x: rotationQuaternion.x,
+      y: rotationQuaternion.y,
+      z: rotationQuaternion.z,
+      w: rotationQuaternion.w,
+      ease: 'power2.out',
+      onUpdate: () => {
+        this.earth.quaternion.normalize(); // 确保四元数保持单位长度
+      }
+    });
   }
 
   debugInit() {
@@ -157,6 +221,7 @@ export default class Earth {
         }
       );
 
+      earthFolder.addBinding(this.earthRotationFlag, 'value');
       const sunFolder = earthFolder.addFolder({
         title: 'sun'
       });

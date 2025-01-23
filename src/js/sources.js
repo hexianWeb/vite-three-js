@@ -40,5 +40,10 @@ export default [
     name: 'hdriEnvTexture',
     type: 'hdrTexture',
     path: 'textures/hdr/zwartkops_curve_afternoon_4k.hdr'
+  },
+  {
+    name: 'pointMarker',
+    type: 'gltfModel',
+    path: 'model/marker.glb'
   }
 ];
