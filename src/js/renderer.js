@@ -18,6 +18,7 @@ export default class Renderer {
       canvas: this.canvas,
       antialias: true
     });
+    this.instance.outputColorSpace = THREE.SRGBColorSpace;
     this.instance.toneMapping = THREE.ACESFilmicToneMapping;
     this.instance.toneMappingExposure = 0.8;
     this.instance.shadowMap.enabled = true;
@@ -33,6 +34,6 @@ export default class Renderer {
   }
 
   update() {
-    this.instance.render(this.scene, this.camera.instance);
+    // this.instance.render(this.scene, this.camera.instance);
   }
 }

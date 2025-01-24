@@ -6,11 +6,12 @@ import atmosphereVertexShader from '../../shaders/atmosphere/vertex.glsl';
 import earthFragmentShader from '../../shaders/earth/fragment.glsl';
 import earthVertexShader from '../../shaders/earth/vertex.glsl';
 import Experience from '../experience';
+import EventEmitter from '../utils/event-emitter';
 import EarthMarker from './earthMarker';
-import Target360 from './target360';
 
-export default class Earth {
+export default class Earth extends EventEmitter {
   constructor() {
+    super();
     this.experience = new Experience();
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
@@ -22,15 +23,16 @@ export default class Earth {
       this.addEarth();
       this.addAtmosphere();
 
-      // Add target360
-      this.target360 = new Target360();
+      // 存储初始四元数
+      this.initialQuaternion = this.earth.quaternion.clone();
       this.earthMarker = new EarthMarker();
-      this.earthMarker.on('markerClicked', (argument1, argument2) =>
-        this.onMarkerClicked(argument1, argument2)
-      );
+      this.earthMarker.on('markerClicked', (argument1, argument2) => {
+        this.onMarkerClicked(argument1, argument2);
+        this.trigger('EaseIn', [argument1, argument2]);
+      });
       this.earth.add(this.earthMarker.markersGroup);
       this.earthRotationFlag = {
-        value: false
+        value: true
       };
       this.debugInit();
     });
@@ -59,7 +61,9 @@ export default class Earth {
         uDayTexture: new THREE.Uniform(earthDayTexture),
         uNightTexture: new THREE.Uniform(earthNightTexture),
         uCloudTexture: new THREE.Uniform(earthCloudTexture),
-        uSunDirection: new THREE.Uniform(new THREE.Vector3(0, 0, 1)),
+        uSunDirection: new THREE.Uniform(
+          new THREE.Vector3(-0.852, 0.5233, 0.0064)
+        ),
         uAtmosphereDayColor: new THREE.Uniform(new THREE.Color('#00aaff')),
         uAtmosphereTwilightColor: new THREE.Uniform(new THREE.Color('#ff6600'))
       }
@@ -76,7 +80,9 @@ export default class Earth {
       vertexShader: atmosphereVertexShader,
       fragmentShader: atmosphereFragmentShader,
       uniforms: {
-        uSunDirection: new THREE.Uniform(new THREE.Vector3(0, 0, 1)),
+        uSunDirection: new THREE.Uniform(
+          new THREE.Vector3(-0.852, 0.5233, 0.0064)
+        ),
         uAtmosphereDayColor: new THREE.Uniform(new THREE.Color('#0000ff')),
         uAtmosphereTwilightColor: new THREE.Uniform(new THREE.Color('#ff0000')),
         uAtmosphereIntensity: new THREE.Uniform(1),
@@ -112,7 +118,7 @@ export default class Earth {
       this.earthGeometry,
       this.atmosphereMaterial
     );
-    atmosphere.scale.set(1.007, 1.007, 1.007);
+    atmosphere.scale.set(1.02, 1.02, 1.02);
     const atmosphereClone = atmosphere.clone();
     this.scene.add(atmosphere);
     this.scene.add(atmosphereClone);
@@ -120,16 +126,13 @@ export default class Earth {
       this.earthGeometry,
       this.atmosphereMaterial2
     );
-    atmosphere2.scale.set(1.15, 1.15, 1.15);
+    atmosphere2.scale.set(1.13, 1.13, 1.13);
     this.scene.add(atmosphere2);
   }
 
   update() {
     if (this.earth && this.earthRotationFlag.value) {
       this.earth.rotation.y += 0.001;
-    }
-    if (this.target360) {
-      // this.target360.update();
     }
     if (this.earthMarker) {
       this.earthMarker.update();
@@ -191,9 +194,24 @@ export default class Earth {
     });
   }
 
+  // 新增方法：复原到初始旋转姿态
+  resetRotation() {
+    gsap.to(this.earth.quaternion, {
+      duration: 1,
+      x: this.initialQuaternion.x,
+      y: this.initialQuaternion.y,
+      z: this.initialQuaternion.z,
+      w: this.initialQuaternion.w,
+      ease: 'power2.out',
+      onUpdate: () => {
+        this.earth.quaternion.normalize(); // 确保四元数保持单位长度
+      }
+    });
+  }
+
   debugInit() {
     if (this.debugActive) {
-      this.sunSpherical = new THREE.Spherical(1, Math.PI * 0.5, 0.5);
+      this.sunSpherical = new THREE.Spherical(1, 1.02, 4.71);
       this.sunDirection = new THREE.Vector3();
       const debugSun = new THREE.Mesh(
         new THREE.IcosahedronGeometry(0.1, 2),
@@ -249,6 +267,8 @@ export default class Earth {
         })
         .on('change', () => {
           this.sunDirection.setFromSpherical(this.sunSpherical);
+          console.log(this.sunDirection);
+
           debugSun.position.copy(this.sunDirection).multiplyScalar(5);
           this.earthMaterial.uniforms.uSunDirection.value.copy(
             this.sunDirection

@@ -3,18 +3,20 @@ import * as THREE from 'three';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 import Experience from '../experience.js';
-import Float from './float.js';
+import EventEmitter from '../utils/event-emitter';
 
-export default class TextMesh {
-  constructor(options = {}) {
+export default class TextMesh extends EventEmitter {
+  constructor(options = {}, scene = null, camera = null) {
+    super();
     // Global variables
     this.experience = new Experience();
-    this.scene = this.experience.scene;
+    this.scene = scene || this.experience.scene;
     this.iMouse = this.experience.iMouse;
     this.resources = this.experience.resources;
     this.world = this.experience.physics.world;
-    this.camera = this.experience.camera.instance;
+    this.camera = camera || this.experience.camera.instance;
 
+    this.triggerFlag = false;
     // Default options
     const defaultOptions = {
       texts: ['three'],
@@ -22,7 +24,7 @@ export default class TextMesh {
       position: new THREE.Vector3(-3, 10, 4),
       rotation: new THREE.Euler(0, Math.PI / 6, 0),
       fontOptions: {
-        size: 2.5,
+        size: 1.8,
         height: 0.3,
         curveSegments: 24,
         bevelEnabled: true,
@@ -49,30 +51,31 @@ export default class TextMesh {
     this.totalMass = totalMass;
 
     this.textGroups = [];
+    this.textMeshes = []; // 新增：用于存储所有文本网格
     this.offset = this.texts.length * 6 * 0.5; // Margin of 6
     this.raycaster = new THREE.Raycaster();
-    this.float = new Float({ speed: 1.5, floatIntensity: 2 });
     this.colors = [
-      { from: new THREE.Color('#ff699f'), to: new THREE.Color('#a769ff') },
-      { from: new THREE.Color('#683fee'), to: new THREE.Color('#527ee1') },
-      { from: new THREE.Color('#ee663f'), to: new THREE.Color('#f5678d') },
-      { from: new THREE.Color('#ee9ca7'), to: new THREE.Color('#ffdde1') },
-      { from: new THREE.Color('#f7971e'), to: new THREE.Color('#ffd200') },
-      { from: new THREE.Color('#56ccf2'), to: new THREE.Color('#2f80ed') },
-      { from: new THREE.Color('#fc5c7d'), to: new THREE.Color('#6a82fb') },
-      { from: new THREE.Color('#dce35b'), to: new THREE.Color('#45b649') }
+      { from: new THREE.Color('#32de84'), to: new THREE.Color('#4fffb0') },
+      { from: new THREE.Color('#683fee'), to: new THREE.Color('#527ee1') }
+      // { from: new THREE.Color('#ee663f'), to: new THREE.Color('#f5678d') },
+      // { from: new THREE.Color('#ee9ca7'), to: new THREE.Color('#ffdde1') },
+      // { from: new THREE.Color('#f7971e'), to: new THREE.Color('#ffd200') },
+      // { from: new THREE.Color('#56ccf2'), to: new THREE.Color('#2f80ed') },
+      // { from: new THREE.Color('#fc5c7d'), to: new THREE.Color('#6a82fb') },
+      // { from: new THREE.Color('#dce35b'), to: new THREE.Color('#45b649') }
     ];
 
-    this.resources.on('ready', () => {
-      const fontSource = this.resources.items[this.font];
-      if (fontSource) {
-        this.setupTextMeshes(fontSource);
-        this.setConstraints();
-        // this.events();
-      } else {
-        console.error('Font source not loaded');
-      }
-    });
+    // debugger;
+    // this.resources.on('ready', () => {
+    const fontSource = this.resources.items[this.font];
+    if (fontSource) {
+      this.setupTextMeshes(fontSource);
+      this.setConstraints();
+      this.events();
+    } else {
+      console.error('Font source not loaded');
+    }
+    // });
   }
 
   setupTextMeshes(fontSource) {
@@ -109,7 +112,7 @@ export default class TextMesh {
       });
       this.world.addBody(words.ground);
 
-      const randomColor = this.colors[index + 4];
+      const randomColor = this.colors[index];
 
       for (const [index_, letter] of [...text].entries()) {
         const progress = index_ / (text.length - 1);
@@ -170,6 +173,7 @@ export default class TextMesh {
           );
 
           this.world.addBody(mesh.body);
+          this.textMeshes.push(mesh); // 新增：将mesh添加到textMeshes数组中
           words.add(mesh);
         }
       }
@@ -180,6 +184,7 @@ export default class TextMesh {
       }
 
       this.textGroups.push(words);
+
       this.scene.add(words);
     }
 
@@ -245,10 +250,7 @@ export default class TextMesh {
   onClick() {
     this.raycaster.setFromCamera(this.iMouse.normalizedMouse, this.camera);
 
-    const intersects = this.raycaster.intersectObjects(
-      this.scene.children,
-      true
-    );
+    const intersects = this.raycaster.intersectObjects(this.textMeshes);
 
     if (intersects.length > 0) {
       const object_ = intersects[0];
@@ -264,7 +266,6 @@ export default class TextMesh {
       for (const group of this.textGroups) {
         for (const letter of group.children) {
           const { body } = letter;
-          console.log(body);
 
           if (letter !== object) continue;
 
@@ -281,10 +282,7 @@ export default class TextMesh {
   onMouseMove() {
     this.raycaster.setFromCamera(this.iMouse.normalizedMouse, this.camera);
 
-    const intersects = this.raycaster.intersectObjects(
-      this.scene.children,
-      true
-    );
+    const intersects = this.raycaster.intersectObjects(this.textMeshes);
 
     if (intersects.length > 0) {
       const object_ = intersects[0];
@@ -296,17 +294,12 @@ export default class TextMesh {
         for (const letter of group.children) {
           if (letter === object) {
             const { body } = letter;
-            const upwardImpulse = new CANNON.Vec3(0, 0.5, 0);
+            const upwardImpulse = new CANNON.Vec3(0, 0.05, 0);
             body.applyImpulse(upwardImpulse, body.position);
             return; // 找到并应用力后立即返回
           }
         }
       }
-      // // 如果射线命中的对象与上一次不同，才施加力
-      // if (object !== this.lastIntersectedObject) {
-      //   this.applyUpwardForce(object);
-      //   this.lastIntersectedObject = object;
-      // }
     } else {
       // 如果射线没有命中任何对象，重置 lastIntersectedObject
       this.lastIntersectedObject = null;
@@ -327,16 +320,9 @@ export default class TextMesh {
   }
 
   update() {
-    if (this.float) {
-      this.updateFloat();
-    }
-    if (this.textGroups) {
+    if (this.textGroups && !this.triggerFlag) {
       this.updateTextGroups();
     }
-  }
-
-  updateFloat() {
-    this.float.update();
   }
 
   updateTextGroups() {
@@ -352,8 +338,10 @@ export default class TextMesh {
     for (const [letterIndex, letter] of group.children.entries()) {
       this.updateLetter(letter);
 
-      if (letter.body.position.y <= -50) {
-        shouldReset = true;
+      if (letter.body.position.y <= -10) {
+        // shouldReset = true;
+        this.triggerFlag = true;
+        this.trigger('reset');
       }
 
       if (
@@ -380,7 +368,6 @@ export default class TextMesh {
 
   addGroundToGroup(group) {
     if (!group.isGroundDisplayed) {
-      console.log('Adding ground to group');
       this.world.addBody(group.ground);
       group.isGroundDisplayed = true;
     }
@@ -417,7 +404,7 @@ export default class TextMesh {
   }
 
   getOffsetY(index) {
-    return (this.texts.length - index - 1) * 6 - this.offset;
+    return (this.texts.length - index - 1) * 4 - this.offset;
   }
 
   pickRandomColor() {

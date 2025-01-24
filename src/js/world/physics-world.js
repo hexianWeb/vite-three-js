@@ -8,7 +8,6 @@ export default class PhysicsWorld {
     this.scene = this.experience.scene;
     this.world = new CANNON.World();
     this.deltaTime = this.experience.time.delta;
-    // this.world.gravity.set(0, -gravity, 0);
     this.world.gravity.set(0, -gravity, 0);
   }
   update() {

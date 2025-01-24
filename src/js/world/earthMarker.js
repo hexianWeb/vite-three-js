@@ -23,10 +23,10 @@ export default class EarthMarker extends EventEmitter {
 
     // 标记数组
     this.markers = [
-      { title: '北京', coords: { lat: 39.9042, lng: 116.4074 } },
-      { title: '纽约', coords: { lat: 40.7128, lng: -74.006 } },
+      { title: 'Bei&Jing', coords: { lat: 39.9042, lng: 116.4074 } },
+      { title: 'NewYork', coords: { lat: 40.7128, lng: -74.006 } },
       {
-        title: '中国台湾',
+        title: 'Tai&Wan',
         coords: {
           lat: 24.915_71,
           lng: 121.6739
