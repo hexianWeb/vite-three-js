@@ -1,107 +1,109 @@
-# Vite Three JS — 模板
+# Vite Three JS — Template
 
-## Nexa AI项目演示
-![演示视频](./README/nextai.gif)
+[中文版 README](README-zh.md)
+
+## Nexa AI Project Demo
+![Demo GIF](./README/nextai.gif)
 
 ---
 
-## 快速开始
+## Getting Started
 
-### 前置条件：
-- **Node.js**：JavaScript 运行时环境。
-- **可选包管理器**：
-  - **PNPM**：`npm install --global pnpm`
-  - **Yarn**：`npm install --global yarn`
+### Prerequisites:
+- **Node.js**: JavaScript runtime environment.
+- **Optional Package Managers**:
+  - **PNPM**: `npm install --global pnpm`
+  - **Yarn**: `npm install --global yarn`
 
-### 开始开发：
-1. **获取仓库：**
-   - 点击 **"Use this template"** 或 **"Fork"** 按钮。
-   - 或者通过终端克隆仓库：
+### Start Developing:
+1. **Get the repository:**
+   - Click **[Use this template](https://github.com/hexianWeb/nexa-ai-copy/generate)** or **[Fork](https://github.com/hexianWeb/nexa-ai-copy/fork)** button.
+   - Alternatively, clone the repository through your terminal:
      ```bash
      git clone https://github.com/hexianWeb/nexa-ai-copy.git
      ```
 
-2. **打开终端或代码编辑器，进入项目目录并运行以下命令：**
+2. **Open your terminal or code editor, navigate to the project directory, and run the following commands:**
 
-| 操作 | NPM | PNPM | Yarn |
+| Action | NPM | PNPM | Yarn |
 | --- | --- | --- | --- |
-| 安装依赖 | `npm install` | `pnpm install` | `yarn install` |
-| 启动开发服务器 | `npm run dev` | `pnpm dev` | `yarn dev` |
-| 构建生产版本 | `npm run build` | `pnpm build` | `yarn build` |
-| 预览生产版本 | `npm run preview` | `pnpm preview` | `yarn preview` |
+| Install dependencies | `npm install` | `pnpm install` | `yarn install` |
+| Run development server | `npm run dev` | `pnpm dev` | `yarn dev` |
+| Build for production | `npm run build` | `pnpm build` | `yarn build` |
+| Preview production build | `npm run preview` | `pnpm preview` | `yarn preview` |
 
 ---
 
-## 功能特性
+## Features
 
-本模板包含以下功能和技术：
+This template includes the following features and technologies:
 
-- **Three.JS**：基于 WebGL 的 JavaScript 库，用于渲染交互式 3D 和 2D 场景。
-- **TailwindCSS**：实用优先的 CSS 框架，快速实现样式设计。
-- **SASS**：CSS 预处理器，支持变量、嵌套和混合等功能。
-- **PostCSS**：使用插件扩展 CSS 功能。
-- **Playwright**：浏览器自动化库，支持端到端测试。
-- **Vite**：快速高效的构建工具和开发服务器。
+- **Three.JS**: A JavaScript library based on WebGL for rendering interactive 3D and 2D scenes.
+- **TailwindCSS**: A utility-first CSS framework for rapid styling.
+- **SASS**: A CSS preprocessor with support for variables, nesting, and mixins.
+- **PostCSS**: A tool for transforming CSS with JavaScript plugins.
+- **Playwright**: A library for browser automation and end-to-end testing.
+- **Vite**: A fast and efficient build tool and development server.
 
-辅助开发工具：
+Additional development tools:
 
-- **ESLint**：代码规范检查工具。
-- **Prettier**：代码格式化工具。
-- **Husky**：Git 钩子管理工具。
-- **Commitlint**：提交信息格式检查工具。
+- **ESLint**: A tool for enforcing coding standards and identifying potential errors.
+- **Prettier**: A code formatter for consistent style.
+- **Husky**: A Git hook manager for easy setup and configuration.
+- **Commitlint**: A tool for enforcing commit message conventions.
 
 ---
 
-## 浏览器支持
+## Browser Support
 
-配置文件确保了对主流浏览器的支持（覆盖率约 92.3%）：
+The configuration ensures support for major browsers (coverage of approximately 92.3%):
 
-| 浏览器 | 版本 |
+| Browser | Version |
 | :---: | :---: |
-| ![Chrome][chrome-icon] | 最新 3 个版本 |
-| ![Firefox][firefox-icon] | 最新 3 个版本 |
-| ![Edge][edge-icon] | 最新 3 个版本 |
-| ![Opera][opera-icon] | 最新 3 个版本 |
-| ![Safari][safari-icon] | 最新 3 个版本 |
+| ![Chrome][chrome-icon] | Latest 3 versions |
+| ![Firefox][firefox-icon] | Latest 3 versions |
+| ![Edge][edge-icon] | Latest 3 versions |
+| ![Opera][opera-icon] | Latest 3 versions |
+| ![Safari][safari-icon] | Latest 3 versions |
 
-为了支持更多浏览器，请更新 `.browserslistrc` 文件中的配置。注意，支持的浏览器版本越多，打包后的文件体积会越大。
-
----
-
-## 贡献指南
-
-欢迎贡献代码！任何大小的贡献都非常重要。请参考 [贡献指南](CODE_OF_CONDUCT.md) 获取更多信息，并确保所有提交遵循 [提交信息规范](https://github.com/conventional-changelog/commitlint/#what-is-commitlint)。
-
-### 如何贡献：
-
-1. **开始使用**：参见 [快速开始](#快速开始)
-2. **添加新功能**：
-   1. 创建新分支：`git checkout -b feat/NEW-FEATURE`
-   2. 提交更改：`git add PATH/TO/FILENAME.EXTENSION`
-   3. 提交代码：`git commit -m "feat: NEW FEATURE"`
-   4. 推送分支：`git push origin feat/NEW-FEATURE`
-3. **修复 Bug**：
-   1. 创建新分支：`git checkout -b fix/BUG-FIX`
-   2. 提交更改：`git add PATH/TO/FILENAME.EXTENSION`
-   3. 提交代码：`git commit -m "fix: BUG FIX"`
-   4. 推送分支：`git push origin fix/BUG-FIX`
-4. **创建 Pull Request**
+To support more browsers, update the `.browserslistrc` configuration file. Note that supporting more browser versions will increase the size of your JS and CSS bundles.
 
 ---
 
-## 许可证
+## Contribution Guide
 
-本项目采用 MIT 许可证，详情参见 [LICENSE](LICENSE) 文件。
+Contributions are welcome! Any contribution, big or small, is greatly appreciated. Please refer to the [contribution guide](CODE_OF_CONDUCT.md) for more information and ensure all commits follow the [commit message conventions](https://github.com/conventional-changelog/commitlint/#what-is-commitlint).
+
+### How to Contribute:
+
+1. **Get started**: See [Getting Started](#getting-started)
+2. **Add a new feature**:
+   1. Create a new branch: `git checkout -b feat/NEW-FEATURE`
+   2. Add your changes: `git add PATH/TO/FILENAME.EXTENSION`
+   3. Commit your changes: `git commit -m "feat: NEW FEATURE"`
+   4. Push your branch: `git push origin feat/NEW-FEATURE`
+3. **Fix a bug**:
+   1. Create a new branch: `git checkout -b fix/BUG-FIX`
+   2. Add your changes: `git add PATH/TO/FILENAME.EXTENSION`
+   3. Commit your changes: `git commit -m "fix: BUG FIX"`
+   4. Push your branch: `git push origin fix/BUG-FIX`
+4. **Create a [Pull Request](https://github.com/hexianWeb/nexa-ai-copy/pulls)**
 
 ---
 
-## 致谢
+## License
 
-特别感谢以下项目的贡献：
-
-- [alrra](https://github.com/alrra) 的 [browser-logos](https://github.com/alrra/browser-logos)
-- [tandpfun](https://github.com/tandpfun) 的 [skill-icons](https://github.com/tandpfun/skill-icons)
+This project is distributed under the **MIT License**. See the [LICENSE](LICENSE) file for more information.
 
 ---
 
-希望这个简洁的 README 对你有帮助！如果有任何问题，请随时联系。
+## Acknowledgements
+
+Special thanks to:
+
+- [alrra](https://github.com/alrra) for [browser-logos](https://github.com/alrra/browser-logos)
+- [tandpfun](https://github.com/tandpfun) for [skill-icons](https://github.com/tandpfun/skill-icons)
+
+---
+
+Hope this concise README helps! If you have any questions, feel free to contact us.
