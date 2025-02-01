@@ -8,6 +8,8 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla';
 import { Pane } from 'tweakpane';
+import { throttle } from 'lodash';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import bgFragment from '../shaders/bg/fragment.glsl';
 import bgVertex from '../shaders/bg/vertex.glsl';
@@ -24,6 +26,10 @@ export default class Three {
   constructor(canvas) {
     this.canvas = canvas;
 
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+    this.isHovered = false;
+    
     this.scene = new THREE.Scene();
     this.bgScene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
@@ -50,14 +56,12 @@ export default class Three {
       canvas: this.canvas,
       alpha: true,
       antialias: true,
-      preserveDrawingBuffer: true
+      powerPreference: "high-performance"
     });
 
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1;
 
     this.bgRenderTarget = new THREE.WebGLRenderTarget(
       device.width,
@@ -67,10 +71,10 @@ export default class Three {
         magFilter: THREE.LinearFilter,
         format: THREE.RGBAFormat,
         precision: 'highp',
-        colorSpace: THREE.LinearSRGBColorSpace
+        colorSpace: THREE.SRGBColorSpace,
+        antialias: true,
       }
     );
-    this.bgRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
 
     // 开启阴影渲染
     this.renderer.shadowMap.enabled = false;
@@ -85,15 +89,19 @@ export default class Three {
     this.setEnv('./lake_pier_2k.hdr');
     this.setBackGround();
     this.setGeometry();
-    // this.addRenderTargetPlane();
     this.bgPostProcess();
     this.render();
     this.setResize();
+
+    // 修改事件监听为节流模式
+    window.addEventListener('mousemove', throttle((e) => {
+      this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    }, 100)); // 100ms 节流
   }
 
   //#region
   setDebug() {
-    // this.scene.add(new THREE.AxesHelper(3));
     this.uniforms = {
       uTime: new THREE.Uniform(0),
       uPositionFrequency: new THREE.Uniform(0.6),
@@ -104,8 +112,10 @@ export default class Three {
       uColor: new THREE.Uniform(new THREE.Color('#fff')),
       uStrength: new THREE.Uniform(0.115),
       colorA: new THREE.Uniform(new THREE.Color('#fff')), // New colorA uniform
-      colorB: new THREE.Uniform(new THREE.Color('#fff')) // New colorB uniform
+      colorB: new THREE.Uniform(new THREE.Color('#fff')), // New colorB uniform
+      uMouseFactor: new THREE.Uniform(1) // 初始值为1.0
     };
+
     this.materialParams = {
       metalness: 0.07,
       roughness: 0.18,
@@ -247,13 +257,25 @@ export default class Three {
       });
   }
   //#endregion
+
+  // 分离检测逻辑
+  checkHover() {
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const intersects = this.raycaster.intersectObject(this.sphereMesh);
+    this.isHovered = intersects.length > 0;
+  }
+
   setLights() {
-    const directionalLight = new THREE.DirectionalLight(0xff_ff_ff, 1);
+    const directionalLight = new THREE.DirectionalLight('#fe917d', 10);
     directionalLight.position.set(0, 0, 5);
+    const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+    // this.scene.add(directionalLightHelper);
     directionalLight.castShadow = true; // 启用阴影投射
     directionalLight.shadow.mapSize.width = 512;
     directionalLight.shadow.mapSize.height = 512;
     this.scene.add(directionalLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
   }
 
   setEnv(hdrPath) {
@@ -264,7 +286,7 @@ export default class Three {
       const environmentMap =
         pmremGenerator.fromEquirectangular(texture).texture;
       this.scene.environment = environmentMap;
-      this.scene.environmentIntensity = 0.5;
+      this.scene.environmentIntensity = 1.5;
     });
   }
 
@@ -274,7 +296,7 @@ export default class Three {
     const textureLoader = new THREE.TextureLoader();
     const matcap = textureLoader.load('./matcap.png');
     // 利用 csm 创建一个基于物理材质的球体
-    let sphereGeometry = new THREE.IcosahedronGeometry(2.5, 64);
+    let sphereGeometry = new THREE.IcosahedronGeometry(2.5, 128);
     sphereGeometry.center();
     sphereGeometry = BufferGeometryUtils.mergeVertices(sphereGeometry);
     sphereGeometry.computeTangents();
@@ -391,15 +413,27 @@ export default class Three {
     this.composer = new EffectComposer(this.renderer, this.bgRenderTarget);
     const bgRenderPass = new RenderPass(this.bgScene, this.bgCamera);
     const outputPass = new OutputPass();
+    outputPass.toneMapping = THREE.NoToneMapping; // ✅ 关闭色调映射
+    outputPass.toneMappingExposure = 1;
     this.composer.addPass(bgRenderPass);
     this.composer.addPass(outputPass);
   }
   render() {
     const elapsedTime = this.clock.getElapsedTime();
+    const delta = this.clock.getDelta(); // 获取时间增量
+
+    this.checkHover();
+    // 平滑过渡鼠标影响因子
+    const targetFactor = this.isHovered ? 1.75 : 1;
+
+    this.uniforms.uMouseFactor.value +=
+      (targetFactor - this.uniforms.uMouseFactor.value) * 5 * 0.01;
 
     this.uniforms.uTime.value = Math.cos(elapsedTime) * 1.5;
     this.planeMaterial.uniforms.uTime.value = elapsedTime;
 
+    // 让sphere 自转
+    this.sphereMesh.rotation.y = elapsedTime * 0.2;
     // Render the background scene using EffectComposer
     this.composer.render();
     // Use the render target's texture as the background for the main scene
@@ -425,7 +459,17 @@ export default class Three {
     this.renderer.setSize(device.width, device.height);
     this.renderer.setPixelRatio(Math.min(device.pixelRatio, 2));
 
-    // Update the render target size
+    // 更新背景正交相机
+    const aspect = device.width / device.height;
+    this.bgCamera.left = -aspect / 2;
+    this.bgCamera.right = aspect / 2;
+    this.bgCamera.top = 0.5;
+    this.bgCamera.bottom = -0.5;
+    this.bgCamera.updateProjectionMatrix();
+
+    // 更新渲染器和 RenderTarget
+    this.renderer.setSize(device.width, device.height);
     this.bgRenderTarget.setSize(device.width, device.height);
+    this.planeMaterial.uniforms.uResolution.value.set(device.width, device.height);
   }
 }

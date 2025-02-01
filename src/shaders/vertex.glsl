@@ -4,6 +4,7 @@ uniform float uTimeFrequency;
 uniform float uNoiseFrequency;
 uniform float uNoiseTimeFrequency;
 uniform float uNoiseStrength;
+uniform float uMouseFactor; // 新增uniform
 
 uniform float uStrength;
 
@@ -14,9 +15,17 @@ varying float vWobble;
 #include ./simpleNoise4d.glsl
 
 float getWobble(vec3 position) {
-  vec3 noisePosition = position + snoise(vec4(position * uNoiseFrequency, uTime * uNoiseTimeFrequency)) * uNoiseStrength;
+  // 应用uMouseFactor到噪声频率参数
+  vec3 noisePosition = position + snoise(vec4(
+    position * (uNoiseFrequency * (2.0-uMouseFactor)), 
+    uTime * (uNoiseTimeFrequency * uMouseFactor)
+  )) * uNoiseStrength;
 
-  return snoise(vec4(noisePosition*uPositionFrequency, uTime*uTimeFrequency))*uStrength;
+  // 应用uMouseFactor到位置和时间频率
+  return snoise(vec4(
+    noisePosition * (uPositionFrequency * (2.0-uMouseFactor)), 
+    uTime * (uTimeFrequency * uMouseFactor)
+  )) * uStrength;
 }
 
 void main() {
