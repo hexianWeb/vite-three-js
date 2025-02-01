@@ -26,8 +26,9 @@
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^5.4.1",
+    "lodash": "^4.17.21",
     "postcss-import": "^16.1.0",
-    "three": "^0.167.1",
+    "three": "^0.173.0",
     "three-custom-shader-material": "^6.0.13",
     "tweakpane": "^4.0.4"
   },
