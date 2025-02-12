@@ -71,6 +71,9 @@
     <!-- iOS -->
     <link rel="apple-touch-icon" href="/favicon/favicon-512.webp" />
     <link rel="mask-icon" href="/favicon/favicon-512.webp" color="black" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lavishly+Yours&family=Wallpoet&display=swap" rel="stylesheet">
     <meta name="apple-mobile-web-app-title" content="Vite ThreeJS — Template" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -81,29 +84,85 @@
 
     <script defer src="/_vercel/insights/script.js"></script>
   </head>
-  <body>
+  <body class="bg-black text-white">
     <noscript class="text-center text-lg text-red-500">
       Enable JavaScript to enjoy all the features of this app.
     </noscript>
-    <main class="flex h-full bg-primary text-color">
-      <header
-        class="absolute top-0 z-[1] w-full cursor-default bg-accent-primary sm:w-auto"
-      >
-        <div class="relative flex justify-center">
-          <h1
-            class="z-[1] select-none p-4 text-xl font-semibold sm:text-2xl md:text-3xl"
-          >
-            Vite ThreeJS — Template
-          </h1>
-          <div
-            class="arrow-right top absolute -right-[43px] -top-[35px] hidden h-0 w-0 rotate-90 border-b-[60px] border-t-[70px] border-b-transparent border-l-accent-primary border-t-transparent sm:-right-[40px] sm:block sm:border-l-[70px] md:-right-[43px] md:border-l-[76px]"
-          ></div>
+    <main class="flex flex-col h-full bg-black text-white mx-16 text-3xl ">
+      <canvas id="canvas" class="fixed top-0 left-0 z-0 h-full w-full pointer-events-auto"></canvas>
+
+      <header class="relative z-10 flex justify-between items-center p-6">
+        <h1 class="text-5xl font-bold">Osmo</h1>
+        <nav>
+          <ul class="flex space-x-20">
+            <li><a href="#" class="hover:text-gray-300">Home</a></li>
+            <li><a href="#" class="hover:text-gray-300">Pricing</a></li>
+            <li><a href="#" class="hover:text-gray-300">Updates<sup class="text-xs text-red-300">48</sup></a></li>
+            <li><a href="#" class="hover:text-gray-300">FAQ</a></li>
+          </ul>
+        </nav>
+        <div class="flex space-x-4">
+          <button class="hover:bg-gray-700 px-4 py-2 rounded">Log in</button>
+          <button class="bg-white text-black hover:bg-gray-200 px-4 py-2 rounded">Get Started</button>
         </div>
       </header>
-      <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
+
+      <div class="relative z-10 flex h-full mt-4">
+        <div class="absolute w-1/4 p-4 flex justify-around top-1/4 h-auto" >
+          <ul class="space-y-2">
+            <li>Buttons</li>
+            <li>Components</li>
+            <li>Transitions</li>
+            <li>Animations</li>
+            <li>Loaders</li>
+          </ul>
+          <ul class="space-y-2">
+            <li>Documentation</li>
+            <li>Tools</li>
+            <li>References</li>
+            <li>Tutorials</li>
+          </ul>
+        </div>
+
+        <div class="w-2/3 p-4 h-auto absolute top-[20%] left-1/3 space-y-24">
+          <h1 class="text-9xl font-semibold">Start building websites people remember.</h1>
+          <div class="flex space-x-32">
+            <button class="bg-white text-black hover:bg-gray-200 px-8 py-4 rounded-lg text-2xl">Become a member</button>
+            <button class="bg-transparent backdrop-blur-sm bg-opacity-30 hover:bg-opacity-50 border border-white px-8 py-4 rounded-lg flex items-center text-2xl">
+              <img src=".\img\osmo\cat.jpg" alt="User Avatar" class="w-8 h-8 rounded-full mr-3">
+              About us
+            </button>
+          </div>
+        </div>
+        <div class="fixed bottom-4 right-4 z-20">
+          <div class="bg-white bg-opacity-80 backdrop-blur-sm text-black p-4 rounded-lg w-80 h-96 flex flex-col">
+            <p class="text-2xl font-bold mb-4">Chat Room</p>
+            <div class="flex-grow overflow-y-auto mb-4 space-y-2">
+              <div class="flex items-start">
+                <img src=".\img\osmo\cat.jpg" alt="User 1" class="w-8 h-8 rounded-full mr-2">
+                <div class="bg-gray-200 p-2 rounded-lg">
+                  <p class="text-sm">Hello! How can I help you today?</p>
+                </div>
+              </div>
+              <div class="flex items-start justify-end">
+                <div class="bg-blue-200 p-2 rounded-lg">
+                  <p class="text-sm">I'm interested in your services. Can you tell me more?</p>
+                </div>
+                <img src=".\img\osmo\cat.jpg" alt="User 2" class="w-8 h-8 rounded-full ml-2">
+              </div>
+            </div>
+            <input type="text" placeholder="Type your message..." class="w-full p-2 rounded-lg border border-gray-300">
+          </div>
+        </div>
+        <p class="max-w-2xl text-orange-100 absolute left-1/3 bottom-28">
+          Osmo came from constantly digging through old projects wondering "How did I build that again?" It is basically our personal toolbox, packed with components, techniques, tricks and tutorials—and it will keep growing.
+        </p>
+      </div>
 
     </main>
 
     <script type="module" src="src/js/index.js"></script>
   </body>
+
+
 </html>
