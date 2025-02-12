@@ -10,5 +10,15 @@ export default [
       'textures/environmentMap/pz.jpg',
       'textures/environmentMap/nz.jpg'
     ]
+  },
+  {
+    name: 'displacementTexture',
+    type: 'texture',
+    path: 'img/osmo/displacement.jpg'
+  },
+  {
+    name: 'normalTexture',
+    type: 'texture',
+    path: 'img/osmo/NormalMap2.png'
   }
 ];

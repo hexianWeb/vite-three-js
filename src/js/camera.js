@@ -14,7 +14,7 @@ export default class Camera {
     this.debug = this.experience.debug;
     this.debugActive = this.experience.debug.active;
 
-    this.position = new THREE.Vector3(0, 0, 9);
+    this.position = new THREE.Vector3(0, 0, 1);
     this.target = new THREE.Vector3(0, 0, 0);
 
     this.setInstance();
@@ -25,7 +25,7 @@ export default class Camera {
   setInstance() {
     if (this.orthographic) {
       const aspect = this.sizes.aspect;
-      this.frustumSize = 15;
+      this.frustumSize = 1;
 
       this.instance = new THREE.OrthographicCamera(
         -this.frustumSize * aspect,
@@ -45,6 +45,8 @@ export default class Camera {
     }
     this.instance.position.copy(this.position);
     this.instance.lookAt(this.target);
+    this.instance.zoom = 2;
+    this.instance.updateProjectionMatrix();
     this.scene.add(this.instance);
   }
 
@@ -60,8 +62,9 @@ export default class Camera {
     this.trackballControls.noRotate = true; // 禁用旋转
     this.trackballControls.noPan = true; // 禁用平移
     this.trackballControls.noZoom = false; // 启用缩放
-    this.trackballControls.zoomSpeed = 1; // 设置缩放速度
-
+    this.trackballControls.zoomSpeed = 0.5; // 设置缩放速度
+    this.trackballControls.minZoom = 1;
+    this.trackballControls.maxZoom = 1.7;
     // 同步两个控制器的目标点
     this.trackballControls.target.copy(this.target);
   }

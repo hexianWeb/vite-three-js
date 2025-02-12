@@ -20,7 +20,7 @@
     "test:safari": "npx playwright test --headed --project=webkit",
     "lint": "npx eslint --ext js ./src",
     "lint:fix": "npx eslint --ext js ./src --fix",
-    "dev": "vite --host",
+    "dev": "vite --host --port 3128",
     "build": "vite build",
     "preview": "vite preview"
   },
