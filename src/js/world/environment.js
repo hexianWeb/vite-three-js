@@ -22,6 +22,8 @@ export default class Environment {
     ];
 
     this.lightPosition = new THREE.Vector3(0, 0, 1);
+    this.colorTransition = false; // 标记是否正在进行颜色过渡
+    this.targetColors = []; // 存储目标颜色
 
     this.setLights();
     this.setEventListeners();
@@ -36,10 +38,22 @@ export default class Environment {
       this.createPointLight(10),
       this.createPointLight(2),
       this.createPointLight(3),
-      this.createAmbientLight(6)
+      this.createAmbientLight(1.5)
     ];
 
+    // 初始化灯光颜色
+    this.initLightColors();
+
     for (const light of this.lights) this.scene.add(light.object);
+  }
+
+  initLightColors() {
+    const numberLights = this.lights.length;
+
+    for (let index = 0; index < numberLights; index++) {
+      const colorIndex = Math.min(index, this.colors.length - 1);
+      this.lights[index].object.color.copy(this.colors[colorIndex]);
+    }
   }
 
   createPointLight(intensity) {
@@ -66,8 +80,24 @@ export default class Environment {
 
   setEventListeners() {
     window.addEventListener('click', () => {
+      // 打乱颜色数组
       this.colors = [...this.colors.sort(() => Math.random() - 0.5)];
+
+      // 设置目标颜色并启动过渡
+      this.startColorTransition();
     });
+  }
+
+  startColorTransition() {
+    // 标记开始颜色过渡
+    this.colorTransition = true;
+
+    // 为每个灯光设置目标颜色
+    const numberLights = this.lights.length;
+    for (let index = 0; index < numberLights; index++) {
+      const colorIndex = Math.min(index, this.colors.length - 1);
+      this.lights[index].targetColor = this.colors[colorIndex].clone();
+    }
   }
 
   setDebug() {
@@ -111,21 +141,49 @@ export default class Environment {
   update() {
     const delta = this.experience.time.delta / 1000;
 
-    this.updateColors(delta);
+    // 只在需要时更新颜色
+    if (this.colorTransition) {
+      this.updateColors(delta);
+    }
+
     this.updatePositions(delta, this.iMouse.normalizedMouse);
   }
 
   updateColors(delta) {
-    for (let index = 0; index < 6; index++) {
-      this.dampC(
-        this.lights[index].object.color,
-        this.colors[index],
-        0.25 + index * 0.05,
-        delta
-      );
+    const numberLights = this.lights.length;
+    const baseSmooth = 0.25;
+    const smoothIncrement = 0.05;
+
+    let allTransitioned = true; // 检查所有颜色是否已完成过渡
+
+    for (let index = 0; index < numberLights; index++) {
+      const smoothTime = baseSmooth + index * smoothIncrement;
+
+      // 使用目标颜色进行平滑过渡
+      const currentColor = this.lights[index].object.color;
+      const targetColor = this.lights[index].targetColor;
+
+      this.dampC(currentColor, targetColor, smoothTime, delta);
+
+      // 检查是否还在过渡
+      if (!this.isColorClose(currentColor, targetColor)) {
+        allTransitioned = false;
+      }
     }
 
-    this.dampC(this.lights[6].object.color, this.colors[6], 0.45, delta);
+    // 如果所有颜色都已完成过渡，停止更新
+    if (allTransitioned) {
+      this.colorTransition = false;
+    }
+  }
+
+  // 检查两个颜色是否足够接近(已完成过渡)
+  isColorClose(color1, color2, threshold = 0.01) {
+    return (
+      Math.abs(color1.r - color2.r) < threshold &&
+      Math.abs(color1.g - color2.g) < threshold &&
+      Math.abs(color1.b - color2.b) < threshold
+    );
   }
 
   updatePositions(delta, mouse) {

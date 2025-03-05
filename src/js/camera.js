@@ -60,7 +60,7 @@ export default class Camera {
     // TrackballControls 设置
     this.trackballControls = new TrackballControls(this.instance, this.canvas);
     this.trackballControls.noRotate = true; // 禁用旋转
-    this.trackballControls.noPan = true; // 禁用平移
+    this.trackballControls.noPan = false; // 禁用平移
     this.trackballControls.noZoom = false; // 启用缩放
     this.trackballControls.zoomSpeed = 0.5; // 设置缩放速度
     this.trackballControls.minZoom = 1;

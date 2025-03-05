@@ -5,8 +5,8 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 import Experience from '../experience.js';
-import CustomPass from './customPass.js';
-import { NoisePass } from './noisePass.js'; // 新建这个文件
+import CustomPass from './custom-pass.js';
+import { NoisePass } from './noise-pass.js'; // 新建这个文件
 
 export default class Effects {
   constructor() {
@@ -44,8 +44,8 @@ export default class Effects {
     this.composer = new EffectComposer(this.renderer.instance);
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
-    this.composer.addPass(this.customPass);
     this.composer.addPass(this.noisePass); // 新增噪点Pass
+    this.composer.addPass(this.customPass);
   }
 
   setDebug() {
