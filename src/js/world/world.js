@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
+import Area from './area.js'
 import Environment from './environment.js'
 
 export default class World {
@@ -14,6 +15,7 @@ export default class World {
     this.resources.on('ready', () => {
       // Setup
       this.environment = new Environment()
+      this.area = new Area()
     })
   }
 
