@@ -16,4 +16,9 @@ export default [
     type: 'gltfModel',
     path: 'models/scene.glb',
   },
+  {
+    name: 'heroModel',
+    type: 'gltfModel',
+    path: 'models/character-soldier.glb',
+  },
 ]
