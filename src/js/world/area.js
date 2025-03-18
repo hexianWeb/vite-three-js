@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
@@ -63,6 +64,9 @@ export default class Area {
 
     this.raycaster = new THREE.Raycaster()
 
+    // Store the currently hovered object
+    this.hoveredObject = null
+
     this.setupArea()
     window.addEventListener('mousemove', this.onMouseMove.bind(this))
     window.addEventListener('click', this.onMouseDown.bind(this))
@@ -89,14 +93,49 @@ export default class Area {
   onMouseMove() {
     this.raycaster.setFromCamera(this.iMouse.normalizedMouse, this.camera)
     const intersects = this.raycaster.intersectObjects(this.homeStuffsObject)
+
     if (intersects.length > 0) {
-      intersects.forEach((intersect) => {
-        document.body.style.cursor = 'pointer'
-        intersect.object.material.color.set(0x00FF00)
-      })
+      const intersectedObject = intersects[0].object
+      document.body.style.cursor = 'pointer'
+
+      // If we're hovering a new object
+      if (this.hoveredObject !== intersectedObject) {
+        // Reset previous object if exists
+        if (this.hoveredObject) {
+          gsap.to(this.hoveredObject.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            duration: 0.3,
+            ease: 'power2.out',
+          })
+        }
+
+        // Scale up new object
+        this.hoveredObject = intersectedObject
+        gsap.to(this.hoveredObject.scale, {
+          x: 1.2,
+          y: 1.2,
+          z: 1.2,
+          duration: 0.3,
+          ease: 'power2.out',
+        })
+      }
     }
     else {
       document.body.style.cursor = 'default'
+
+      // Reset currently hovered object if exists
+      if (this.hoveredObject) {
+        gsap.to(this.hoveredObject.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.3,
+          ease: 'power2.out',
+        })
+        this.hoveredObject = null
+      }
     }
   }
 

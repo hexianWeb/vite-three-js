@@ -19,6 +19,13 @@ export default class World {
       this.area = new Area()
       this.hero = new Hero()
     })
+    // 添加一个白色大网格
+    const gridHelper = new THREE.GridHelper(100, 100)
+    gridHelper.material.color.set(0xFFFFFF)
+    gridHelper.material.opacity = 0.5
+    gridHelper.material.transparent = true
+    gridHelper.position.y = -0.1
+    this.scene.add(gridHelper)
   }
 
   update() {
