@@ -21,4 +21,9 @@ export default [
     type: 'gltfModel',
     path: 'models/character-soldier.glb',
   },
+  {
+    name: 'colliderModel',
+    type: 'gltfModel',
+    path: 'models/collision-world.glb',
+  },
 ]

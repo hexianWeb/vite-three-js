@@ -1,5 +1,7 @@
 import gsap from 'gsap'
 import * as THREE from 'three'
+import { Capsule } from 'three/addons/math/Capsule.js'
+import { Octree } from 'three/addons/math/Octree.js'
 
 import Experience from '../experience.js'
 
@@ -13,6 +15,12 @@ export default class Hero {
     this.time = this.experience.time
     this.debug = this.experience.debug
 
+    // Camera follow parameters
+    this.cameraOffset = new THREE.Vector3(0, 2, 5) // Camera offset from character
+    this.cameraLerpFactor = 0.1 // Smoothing factor for camera movement
+    this.cameraTarget = new THREE.Vector3() // Target position for camera
+    this.cameraLookAt = new THREE.Vector3() // Point for camera to look at
+
     // Character object
     this.character = {
       instance: null,
@@ -23,6 +31,17 @@ export default class Hero {
       currentDirection: new THREE.Vector3(-1, 0, 0), // Initially facing -X direction
       isSitting: false,
     }
+
+    // Collision
+    this.worldOctree = new Octree()
+    this.playerCollider = new Capsule(
+      new THREE.Vector3(0, 2.35, 0),
+      new THREE.Vector3(0, 3, 0),
+      0.35,
+    )
+    this.playerVelocity = new THREE.Vector3()
+    this.playerOnFloor = false
+    this.GRAVITY = 30
 
     // Animation mixer
     this.mixer = null
@@ -40,6 +59,7 @@ export default class Hero {
       arrowLeft: false,
       arrowRight: false,
       z: false,
+      space: false,
     }
 
     // 英雄角色参数
@@ -53,13 +73,14 @@ export default class Hero {
     this.hero = this.resources.items.heroModel.scene.children[0]
     console.warn('模型信息:', this.resources.items.heroModel)
 
-    // Setup the animation
+    this.collider = this.resources.items.colliderModel.scene
+
     this.animation = {}
     this.animation.mixer = new THREE.AnimationMixer(this.hero)
     this.animation.actions = {}
 
     const skeleton = new THREE.SkeletonHelper(this.hero)
-    skeleton.visible = true
+    skeleton.visible = false
     this.scene.add(skeleton)
 
     // Get all animations
@@ -98,6 +119,7 @@ export default class Hero {
     this.setHero()
     this.setupAnimations()
     this.setupEventListeners()
+    this.setupCollider()
 
     // Setup debug if active
     if (this.debug.active) {
@@ -106,7 +128,7 @@ export default class Hero {
   }
 
   setHero() {
-    this.hero.position.set(0, 0.2, 0)
+    this.hero.position.set(36, 10, 5)
     this.hero.scale.set(2, 2, 2)
     this.hero.rotation.set(0, Math.PI / 2, 0) // Set initial rotation to face -X direction
     this.hero.castShadow = true
@@ -121,6 +143,90 @@ export default class Hero {
     })
 
     this.character.instance = this.hero
+
+    // Initialize player collider position
+    this.playerCollider.start.set(
+      this.hero.position.x,
+      this.hero.position.y + 2.35,
+      this.hero.position.z,
+    )
+    this.playerCollider.end.set(
+      this.hero.position.x,
+      this.hero.position.y + 3,
+      this.hero.position.z,
+    )
+  }
+
+  setupCollider() {
+    // Initialize octree from the collision model
+    if (this.collider) {
+      this.worldOctree.fromGraphNode(this.collider)
+      console.warn('Octree created from collider model')
+
+      // Make collider model invisible but keep it in the scene for collisions
+      this.collider.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.visible = false
+        }
+      })
+
+      this.scene.add(this.collider)
+
+      // Add debug visualizer if debug is active
+      if (this.debug.active) {
+        this.setupColliderVisualizer()
+      }
+    }
+  }
+
+  setupColliderVisualizer() {
+    // Import OctreeHelper if not already imported
+    import('three/addons/helpers/OctreeHelper.js').then(({ OctreeHelper }) => {
+      this.octreeHelper = new OctreeHelper(this.worldOctree)
+      this.octreeHelper.visible = false
+      this.scene.add(this.octreeHelper)
+
+      // Add to debug panel
+      const colliderFolder = this.debug.ui.addFolder({
+        title: '碰撞体系统',
+        expanded: false,
+      })
+
+      colliderFolder.addBinding(
+        { visualize: false },
+        'visualize',
+        {
+          label: '显示碰撞体',
+        },
+      ).on('change', (event) => {
+        this.octreeHelper.visible = event.value
+      })
+
+      // Add capsule helper to visualize player collider
+      const geometry = new THREE.CapsuleGeometry(
+        this.playerCollider.radius,
+        this.playerCollider.end.y - this.playerCollider.start.y,
+        4,
+        8,
+      )
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x00FF00,
+        wireframe: true,
+      })
+      this.capsuleHelper = new THREE.Mesh(geometry, material)
+      this.capsuleHelper.visible = false
+      this.scene.add(this.capsuleHelper)
+
+      colliderFolder.addBinding(
+        { playerCollider: false },
+        'playerCollider',
+        {
+          label: '显示角色碰撞体',
+        },
+      ).on('change', (event) => {
+        this.capsuleHelper.visible = event.value
+      })
+    })
   }
 
   setupAnimations() {
@@ -157,10 +263,17 @@ export default class Hero {
         this.keys.arrowLeft = true
       if (e.key === 'ArrowRight')
         this.keys.arrowRight = true
+      if (e.key === ' ' || e.code === 'Space')
+        this.keys.space = true
 
       // Z key for sitting
       if (key === 'z') {
         this.toggleSit()
+      }
+
+      // Jump when space is pressed and player is on floor
+      if ((e.key === ' ' || e.code === 'Space') && this.playerOnFloor && !this.character.isSitting) {
+        this.jump()
       }
     })
 
@@ -181,69 +294,147 @@ export default class Hero {
         this.keys.arrowLeft = false
       if (e.key === 'ArrowRight')
         this.keys.arrowRight = false
+      if (e.key === ' ' || e.code === 'Space')
+        this.keys.space = false
     })
   }
 
-  moveCharacter() {
-    if (this.character.isMoving || this.character.isSitting)
+  moveCharacter(deltaTime) {
+    if (this.character.isSitting)
       return
 
+    // Calculate movement direction
     let moveX = 0
     let moveZ = 0
     let newDirection = null
 
+    // Apply gravity if not on floor
+    if (!this.playerOnFloor) {
+      this.playerVelocity.y -= this.GRAVITY * deltaTime
+    }
+
     // Calculate movement based on key inputs
+    const speedDelta = deltaTime * (this.playerOnFloor ? 25 : 8)
+
     if (this.keys.w || this.keys.arrowUp) {
-      moveZ = -this.character.moveDistance
+      moveZ = -speedDelta
       newDirection = new THREE.Vector3(0, 0, 1) // Facing -Z
     }
     else if (this.keys.s || this.keys.arrowDown) {
-      moveZ = this.character.moveDistance
+      moveZ = speedDelta
       newDirection = new THREE.Vector3(0, 0, -1) // Facing +Z
     }
     else if (this.keys.a || this.keys.arrowLeft) {
-      moveX = -this.character.moveDistance
+      moveX = -speedDelta
       newDirection = new THREE.Vector3(1, 0, 0) // Facing -X
     }
     else if (this.keys.d || this.keys.arrowRight) {
-      moveX = this.character.moveDistance
+      moveX = speedDelta
       newDirection = new THREE.Vector3(-1, 0, 0) // Facing +X
     }
 
-    // If there's movement input
+    // Add velocity in the movement direction
     if (moveX !== 0 || moveZ !== 0) {
-      this.character.isMoving = true
-
       // Update character rotation to face new direction if needed
       this.updateCharacterRotation(newDirection)
 
-      // Play walk animation
-      this.playAnimation('walk')
+      // Only play walk animation if on floor and not already playing jump
+      if (this.playerOnFloor && this.currentAnimation !== this.animations.jump) {
+        this.playAnimation('walk')
+      }
 
-      // Animate movement using GSAP
-      gsap.to(this.character.instance.position, {
-        x: this.character.instance.position.x + moveX,
-        z: this.character.instance.position.z + moveZ,
-        duration: this.character.moveDuration,
-        ease: 'linear',
-        onComplete: () => {
-          this.character.isMoving = false
+      // Add velocity in the direction
+      if (moveX !== 0) {
+        this.playerVelocity.x += moveX
+      }
+      if (moveZ !== 0) {
+        this.playerVelocity.z += moveZ
+      }
+    }
+    else if (this.playerOnFloor) {
+      // If no movement keys are pressed and on floor, play idle animation
+      // But only if not already jumping
+      if (!this.character.isSitting && this.currentAnimation !== this.animations.jump) {
+        this.playAnimation('idle')
+      }
+    }
 
-          // Check if any movement keys are still pressed
-          if (!(this.keys.w || this.keys.a || this.keys.s || this.keys.d
-            || this.keys.arrowUp || this.keys.arrowDown
-            || this.keys.arrowLeft || this.keys.arrowRight)) {
-            // If no movement keys are pressed, play idle animation
-            if (!this.character.isSitting) {
-              this.playAnimation('idle')
-            }
-          }
-          else {
-            // If keys are still pressed, trigger movement again
-            this.moveCharacter()
-          }
-        },
-      })
+    // Apply damping to slow down movement over time
+    const damping = Math.exp(-4 * deltaTime) - 1
+    this.playerVelocity.addScaledVector(this.playerVelocity, damping)
+
+    // Move player with velocity
+    const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
+    this.playerCollider.translate(deltaPosition)
+
+    // Check for collisions and adjust position
+    this.playerCollisions()
+
+    // Handle animation transitions
+    this.updateAnimationState()
+
+    // Update model position to match collider
+    this.updateModelFromCollider()
+  }
+
+  updateAnimationState() {
+    // If just landed on the floor
+    if (this.playerOnFloor && this.currentAnimation === this.animations.jump) {
+      // Check if any movement keys are pressed
+      const isMoving = this.keys.w || this.keys.a || this.keys.s || this.keys.d
+        || this.keys.arrowUp || this.keys.arrowDown
+        || this.keys.arrowLeft || this.keys.arrowRight
+
+      // Play walk animation if moving, otherwise play idle
+      if (isMoving) {
+        this.playAnimation('walk')
+      }
+      else {
+        this.playAnimation('idle')
+      }
+    }
+
+    // If falling (not on floor and moving down)
+    if (!this.playerOnFloor && this.playerVelocity.y < 0 && this.currentAnimation !== this.animations.fall) {
+      this.playAnimation('fall')
+    }
+  }
+
+  playerCollisions() {
+    const result = this.worldOctree.capsuleIntersect(this.playerCollider)
+    this.playerOnFloor = false
+
+    if (result) {
+      this.playerOnFloor = result.normal.y > 0
+
+      if (!this.playerOnFloor) {
+        // Slide along the surface if falling
+        this.playerVelocity.addScaledVector(
+          result.normal,
+          -result.normal.dot(this.playerVelocity),
+        )
+      }
+
+      // Adjust position to prevent clipping
+      if (result.depth >= 1e-10) {
+        this.playerCollider.translate(result.normal.multiplyScalar(result.depth))
+      }
+    }
+  }
+
+  updateModelFromCollider() {
+    // Get center position between collider start and end
+    const center = new THREE.Vector3()
+      .addVectors(this.playerCollider.start, this.playerCollider.end)
+      .multiplyScalar(0.5)
+
+    // Update hero position
+    this.hero.position.copy(center)
+    this.hero.position.y -= 0.7 // Adjust height to make feet touch ground
+
+    // Update capsule helper position if it exists
+    if (this.capsuleHelper) {
+      this.capsuleHelper.position.copy(center)
     }
   }
 
@@ -335,6 +526,16 @@ export default class Hero {
     this.currentAnimation = newAnimation
   }
 
+  jump() {
+    // Apply upward velocity for jumping
+    if (this.playerOnFloor) {
+      this.playerVelocity.y = 10
+      this.playerOnFloor = false
+      this.playAnimation('jump')
+    }
+  }
+
+  // #region
   /**
    * 创建调试面板，用于控制角色和动画
    */
@@ -601,12 +802,67 @@ export default class Hero {
         }
       })
     })
+
+    // Add camera follow controls to debug panel
+    const cameraFolder = this.debug.ui.addFolder({
+      title: '相机跟随设置',
+      expanded: false,
+    })
+
+    // Camera offset controls
+    cameraFolder.addBinding(
+      this.cameraOffset,
+      'x',
+      {
+        label: '相机X偏移',
+        min: -10,
+        max: 10,
+        step: 0.1,
+      },
+    )
+
+    cameraFolder.addBinding(
+      this.cameraOffset,
+      'y',
+      {
+        label: '相机Y偏移',
+        min: -10,
+        max: 10,
+        step: 0.1,
+      },
+    )
+
+    cameraFolder.addBinding(
+      this.cameraOffset,
+      'z',
+      {
+        label: '相机Z偏移',
+        min: -10,
+        max: 10,
+        step: 0.1,
+      },
+    )
+
+    // Camera smoothing control
+    cameraFolder.addBinding(
+      this,
+      'cameraLerpFactor',
+      {
+        label: '相机平滑度',
+        min: 0.01,
+        max: 0.5,
+        step: 0.01,
+      },
+    )
   }
 
+  // #endregion
   update() {
+    const deltaTime = this.time.delta / 1000
+
     // Update animation mixer
     if (this.mixer) {
-      this.mixer.update(this.time.delta / 1000)
+      this.mixer.update(deltaTime)
     }
 
     // Check if any movement keys are pressed
@@ -615,15 +871,41 @@ export default class Hero {
         || this.keys.arrowUp || this.keys.arrowDown
         || this.keys.arrowLeft || this.keys.arrowRight
 
-    // Process movement input if character is not already moving
-    if (!this.character.isMoving && isAnyMovementKeyPressed && !this.character.isSitting) {
-      this.moveCharacter()
+    // Move character with collision detection
+    if (!this.character.isSitting) {
+      this.moveCharacter(deltaTime)
+    }
+    else if (!isAnyMovementKeyPressed && this.playerOnFloor) {
+      // Apply small damping when not pressing keys
+      const damping = Math.exp(-10 * deltaTime) - 1
+      this.playerVelocity.addScaledVector(this.playerVelocity, damping)
+
+      // Still update position for gravity
+      const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
+      this.playerCollider.translate(deltaPosition)
+      this.playerCollisions()
+      this.updateModelFromCollider()
     }
 
-    // If character stops moving and no keys are pressed, switch to idle
-    if (!this.character.isMoving && !isAnyMovementKeyPressed
-      && this.currentAnimation === this.animations.walk && !this.character.isSitting) {
-      this.playAnimation('idle')
-    }
+    // Update camera position
+    this.updateCamera()
+  }
+
+  updateCamera() {
+    // Calculate target camera position based on character's position and rotation
+    const characterPosition = this.hero.position.clone()
+
+    // Set camera target position
+    this.cameraTarget.copy(characterPosition).add(new THREE.Vector3(10, 12, 15))
+
+    // Set camera look-at point (slightly above character's position)
+    this.cameraLookAt.copy(characterPosition)
+    this.cameraLookAt.y += 1.5 // Look at character's upper body
+
+    // Smoothly move camera to target position
+    this.camera.position.lerp(this.cameraTarget, this.cameraLerpFactor)
+
+    // Make camera look at the target point
+    this.camera.lookAt(this.cameraLookAt)
   }
 }
