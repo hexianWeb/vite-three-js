@@ -22,5 +22,9 @@ export default class World {
   }
 
   update() {
+    // Update hero if it exists
+    if (this.hero) {
+      this.hero.update()
+    }
   }
 }
