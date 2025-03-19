@@ -29,7 +29,8 @@
     "cannon": "^0.6.2",
     "gsap": "^3.12.5",
     "postcss-import": "^16.1.0",
-    "three": "^0.172.0"
+    "three": "^0.172.0",
+    "typed.js": "^2.1.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.10.1",

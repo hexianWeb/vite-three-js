@@ -1,4 +1,5 @@
 import Three from './experience'
+import IntroDialog from './world/introDialog'
 import '../css/global.css'
 
 import '../scss/global.scss'
@@ -11,4 +12,7 @@ window.addEventListener('load', () => {
   if (canvas) {
     new Three(document.querySelector('#canvas'))
   }
+
+  // Initialize the intro dialog
+  new IntroDialog()
 })

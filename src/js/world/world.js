@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import Experience from '../experience.js'
 import Area from './area.js'
+import Effects from './effect.js'
 import Environment from './environment.js'
 import Hero from './hero.js'
 
@@ -26,6 +27,7 @@ export default class World {
     gridHelper.material.transparent = true
     gridHelper.position.y = -0.1
     this.scene.add(gridHelper)
+    this.effects = new Effects()
   }
 
   update() {
@@ -33,5 +35,10 @@ export default class World {
     if (this.hero) {
       this.hero.update()
     }
+    this.effects.update()
+  }
+
+  resize() {
+    this.effects.resize()
   }
 }
