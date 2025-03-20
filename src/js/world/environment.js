@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
@@ -20,6 +21,27 @@ export default class Environment {
     // this.setEnvironmentMap()
     this.setAmbientLight()
     this.debuggerInit()
+
+    // 日/夜切换
+    this.toggleDayNightDom = document.getElementById('dayNightToggle')
+    this.isNightMode = false
+    this.toggleDayNightDom.addEventListener('click', () => {
+      this.isNightMode = !this.isNightMode
+      this.handleDayNightTransition()
+      this.toggleDebugHash()
+    })
+  }
+
+  toggleDebugHash() {
+    const currentHash = window.location.hash
+    if (currentHash === '#debug') {
+      // Remove #debug from URL
+      history.pushState('', document.title, window.location.pathname + window.location.search)
+    }
+    else {
+      // Add #debug to URL
+      window.location.hash = 'debug'
+    }
   }
 
   setSunLight() {
@@ -78,6 +100,10 @@ export default class Environment {
 
   updateSunLightIntensity() {
     this.sunLight.intensity = this.sunLightIntensity
+  }
+
+  updateAmbientLightIntensity() {
+    this.ambientLight.intensity = this.ambientLightIntensity
   }
 
   debuggerInit() {
@@ -148,5 +174,34 @@ export default class Environment {
         })
       }
     }
+  }
+
+  handleDayNightTransition() {
+    const targetColor = this.isNightMode ? '#5e5994' : '#ffffff'
+    const targetIntensity = this.isNightMode ? 0.2 : 1.0
+
+    // Create a temporary color object for GSAP to animate
+    const colorObj = {
+      r: this.sunLight.color.r,
+      g: this.sunLight.color.g,
+      b: this.sunLight.color.b,
+    }
+
+    // Animate both color and intensity
+    gsap.to(colorObj, {
+      r: new THREE.Color(targetColor).r,
+      g: new THREE.Color(targetColor).g,
+      b: new THREE.Color(targetColor).b,
+      duration: 1,
+      onUpdate: () => {
+        this.sunLight.color.setRGB(colorObj.r, colorObj.g, colorObj.b)
+      },
+    })
+
+    gsap.to(this.ambientLight, {
+      intensity: targetIntensity,
+      duration: 1,
+      ease: 'power2.inOut',
+    })
   }
 }
