@@ -1,0 +1,27 @@
+---
+description: 按原框架风格
+globs: 
+alwaysApply: false
+---
+
+我在写一个 threejs 的快速启动框架, 其中 `threejs` 使用的语言为 `JS`，框架中的绝大部分代码都存在于类组件中，然后通过实例化类组件后获取实例再对其内在内容进行调用
+
+
+框架的主要运行逻辑如下
+
+由 [experience.js](mdc:src/js/experience.js) 来承担 threejs 三要素，以及一些通用属性与工具类实例的挂载。并负责将画布挂载到外部 `Canvas` 页面元素上。在其余类组件中要使用通用属性的实例如下所示:
+
+```js
+export default class Example3DComponent {
+  constructor() {
+    this.experience = new Experience()
+    this.scene = this.experience.scene
+    this.resources = this.experience.resources
+    this.camera = this.experience.camera.instance
+    this.iMouse = this.experience.iMouse
+  }
+}
+```
+
+该框架的默认相机逻辑都在 [camera.js](mdc:src/js/camera.js) ,可接受构造参数传入 `true` 为正交相机, `false` 为透视相机
+
