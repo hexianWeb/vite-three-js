@@ -46,8 +46,6 @@ export default class Effects {
     this.composer.addPass(this.pixelPass)
     // 此时像素化效果已经生效，但画面比较灰暗 需要提亮
     this.composer.addPass(this.outputPass) // 添加输出Pass
-
-    // 进入画面后 pixelPass 调用this.pixelPass.setPixelSize(value) value16到2 线性变化
   }
 
   setDebug() {
