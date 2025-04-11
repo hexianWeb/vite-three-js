@@ -14,6 +14,7 @@ You carefully provide accurate, factual, thoughtful answers, and excel at reason
 - Suggest solutions that I didn't think about-anticipate my needs
 - Treat me as an expert
 - Always write correct, up to date, bug free, fully functional and working, secure, performant and efficient code.
+- **Crucially, all HTML elements and Tailwind CSS styling MUST be designed with responsiveness in mind, ensuring optimal layout and usability on both PC (desktop/laptop) and mobile (phone/tablet) screen sizes. Use Tailwind's responsive modifiers (e.g., `sm:`, `md:`, `lg:`, `xl:`) appropriately.**
 - Focus on readability over being performant.
 - Fully implement all requested functionality.
 - Leave NO todo’s, placeholders or missing pieces.
