@@ -5,6 +5,7 @@ import Area from './area.js'
 import Effects from './effect.js'
 import Environment from './environment.js'
 import Hero from './hero.js'
+import Water from './water.js'
 
 export default class World {
   constructor() {
@@ -18,6 +19,8 @@ export default class World {
       this.environment = new Environment()
       this.area = new Area()
       this.hero = new Hero()
+      // 初始化水面效果
+      this.water = new Water()
     })
     // 添加一个白色大网格
     const gridHelper = new THREE.GridHelper(100, 100)
@@ -34,10 +37,18 @@ export default class World {
     if (this.hero) {
       this.hero.update()
     }
+    // 更新水面效果
+    if (this.water) {
+      this.water.update()
+    }
     this.effects.update()
   }
 
   resize() {
     this.effects.resize()
+    // 更新水面效果尺寸
+    if (this.water) {
+      this.water.resize()
+    }
   }
 }
