@@ -4,6 +4,11 @@ globs:
 alwaysApply: false
 ---
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: 按原框架风格
 globs: 
 alwaysApply: false
@@ -121,11 +126,13 @@ export default class Your3DComponent {
 **创造时需注意关键点**
 *   **单例模式:** 任何地方调用 `new Experience()` 都会返回同一个已经创建好的实例。这是获取框架核心访问权限的标准方式。
 *   **实例访问:** 始终通过 `this.experience` 这个实例来访问共享的资源，例如 `this.experience.scene`, `this.experience.time`。
-*   **父子组件通信:** 如果父组件和子组件之间需要进行通信（例如，子组件需要通知父组件某个事件发生），应考虑让相关组件继承 `src/js/utils/event-emitter.js` 中的 `EventEmitter` 类。子组件可以通过 `this.trigger('eventName', [arguments])` 触发事件，父组件可以通过 `childInstance.on('eventName', callback)` 来监听事件。
-*  **debugInit** 每个创建的类组件都应该拥有足够多的可控制面板。特别是创建的 3D 基本体使用了 `ShaderMaterial` 时,注意 一般调控属性使用 `addBinding` 而不是 `addInput` ,而颜色调控则使用 addColor,例如
+*   **父子组件通信:** 如果父组件和子组件之间需要进行通信（例如，子组件需要通知父组件某个事件发生），应考虑让相关组件继承 [event-emitter.js](mdc:src/js/utils/event-emitter.js) 中的 `EventEmitter` 类。子组件可以通过 `this.trigger('eventName', [arguments])` 触发事件，父组件可以通过 `childInstance.on('eventName', callback)` 来监听事件。
+*  **debugInit** 每个创建的类组件都应该拥有足够多的可控制面板。特别是创建的 3D 基本体使用了 `ShaderMaterial` 时,注意 一般调控属性使用 `addBinding` 而不是 `addInput` ,**所有的颜色调控都使用**:
 ```js
- foamFolder.addColor(guiParams, 'foamColor').name('Foam Color').onChange(v => uniforms.foamColor.value.setHex(v));
- ```
+XXXFolder.addBinding(PARAMS, 'background', {
+  view: 'color',
+});
+```
 *  **update** 当类组件中 `update` 内部存在逻辑时，要求在调用他的父组件(如果有)里调用 `update` 如在`FatherComponent`中执行 `this.child.update()`
 *  **
 *   **相机 (`Camera`)**:

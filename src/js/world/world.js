@@ -5,6 +5,7 @@ import Area from './area.js'
 import Effects from './effect.js'
 import Environment from './environment.js'
 import Hero from './hero.js'
+import Smoke from './smoke.js'
 import Water from './water.js'
 
 export default class World {

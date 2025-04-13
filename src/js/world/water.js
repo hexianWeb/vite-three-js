@@ -16,12 +16,13 @@ export default class Water {
     this.uniforms = {
       iTime: { value: 0.0 },
       iResolution: { value: new THREE.Vector2(this.sizes.width, this.sizes.height) },
-      distanceFactor: { value: 0.23 },
+      distanceFactor: { value: 0.19 },
       color1: { value: new THREE.Color('#075869') },
       color2: { value: new THREE.Color(0xFFFFFF) },
       foamColor: { value: new THREE.Color(0xFFFFFF) },
       foamWidth: { value: 0.04 },
-      foamSoftness: { value: 0.12 },
+      foamSoftness: { value: 0.16 },
+      pixelSize: { value: 48.0 },
     }
 
     // 创建着色器材质
@@ -33,13 +34,13 @@ export default class Water {
     // 如果debug模式激活，添加调试面板
     if (this.debug.active) {
       this.debugObject = {
-        positionX: -36,
+        positionX: -40.8,
         positionY: 0.3,
-        positionZ: 5,
-        scale: 50,
-        color1: '#075869',
-        color2: '#ffffff',
-        foamColor: '#ffffff',
+        positionZ: -1.8,
+        scale: 10,
+        color1: '#10928c',
+        color2: '#dbebda',
+        foamColor: '#e5f5e7',
       }
       this.debugInit()
     }
@@ -69,6 +70,7 @@ export default class Water {
       uniform vec3 foamColor;
       uniform float foamWidth;
       uniform float foamSoftness;
+      uniform float pixelSize;
 
       varying vec2 vUv;
 
@@ -78,8 +80,11 @@ export default class Water {
       }
 
       void main() {
+        // 像素化处理
+        vec2 pixels = vec2(pixelSize); // 使用uniform变量控制像素化程度
+        vec2 uv = floor(vUv * pixels) / pixels;
+
         // 水面计算
-        vec2 uv = vUv;
         uv *= 8.0;
         vec2 uv_i = floor(uv);
 
@@ -100,7 +105,7 @@ export default class Water {
         float factor = smoothstep(0.05, 0.4, m_dist);
         vec3 waterColor = mix(color1, color2, factor);
 
-        // 泡沫计算
+        // 泡沫计算 - 使用像素化后的UV坐标
         float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
         float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
         float minDistToEdge = min(distToEdgeX, distToEdgeY);
@@ -109,7 +114,7 @@ export default class Water {
         foamFactor = clamp(foamFactor, 0.0, 1.0);
 
         vec3 finalColor = mix(waterColor, foamColor, foamFactor);
-        gl_FragColor = vec4(finalColor, 0.8);
+        gl_FragColor = vec4(finalColor, 0.7);
       }
     `
 
@@ -127,12 +132,12 @@ export default class Water {
 
   createWaterMesh() {
     // 创建一个大平面作为水面
-    const geometry = new THREE.PlaneGeometry(50, 50, 1, 1)
+    const geometry = new THREE.PlaneGeometry(10, 12.5, 1, 1)
     this.waterMesh = new THREE.Mesh(geometry, this.shaderMaterial)
 
     // 设置水面位置和旋转
     this.waterMesh.rotation.x = -Math.PI / 2 // 使平面水平放置
-    this.waterMesh.position.set(-36, 0.3, 5) // 使用默认位置
+    this.waterMesh.position.set(-40.8, 0.3, -1.7) // 使用默认位置
 
     // 将水面添加到场景
     this.scene.add(this.waterMesh)
@@ -156,19 +161,19 @@ export default class Water {
     // 创建调试面板
     this.debugFolder = this.debug.ui.addFolder({
       title: '水面效果',
-      expanded: true,
+      expanded: false,
     })
 
     // 水面参数控制
     const waterFolder = this.debugFolder.addFolder({
       title: '水面参数',
-      expanded: true,
+      expanded: false,
     })
 
     // 添加位置控制
     const positionFolder = waterFolder.addFolder({
       title: '位置控制',
-      expanded: true,
+      expanded: false,
     })
 
     // X轴位置控制
@@ -219,8 +224,8 @@ export default class Water {
       'scale',
       {
         label: '水面大小',
-        min: 10,
-        max: 100,
+        min: 1,
+        max: 50,
         step: 1,
       },
     ).on('change', () => {
@@ -269,6 +274,23 @@ export default class Water {
       title: '泡沫参数',
       expanded: true,
     })
+
+    // 添加像素化控制面板
+    const pixelFolder = this.debugFolder.addFolder({
+      title: '像素化参数',
+      expanded: true,
+    })
+
+    pixelFolder.addBinding(
+      this.uniforms.pixelSize,
+      'value',
+      {
+        label: '像素化程度',
+        min: 8,
+        max: 64,
+        step: 1,
+      },
+    )
 
     foamFolder.addBinding(
       this.debugObject,

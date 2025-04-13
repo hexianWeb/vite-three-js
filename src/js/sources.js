@@ -44,4 +44,9 @@ export default [
     type: 'gltfModel',
     path: 'models/collision-world.glb',
   },
+  {
+    name: 'perlinNoiseTexture',
+    type: 'texture',
+    path: 'textures/noise/perlin.png',
+  },
 ]

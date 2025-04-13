@@ -28,21 +28,9 @@ export default class Environment {
     this.toggleDayNightDom.addEventListener('click', () => {
       this.isNightMode = !this.isNightMode
       this.handleDayNightTransition()
-      this.toggleDebugHash()
     })
   }
 
-  toggleDebugHash() {
-    const currentHash = window.location.hash
-    if (currentHash === '#debug') {
-      // Remove #debug from URL
-      history.pushState('', document.title, window.location.pathname + window.location.search)
-    }
-    else {
-      // Add #debug to URL
-      window.location.hash = 'debug'
-    }
-  }
 
   setSunLight() {
     this.sunLightColor = '#ffffff'
