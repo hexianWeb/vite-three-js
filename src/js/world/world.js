@@ -42,7 +42,11 @@ export default class World {
     if (this.water) {
       this.water.update()
     }
+    if (this.environment) {
+      this.environment.update()
+    }
     this.effects.update()
+
   }
 
   resize() {

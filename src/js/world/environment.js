@@ -2,9 +2,14 @@ import gsap from 'gsap'
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
+import EventEmitter from '../utils/event-emitter.js'
+import DayNightManager from '../utils/day-night-manager.js'
+import Fireflies from './fireflies.js'
 
-export default class Environment {
+export default class Environment extends EventEmitter {
   constructor() {
+    super()
+    
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
@@ -20,17 +25,23 @@ export default class Environment {
     this.setSunLight()
     // this.setEnvironmentMap()
     this.setAmbientLight()
+    this.setupDayNightSystem()
     this.debuggerInit()
-
-    // 日/夜切换
-    this.toggleDayNightDom = document.getElementById('dayNightToggle')
-    this.isNightMode = false
-    this.toggleDayNightDom.addEventListener('click', () => {
-      this.isNightMode = !this.isNightMode
-      this.handleDayNightTransition()
-    })
   }
 
+  setupDayNightSystem() {
+    // Initialize day/night manager
+    this.dayNightManager = new DayNightManager()
+    
+    // Initialize fireflies
+    this.fireflies = new Fireflies()
+    
+    // Listen for day/night toggle
+    this.dayNightManager.on('dayNightToggle', (isNight) => {
+      this.handleDayNightTransition(isNight)
+      this.fireflies.setVisibility(isNight)
+    })
+  }
 
   setSunLight() {
     this.sunLightColor = '#ffffff'
@@ -164,9 +175,9 @@ export default class Environment {
     }
   }
 
-  handleDayNightTransition() {
-    const targetColor = this.isNightMode ? '#5e5994' : '#ffffff'
-    const targetIntensity = this.isNightMode ? 0.2 : 1.0
+  handleDayNightTransition(isNight) {
+    const targetColor = isNight ? '#5e5994' : '#ffffff'
+    const targetIntensity = isNight ? 0.2 : 1.0
 
     // Create a temporary color object for GSAP to animate
     const colorObj = {
@@ -191,5 +202,11 @@ export default class Environment {
       duration: 1,
       ease: 'power2.inOut',
     })
+  }
+
+  update() {
+    if (this.fireflies) {
+      this.fireflies.update()
+    }
   }
 }
