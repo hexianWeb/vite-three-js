@@ -133,7 +133,7 @@ XXXFolder.addBinding(PARAMS, 'background', {
   view: 'color',
 });
 ```
-*  **update** 当类组件中 `update` 内部存在逻辑时，要求在调用他的父组件(如果有)里调用 `update` 如在`FatherComponent`中执行 `this.child.update()`
+*  **update** 当类组件中 `update` 内部存在逻辑时，要求在调用他的父组件(如果有)里调用 `update` 如在`FatherComponent`中执行 `this.child.update()` **注意： 时间并不通过update参数传递 而是 通过this.experience.time来获取时间对象**
 *  **
 *   **相机 (`Camera`)**:
     *   定义在 `src/js/camera.js`。
