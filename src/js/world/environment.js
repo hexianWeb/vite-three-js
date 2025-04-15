@@ -2,14 +2,14 @@ import gsap from 'gsap'
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
-import EventEmitter from '../utils/event-emitter.js'
 import DayNightManager from '../utils/day-night-manager.js'
+import EventEmitter from '../utils/event-emitter.js'
 import Fireflies from './fireflies.js'
 
 export default class Environment extends EventEmitter {
   constructor() {
     super()
-    
+
     this.experience = new Experience()
     this.scene = this.experience.scene
     this.resources = this.experience.resources
@@ -32,10 +32,10 @@ export default class Environment extends EventEmitter {
   setupDayNightSystem() {
     // Initialize day/night manager
     this.dayNightManager = new DayNightManager()
-    
+
     // Initialize fireflies
     this.fireflies = new Fireflies()
-    
+
     // Listen for day/night toggle
     this.dayNightManager.on('dayNightToggle', (isNight) => {
       this.handleDayNightTransition(isNight)
