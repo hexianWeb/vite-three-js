@@ -11,18 +11,21 @@ export default class Water {
     this.time = this.experience.time
     this.debug = this.experience.debug
     this.sizes = this.experience.sizes
+    this.resources = this.experience.resources
 
     // 初始化着色器uniforms
     this.uniforms = {
       iTime: { value: 0.0 },
       iResolution: { value: new THREE.Vector2(this.sizes.width, this.sizes.height) },
-      distanceFactor: { value: 0.19 },
-      color1: { value: new THREE.Color('#075869') },
-      color2: { value: new THREE.Color(0xFFFFFF) },
-      foamColor: { value: new THREE.Color(0xFFFFFF) },
-      foamWidth: { value: 0.04 },
-      foamSoftness: { value: 0.16 },
+      distanceFactor: { value: 0.24 },
+      color1: { value: new THREE.Color('#e94909') },
+      color2: { value: new THREE.Color('#4cff05') },
+      foamColor: { value: new THREE.Color('#ee0000') },
+      foamWidth: { value: 0.10 },
+      foamSoftness: { value: 0.10 },
       pixelSize: { value: 48.0 },
+      flowMap: { value: this.resources.items.flowMapTexture },
+      flowSpeed: { value: 0.0015 },
     }
 
     // 创建着色器材质
@@ -35,12 +38,13 @@ export default class Water {
     if (this.debug.active) {
       this.debugObject = {
         positionX: -40.8,
-        positionY: 0.3,
+        positionY: 0.98,
         positionZ: -1.8,
         scale: 10,
-        color1: '#10928c',
-        color2: '#dbebda',
-        foamColor: '#e5f5e7',
+        color1: '#e94909',
+        color2: '#4cff05',
+        foamColor: '#ee0000',
+        flowSpeed: 0.001,
       }
       this.debugInit()
     }
@@ -52,9 +56,6 @@ export default class Water {
       uniform float iTime;
       varying vec2 vUv;
       void main() {
-          vec2 uv = uv;
-          uv.x += sin(iTime * 0.1) * 0.01;
-          uv.y += cos(iTime * 0.1) * 0.01;
           vUv = uv;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
@@ -71,6 +72,8 @@ export default class Water {
       uniform float foamWidth;
       uniform float foamSoftness;
       uniform float pixelSize;
+      uniform sampler2D flowMap;
+      uniform float flowSpeed;
 
       varying vec2 vUv;
 
@@ -80,9 +83,18 @@ export default class Water {
       }
 
       void main() {
+        // 获取流动图的值
+        vec2 flow = texture2D(flowMap, vUv).rg * 2.0 - 1.0;
+        
+        // 计算流动偏移
+        vec2 flowOffset = flow * flowSpeed * sin(iTime * 0.5)*20.0;
+        
+        // 应用流动偏移到UV坐标
+        vec2 uv = vUv + flowOffset;
+
         // 像素化处理
-        vec2 pixels = vec2(pixelSize); // 使用uniform变量控制像素化程度
-        vec2 uv = floor(vUv * pixels) / pixels;
+        vec2 pixels = vec2(pixelSize);
+        uv = floor(uv * pixels) / pixels;
 
         // 水面计算
         uv *= 8.0;
@@ -137,7 +149,7 @@ export default class Water {
 
     // 设置水面位置和旋转
     this.waterMesh.rotation.x = -Math.PI / 2 // 使平面水平放置
-    this.waterMesh.position.set(-40.8, 0.3, -1.7) // 使用默认位置
+    this.waterMesh.position.set(-40.8, 0.98, -1.8) // 使用默认位置
 
     // 将水面添加到场景
     this.scene.add(this.waterMesh)
@@ -169,6 +181,18 @@ export default class Water {
       title: '水面参数',
       expanded: false,
     })
+
+    // 添加流动速度控制
+    waterFolder.addBinding(
+      this.uniforms.flowSpeed,
+      'value',
+      {
+        label: '流动速度',
+        min: 0,
+        max: 0.2,
+        step: 0.001,
+      },
+    )
 
     // 添加位置控制
     const positionFolder = waterFolder.addFolder({
