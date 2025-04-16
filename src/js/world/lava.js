@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import Experience from '../experience.js'
 
-export default class Water {
+export default class Lava {
   constructor() {
     // 获取 Experience 单例实例
     this.experience = new Experience()
@@ -20,9 +20,9 @@ export default class Water {
       distanceFactor: { value: 0.24 },
       color1: { value: new THREE.Color('#e94909') },
       color2: { value: new THREE.Color('#4cff05') },
-      foamColor: { value: new THREE.Color('#ee0000') },
-      foamWidth: { value: 0.10 },
-      foamSoftness: { value: 0.10 },
+      glowColor: { value: new THREE.Color('#ee0000') },
+      glowWidth: { value: 0.10 },
+      glowSoftness: { value: 0.10 },
       pixelSize: { value: 48.0 },
       flowMap: { value: this.resources.items.flowMapTexture },
       flowSpeed: { value: 0.0015 },
@@ -31,8 +31,8 @@ export default class Water {
     // 创建着色器材质
     this.createShaderMaterial()
 
-    // 创建水面网格
-    this.createWaterMesh()
+    // 创建岩浆表面网格
+    this.createLavaMesh()
 
     // 如果debug模式激活，添加调试面板
     if (this.debug.active) {
@@ -43,7 +43,7 @@ export default class Water {
         scale: 10,
         color1: '#e94909',
         color2: '#4cff05',
-        foamColor: '#ee0000',
+        glowColor: '#ee0000',
         flowSpeed: 0.001,
       }
       this.debugInit()
@@ -68,9 +68,9 @@ export default class Water {
       uniform float distanceFactor;
       uniform vec3 color1;
       uniform vec3 color2;
-      uniform vec3 foamColor;
-      uniform float foamWidth;
-      uniform float foamSoftness;
+      uniform vec3 glowColor;
+      uniform float glowWidth;
+      uniform float glowSoftness;
       uniform float pixelSize;
       uniform sampler2D flowMap;
       uniform float flowSpeed;
@@ -96,7 +96,7 @@ export default class Water {
         vec2 pixels = vec2(pixelSize);
         uv = floor(uv * pixels) / pixels;
 
-        // 水面计算
+        // 岩浆表面计算
         uv *= 8.0;
         vec2 uv_i = floor(uv);
 
@@ -115,17 +115,17 @@ export default class Water {
         }
 
         float factor = smoothstep(0.05, 0.4, m_dist);
-        vec3 waterColor = mix(color1, color2, factor);
+        vec3 lavaColor = mix(color1, color2, factor);
 
-        // 泡沫计算 - 使用像素化后的UV坐标
+        // 发光效果计算 - 使用像素化后的UV坐标
         float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
         float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
         float minDistToEdge = min(distToEdgeX, distToEdgeY);
 
-        float foamFactor = 1.0 - smoothstep(foamWidth - foamSoftness, foamWidth, minDistToEdge);
-        foamFactor = clamp(foamFactor, 0.0, 1.0);
+        float glowFactor = 1.0 - smoothstep(glowWidth - glowSoftness, glowWidth, minDistToEdge);
+        glowFactor = clamp(glowFactor, 0.0, 1.0);
 
-        vec3 finalColor = mix(waterColor, foamColor, foamFactor);
+        vec3 finalColor = mix(lavaColor, glowColor, glowFactor);
         gl_FragColor = vec4(finalColor, 0.7);
       }
     `
@@ -142,17 +142,17 @@ export default class Water {
     })
   }
 
-  createWaterMesh() {
-    // 创建一个大平面作为水面
+  createLavaMesh() {
+    // 创建一个大平面作为岩浆表面
     const geometry = new THREE.PlaneGeometry(10, 12.5, 1, 1)
-    this.waterMesh = new THREE.Mesh(geometry, this.shaderMaterial)
+    this.lavaMesh = new THREE.Mesh(geometry, this.shaderMaterial)
 
-    // 设置水面位置和旋转
-    this.waterMesh.rotation.x = -Math.PI / 2 // 使平面水平放置
-    this.waterMesh.position.set(-40.8, 0.98, -1.8) // 使用默认位置
+    // 设置岩浆表面位置和旋转
+    this.lavaMesh.rotation.x = -Math.PI / 2 // 使平面水平放置
+    this.lavaMesh.position.set(-40.8, 0.98, -1.8) // 使用默认位置
 
-    // 将水面添加到场景
-    this.scene.add(this.waterMesh)
+    // 将岩浆表面添加到场景
+    this.scene.add(this.lavaMesh)
   }
 
   update() {
@@ -172,18 +172,18 @@ export default class Water {
   debugInit() {
     // 创建调试面板
     this.debugFolder = this.debug.ui.addFolder({
-      title: '水面效果',
+      title: '岩浆效果',
       expanded: false,
     })
 
-    // 水面参数控制
-    const waterFolder = this.debugFolder.addFolder({
-      title: '水面参数',
+    // 岩浆参数控制
+    const lavaFolder = this.debugFolder.addFolder({
+      title: '岩浆参数',
       expanded: false,
     })
 
     // 添加流动速度控制
-    waterFolder.addBinding(
+    lavaFolder.addBinding(
       this.uniforms.flowSpeed,
       'value',
       {
@@ -195,7 +195,7 @@ export default class Water {
     )
 
     // 添加位置控制
-    const positionFolder = waterFolder.addFolder({
+    const positionFolder = lavaFolder.addFolder({
       title: '位置控制',
       expanded: false,
     })
@@ -211,7 +211,7 @@ export default class Water {
         step: 0.1,
       },
     ).on('change', () => {
-      this.waterMesh.position.x = this.debugObject.positionX
+      this.lavaMesh.position.x = this.debugObject.positionX
     })
 
     // Y轴位置控制
@@ -225,7 +225,7 @@ export default class Water {
         step: 0.01,
       },
     ).on('change', () => {
-      this.waterMesh.position.y = this.debugObject.positionY
+      this.lavaMesh.position.y = this.debugObject.positionY
     })
 
     // Z轴位置控制
@@ -239,28 +239,28 @@ export default class Water {
         step: 0.1,
       },
     ).on('change', () => {
-      this.waterMesh.position.z = this.debugObject.positionZ
+      this.lavaMesh.position.z = this.debugObject.positionZ
     })
 
     // 添加大小控制
-    waterFolder.addBinding(
+    lavaFolder.addBinding(
       this.debugObject,
       'scale',
       {
-        label: '水面大小',
+        label: '岩浆表面大小',
         min: 1,
         max: 50,
         step: 1,
       },
     ).on('change', () => {
-      this.waterMesh.scale.set(
+      this.lavaMesh.scale.set(
         this.debugObject.scale / 50,
         this.debugObject.scale / 50,
         1,
       )
     })
 
-    waterFolder.addBinding(
+    lavaFolder.addBinding(
       this.uniforms.distanceFactor,
       'value',
       {
@@ -271,31 +271,31 @@ export default class Water {
       },
     )
 
-    waterFolder.addBinding(
+    lavaFolder.addBinding(
       this.debugObject,
       'color1',
       {
-        label: '水面颜色1',
+        label: '岩浆颜色1',
         view: 'color',
       },
     ).on('change', () => {
       this.uniforms.color1.value.set(this.debugObject.color1)
     })
 
-    waterFolder.addBinding(
+    lavaFolder.addBinding(
       this.debugObject,
       'color2',
       {
-        label: '水面颜色2',
+        label: '岩浆颜色2',
         view: 'color',
       },
     ).on('change', () => {
       this.uniforms.color2.value.set(this.debugObject.color2)
     })
 
-    // 泡沫参数控制
-    const foamFolder = this.debugFolder.addFolder({
-      title: '泡沫参数',
+    // 发光参数控制
+    const glowFolder = this.debugFolder.addFolder({
+      title: '发光参数',
       expanded: true,
     })
 
@@ -316,33 +316,33 @@ export default class Water {
       },
     )
 
-    foamFolder.addBinding(
+    glowFolder.addBinding(
       this.debugObject,
-      'foamColor',
+      'glowColor',
       {
-        label: '泡沫颜色',
+        label: '发光颜色',
         view: 'color',
       },
     ).on('change', () => {
-      this.uniforms.foamColor.value.set(this.debugObject.foamColor)
+      this.uniforms.glowColor.value.set(this.debugObject.glowColor)
     })
 
-    foamFolder.addBinding(
-      this.uniforms.foamWidth,
+    glowFolder.addBinding(
+      this.uniforms.glowWidth,
       'value',
       {
-        label: '泡沫宽度',
+        label: '发光宽度',
         min: 0,
         max: 0.2,
         step: 0.005,
       },
     )
 
-    foamFolder.addBinding(
-      this.uniforms.foamSoftness,
+    glowFolder.addBinding(
+      this.uniforms.glowSoftness,
       'value',
       {
-        label: '泡沫柔和度',
+        label: '发光柔和度',
         min: 0,
         max: 0.1,
         step: 0.001,

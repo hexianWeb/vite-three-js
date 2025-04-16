@@ -1,13 +1,10 @@
-import * as THREE from 'three'
-
 import Experience from '../experience.js'
 import Area from './area.js'
 import Effects from './effect.js'
 import Environment from './environment.js'
 import Hero from './hero.js'
+import Lava from './lava.js'
 import PortalEffect from './portal-effect.js'
-import Smoke from './smoke.js'
-import Water from './water.js'
 
 export default class World {
   constructor() {
@@ -21,18 +18,12 @@ export default class World {
       this.environment = new Environment()
       this.area = new Area()
       this.hero = new Hero()
-      // 初始化水面效果
-      this.water = new Water()
+      // 初始化岩浆效果
+      this.lava = new Lava()
       // 初始化传送门效果
       this.portalEffect = new PortalEffect()
     })
-    // 添加一个白色大网格
-    const gridHelper = new THREE.GridHelper(100, 100)
-    gridHelper.material.color.set(0xFFFFFF)
-    gridHelper.material.opacity = 0.5
-    gridHelper.material.transparent = true
-    gridHelper.position.y = -0.1
-    this.scene.add(gridHelper)
+
     this.effects = new Effects()
   }
 
@@ -41,9 +32,9 @@ export default class World {
     if (this.hero) {
       this.hero.update()
     }
-    // 更新水面效果
-    if (this.water) {
-      this.water.update()
+    // 更新岩浆效果
+    if (this.lava) {
+      this.lava.update()
     }
     if (this.environment) {
       this.environment.update()
@@ -57,9 +48,9 @@ export default class World {
 
   resize() {
     this.effects.resize()
-    // 更新水面效果尺寸
-    if (this.water) {
-      this.water.resize()
+    // 更新岩浆效果尺寸
+    if (this.lava) {
+      this.lava.resize()
     }
   }
 }
