@@ -543,7 +543,7 @@ export default class Hero {
     // ===== 角色动画控制面板 =====
     this.debugFolder = this.debug.ui.addFolder({
       title: '角色动画控制',
-      expanded: true,
+      expanded: false,
     })
 
     // ----- 基本信息显示 -----

@@ -54,4 +54,9 @@ export default [
     type: 'texture',
     path: 'textures/noise/cables (8).png',
   },
+  {
+    name: 'waterMaskTexture',
+    type: 'texture',
+    path: 'textures/noise/waterMask.png',
+  },
 ]

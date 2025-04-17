@@ -4,6 +4,7 @@ import Effects from './effect.js'
 import Environment from './environment.js'
 import Hero from './hero.js'
 import Lava from './lava.js'
+import Ocean from './ocean.js'
 import PortalEffect from './portal-effect.js'
 
 export default class World {
@@ -20,6 +21,8 @@ export default class World {
       this.hero = new Hero()
       // 初始化岩浆效果
       this.lava = new Lava()
+      // 初始化海洋
+      this.ocean = new Ocean()
       // 初始化传送门效果
       this.portalEffect = new PortalEffect()
     })
@@ -38,6 +41,10 @@ export default class World {
     }
     if (this.environment) {
       this.environment.update()
+    }
+    // 更新海洋
+    if (this.ocean) {
+      this.ocean.update()
     }
     // 更新传送门效果
     if (this.portalEffect) {
