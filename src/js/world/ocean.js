@@ -1,3 +1,4 @@
+import GSAP from 'gsap'
 import * as THREE from 'three'
 import Experience from '../experience.js'
 
@@ -20,12 +21,23 @@ export default class Ocean {
       waveSpeed: 0.12,
       noiseScale: 1.5, // 添加噪声缩放控制
       waveHeight: 2.35, // 添加波浪高度控制
+      nightDarkFactor: 0.3, // 夜晚变暗系数
     }
 
     // 设置
     this.setGeometry()
     this.setMaterial()
     this.setMesh()
+
+    // 监听日夜切换
+    this.experience.world.environment.dayNightManager.on('dayNightToggle', (isNight) => {
+      // 使用GSAP创建过渡动画
+      GSAP.to(this.material.uniforms.uNightTransition, {
+        value: isNight ? 1 : 0,
+        duration: 2,
+        ease: 'power2.inOut',
+      })
+    })
 
     if (this.debug.active) {
       this.debugInit()
@@ -99,10 +111,6 @@ export default class Ocean {
           // 创建波浪效果
           vec4 modelPosition = modelMatrix * vec4(position, 1.0);
           
-          // 添加UV动画
-          vec2 flowUv = vUv;
-          flowUv.x += uTime * uFlowSpeed * 0.05;
-          
           // 使用FBM计算波浪高度
           float elevation = fbm(vec2(
             modelPosition.x * uNoiseScale + uTime * uWaveSpeed,
@@ -119,8 +127,11 @@ export default class Ocean {
         uniform sampler2D uWaterMask;
         uniform vec3 uSurfaceColor;
         uniform vec3 uFoamColor;
+        uniform vec3 uNightSurfaceColor;
+        uniform vec3 uNightFoamColor;
         uniform float uColorOffset;
         uniform float uColorMultiplier;
+        uniform float uNightTransition;
         
         varying vec2 vUv;
         varying float vElevation;
@@ -129,11 +140,18 @@ export default class Ocean {
           // 获取水面遮罩纹理
           vec4 waterMask = texture2D(uWaterMask, vUv * vec2(64.0, 64.0));
           
-          // 混合海面颜色和泡沫颜色
-          float mixStrength = (vElevation + uColorOffset) * uColorMultiplier;
-          vec3 color = mix(uSurfaceColor, uFoamColor, mixStrength * waterMask.r);
+          // 计算日间和夜间的混合颜色
+          vec3 dayColor = mix(uSurfaceColor, uFoamColor, waterMask.r);
+          vec3 nightColor = mix(uNightSurfaceColor, uNightFoamColor, waterMask.r);
           
-          gl_FragColor = vec4(color, 0.7);
+          // 根据过渡值混合日夜颜色
+          vec3 finalColor = mix(dayColor, nightColor, uNightTransition);
+          
+          // 应用波浪高度的混合效果
+          float mixStrength = (vElevation + uColorOffset) * uColorMultiplier;
+          finalColor = mix(finalColor, uFoamColor, mixStrength * waterMask.r);
+          
+          gl_FragColor = vec4(finalColor, 0.7);
         }
       `,
       uniforms: {
@@ -141,12 +159,15 @@ export default class Ocean {
         uWaterMask: { value: this.resources.items.waterMaskTexture },
         uSurfaceColor: { value: new THREE.Color(this.debugObject.surfaceColor) },
         uFoamColor: { value: new THREE.Color(this.debugObject.foamColor) },
+        uNightSurfaceColor: { value: new THREE.Color(this.debugObject.surfaceColor).multiplyScalar(this.debugObject.nightDarkFactor) },
+        uNightFoamColor: { value: new THREE.Color(this.debugObject.foamColor).multiplyScalar(this.debugObject.nightDarkFactor) },
         uColorOffset: { value: this.debugObject.colorOffset },
         uColorMultiplier: { value: this.debugObject.colorMultiplier },
         uFlowSpeed: { value: this.debugObject.flowSpeed },
         uWaveSpeed: { value: this.debugObject.waveSpeed },
         uNoiseScale: { value: this.debugObject.noiseScale },
         uWaveHeight: { value: this.debugObject.waveHeight },
+        uNightTransition: { value: 0 },
       },
       transparent: true,
       side: THREE.FrontSide,
@@ -159,6 +180,16 @@ export default class Ocean {
     this.mesh.rotation.x = -Math.PI * 0.5
     this.mesh.position.y = -1
     this.scene.add(this.mesh)
+  }
+
+  updateNightColors() {
+    // 更新夜晚的颜色
+    this.material.uniforms.uNightSurfaceColor.value.copy(
+      new THREE.Color(this.debugObject.surfaceColor).multiplyScalar(this.debugObject.nightDarkFactor),
+    )
+    this.material.uniforms.uNightFoamColor.value.copy(
+      new THREE.Color(this.debugObject.foamColor).multiplyScalar(this.debugObject.nightDarkFactor),
+    )
   }
 
   debugInit() {
@@ -178,6 +209,7 @@ export default class Ocean {
       },
     ).on('change', () => {
       this.material.uniforms.uSurfaceColor.value.set(this.debugObject.surfaceColor)
+      this.updateNightColors()
     })
 
     // 添加泡沫颜色控制
@@ -190,6 +222,21 @@ export default class Ocean {
       },
     ).on('change', () => {
       this.material.uniforms.uFoamColor.value.set(this.debugObject.foamColor)
+      this.updateNightColors()
+    })
+
+    // 添加夜晚变暗系数控制
+    this.debugFolder.addBinding(
+      this.debugObject,
+      'nightDarkFactor',
+      {
+        label: '夜晚变暗系数',
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+    ).on('change', () => {
+      this.updateNightColors()
     })
 
     // 添加混合参数控制
