@@ -47,3 +47,33 @@ body {
     animation: octocat-wave 560ms ease-in-out;
   }
 }
+
+.pixel-border {
+  /* 新增 border-image 样式 */
+  border-style: solid;
+  border-width: 8px; /* 需要设置边框宽度 */
+  border-image-source: url('/ui/border.png'); /* 图片路径 */
+  border-image-slice: 8 fill; /* 切割尺寸，假设为 8px，fill 填充中间 */
+  border-image-width: 8px; /* 边框图片的宽度 */
+  border-image-outset: 0; /* 边框向外扩展的距离 */
+  border-image-repeat: stretch; /* 拉伸边缘以填充 */
+
+  /* 保留其他属性 */
+  image-rendering: pixelated;
+  box-sizing: border-box;
+} 
+
+.pixel-border2 {
+  /* 新增 border-image 样式 */
+  border-style: solid;
+  border-width: 8px; /* 需要设置边框宽度 */
+  border-image-source: url('/ui/border2.png'); /* 图片路径 */
+  border-image-slice: 8 fill; /* 切割尺寸，假设为 8px，fill 填充中间 */
+  border-image-width: 8px; /* 边框图片的宽度 */
+  border-image-outset: 0; /* 边框向外扩展的距离 */
+  border-image-repeat: stretch; /* 拉伸边缘以填充 */
+
+  /* 保留其他属性 */
+  image-rendering: pixelated;
+  box-sizing: border-box;
+} 
