@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import portalFragmentShader from '../../shaders/portal/fragment.glsl'
 import portalVertexShader from '../../shaders/portal/vertex.glsl'
 import Experience from '../experience.js'
-import DayNightManager from '../utils/day-night-manager.js'
+import DayNightManager from '../ui/day-night-manager.js'
 
 export default class PortalEffect {
   constructor() {

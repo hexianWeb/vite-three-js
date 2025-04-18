@@ -2,7 +2,7 @@ import gsap from 'gsap'
 import * as THREE from 'three'
 
 import Experience from '../experience.js'
-import DayNightManager from '../utils/day-night-manager.js'
+import DayNightManager from '../ui/day-night-manager.js'
 import EventEmitter from '../utils/event-emitter.js'
 import Fireflies from './fireflies.js'
 

@@ -42,7 +42,7 @@ export default [
   {
     name: 'colliderModel',
     type: 'gltfModel',
-    path: 'models/collision-world2.glb',
+    path: 'models/collision-world.glb',
   },
   {
     name: 'perlinNoiseTexture',

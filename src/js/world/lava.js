@@ -18,6 +18,9 @@ export default class Lava {
       iTime: { value: 0.0 },
       iResolution: { value: new THREE.Vector2(this.sizes.width, this.sizes.height) },
       distanceFactor: { value: 0.24 },
+      distanceFactorMin: { value: 0.2 },
+      distanceFactorMax: { value: 0.30 },
+      distanceFactorSpeed: { value: 0.5 },
       color1: { value: new THREE.Color('#e94909') },
       color2: { value: new THREE.Color('#4cff05') },
       glowColor: { value: new THREE.Color('#ee0000') },
@@ -25,7 +28,7 @@ export default class Lava {
       glowSoftness: { value: 0.10 },
       pixelSize: { value: 48.0 },
       flowMap: { value: this.resources.items.flowMapTexture },
-      flowSpeed: { value: 0.0015 },
+      flowSpeed: { value: 0.002 },
     }
 
     // 创建着色器材质
@@ -44,7 +47,7 @@ export default class Lava {
         color1: '#e94909',
         color2: '#4cff05',
         glowColor: '#ee0000',
-        flowSpeed: 0.001,
+        flowSpeed: 0.005,
       }
       this.debugInit()
     }
@@ -159,6 +162,16 @@ export default class Lava {
     // 更新时间uniform
     if (this.uniforms && this.uniforms.iTime) {
       this.uniforms.iTime.value = this.time.elapsed * 0.001
+
+      // 计算波纹强度的周期性变化
+      const time = this.time.elapsed * 0.001
+      const min = this.uniforms.distanceFactorMin.value
+      const max = this.uniforms.distanceFactorMax.value
+      const speed = this.uniforms.distanceFactorSpeed.value
+
+      // 使用正弦函数生成周期性变化
+      this.uniforms.distanceFactor.value
+        = min + (Math.sin(time * speed) * 0.5 + 0.5) * (max - min)
     }
   }
 
