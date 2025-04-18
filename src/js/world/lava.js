@@ -40,8 +40,8 @@ export default class Lava {
     // 如果debug模式激活，添加调试面板
     if (this.debug.active) {
       this.debugObject = {
-        positionX: -40.8,
-        positionY: 0.98,
+        positionX: -40.0,
+        positionY: 0.59,
         positionZ: -1.8,
         scale: 10,
         color1: '#e94909',
@@ -152,7 +152,7 @@ export default class Lava {
 
     // 设置岩浆表面位置和旋转
     this.lavaMesh.rotation.x = -Math.PI / 2 // 使平面水平放置
-    this.lavaMesh.position.set(-40.8, 0.98, -1.8) // 使用默认位置
+    this.lavaMesh.position.set(-40.0, 0.59, -1.8) // 使用默认位置
 
     // 将岩浆表面添加到场景
     this.scene.add(this.lavaMesh)
