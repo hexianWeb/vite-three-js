@@ -3,7 +3,6 @@ import Experience from '../experience.js'
 import Area from './area.js'
 import Effects from './effect.js'
 import Environment from './environment.js'
-import EventPoint from './eventPoint.js' // 引入事件点类
 import EventPointManager from './eventPointManager.js' // 引入事件点管理器类
 import Hero from './hero.js'
 import Lava from './lava.js'
@@ -21,8 +20,8 @@ export default class World {
     this.resources.on('ready', () => {
       // Setup
       this.environment = new Environment()
-      this.area = new Area()
       this.hero = new Hero()
+      this.area = new Area()
       // 初始化岩浆效果
       this.lava = new Lava()
       // 初始化海洋
@@ -41,31 +40,31 @@ export default class World {
    * 设置场景中的所有事件触发点
    */
   setupEventPoints() {
-    // === 测试事件点: 坐标原点附近 ===
-    const originPoint = new EventPoint(
-      new THREE.Vector3(0, 0, 0), // 目标位置 (略高于地面)
-      1.2, // 触发半径
-      () => { // 触发时的回调函数
-        alert('你已到达坐标原点附近！')
-        // console.warn('你已到达坐标原点附近！ (事件点触发)') // 使用 console.warn 代替 alert
+    // 创建一个测试交互点在坐标原点
+    this.eventPointManager.createEventPoint(
+      'origin_test', // 交互点的唯一ID
+      new THREE.Vector3(0, 0, 0), // 位置在坐标原点
+      2, // 交互半径为2个单位
+      () => {
+        console.warn('触发了原点交互！按 F 键进行交互')
+        // 这里可以添加更多交互逻辑，比如：
+        // - 显示对话框
+        // - 播放动画
+        // - 触发事件
+        // - 改变场景状态
       },
-      true, // 只触发一次
+      '按 F 键查看原点信息', // 交互提示文本
     )
-    this.eventPointManager.addEventPoint(originPoint) // 将事件点添加到管理器
 
-    // === 在这里添加更多事件点 ===
-    // 例如：靠近某个物体时触发对话
-    // const dialoguePosition = new THREE.Vector3(5, 1, 2);
-    // const dialogueTrigger = new EventPoint(
-    //   dialoguePosition,
-    //   2.5,
-    //   () => {
-    //     console.log('靠近物体，准备显示对话框...');
-    //     // 调用 UI 管理器显示对话框
-    //   },
-    //   true
-    // );
-    // this.eventPointManager.addEventPoint(dialogueTrigger);
+    // === 在这里添加更多交互点 ===
+    // 示例：
+    // this.eventPointManager.createEventPoint(
+    //   'npc_1',
+    //   new THREE.Vector3(5, 0, 5),
+    //   2,
+    //   () => { console.warn('与NPC对话') },
+    //   '按 F 键与NPC对话'
+    // )
   }
 
   update() {
@@ -93,6 +92,9 @@ export default class World {
     // 更新事件点管理器 (检查是否有事件触发)
     if (this.eventPointManager) {
       this.eventPointManager.update()
+    }
+    if (this.area) {
+      this.area.update()
     }
   }
 
