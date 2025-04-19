@@ -1,4 +1,5 @@
 import Experience from '../experience.js'
+import EventPoint from './eventPoint.js'
 
 /**
  * 事件触发点管理器
@@ -7,32 +8,97 @@ import Experience from '../experience.js'
 export default class EventPointManager {
   constructor() {
     this.experience = new Experience()
-    this.eventPoints = [] // 存储所有事件点实例的数组
+    this.eventPoints = new Map() // 使用 Map 存储事件点，键为唯一标识符
+    this.debug = this.experience.debug
+
+    // 如果调试模式激活，创建调试面板
+    if (this.debug?.active) {
+      this.createDebugPanel()
+    }
+  }
+
+  /**
+   * 创建调试面板
+   */
+  createDebugPanel() {
+    this.debugFolder = this.debug.ui.addFolder({
+      title: '交互点管理器',
+      expanded: false,
+    })
+
+    // 添加显示/隐藏所有交互范围的开关
+    this.debugFolder.addBinding(
+      {
+        showAllTriggers: false,
+      },
+      'showAllTriggers',
+      {
+        label: '显示所有交互范围',
+      },
+    ).on('change', (event) => {
+      this.eventPoints.forEach((point) => {
+        if (point.debugSphere) {
+          point.debugSphere.visible = event.value
+        }
+      })
+    })
   }
 
   /**
    * 添加一个新的事件点到管理器
-   * @param {EventPoint} eventPoint - 要添加的 EventPoint 实例
+   * @param {string} id 事件点的唯一标识符
+   * @param {THREE.Vector3} position 事件点位置
+   * @param {number} radius 触发半径
+   * @param {Function} callback 触发时执行的回调函数
+   * @param {string} [interactionText] 交互提示文本
+   * @returns {EventPoint} 创建的事件点实例
    */
-  addEventPoint(eventPoint) {
-    // 校验传入的是否为有效的 EventPoint 实例
-    if (!eventPoint || typeof eventPoint.update !== 'function') {
-      console.error('向 EventPointManager 添加了无效的 EventPoint')
-      return
+  createEventPoint(id, position, radius, callback, interactionText) {
+    // 检查是否已存在同ID的事件点
+    if (this.eventPoints.has(id)) {
+      console.warn(`事件点 ${id} 已存在，将被替换`)
+      this.removeEventPoint(id)
     }
-    this.eventPoints.push(eventPoint)
-    console.warn(`添加事件点，目标位置: ${eventPoint.targetPosition?.toArray().join(',') || '未知位置'}`)
+
+    // 创建新的事件点
+    const eventPoint = new EventPoint(position, radius, callback, interactionText)
+    this.eventPoints.set(id, eventPoint)
+
+    console.warn(`创建事件点 ${id}，位置: ${position.toArray().join(',')}`)
+    return eventPoint
   }
 
   /**
-   * (可选) 移除一个事件点
-   * @param {EventPoint} eventPointToRemove - 要移除的 EventPoint 实例
+   * 移除指定ID的事件点
+   * @param {string} id 要移除的事件点ID
    */
-  removeEventPoint(eventPointToRemove) {
-    this.eventPoints = this.eventPoints.filter(
-      point => point !== eventPointToRemove, // 过滤掉要移除的事件点
-    )
-    console.warn(`移除事件点，目标位置: ${eventPointToRemove.targetPosition?.toArray().join(',') || '未知位置'}`)
+  removeEventPoint(id) {
+    const eventPoint = this.eventPoints.get(id)
+    if (eventPoint) {
+      eventPoint.destroy() // 清理事件点资源
+      this.eventPoints.delete(id)
+      console.warn(`移除事件点 ${id}`)
+    }
+  }
+
+  /**
+   * 获取指定ID的事件点
+   * @param {string} id 事件点ID
+   * @returns {EventPoint|undefined} 事件点实例或undefined
+   */
+  getEventPoint(id) {
+    return this.eventPoints.get(id)
+  }
+
+  /**
+   * 清除所有事件点
+   */
+  clearAllEventPoints() {
+    this.eventPoints.forEach((point, id) => {
+      point.destroy()
+      console.warn(`清理事件点 ${id}`)
+    })
+    this.eventPoints.clear()
   }
 
   /**
@@ -48,5 +114,14 @@ export default class EventPointManager {
     this.eventPoints.forEach((point) => {
       point.update()
     })
+  }
+
+  /**
+   * 销毁管理器
+   * 清理所有事件点和相关资源
+   */
+  destroy() {
+    this.clearAllEventPoints()
+    // 移除事件监听器等其他清理工作
   }
 }

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import Experience from '../experience.js'
 
 /**
@@ -9,34 +10,91 @@ export default class EventPoint {
    * @param {THREE.Vector3} targetPosition 目标触发位置
    * @param {number} radius 触发半径
    * @param {Function} callback 触发时执行的回调函数
-   * @param {boolean} [triggerOnce] 事件是否只触发一次
+   * @param {string} [interactionText] 交互提示文本
    */
-  constructor(targetPosition, radius, callback, triggerOnce = true) {
+  constructor(targetPosition, radius, callback, interactionText = '按 F 键互动') {
     this.experience = new Experience()
     this.hero = this.experience.world?.hero // 获取英雄实例 (初始可能为 null)
     this.targetPosition = targetPosition // 目标位置
     this.radius = radius // 触发半径
     this.callback = callback // 回调函数
-    this.triggerOnce = triggerOnce // 是否只触发一次
+    this.interactionText = interactionText // 交互提示文本
 
-    this.triggered = false // 标记事件是否已被触发
     this.isHeroNearby = false // 标记英雄当前是否在半径内
+    this.isInteractionAvailable = false // 标记是否可以进行交互
 
-    // 确保英雄实例可用
-    if (!this.hero) {
-      console.warn('事件点构造函数中英雄实例尚不可用，将在 update 中重试。')
+    // 创建辅助球体来可视化交互范围（调试用）
+    if (this.experience.debug?.active) {
+      this.createDebugSphere()
+    }
+
+    // 绑定按键事件
+    this.setupEventListeners()
+  }
+
+  /**
+   * 创建用于调试的交互范围可视化球体
+   */
+  createDebugSphere() {
+    const geometry = new THREE.SphereGeometry(this.radius, 16, 16)
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x00FF00,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.3,
+    })
+    this.debugSphere = new THREE.Mesh(geometry, material)
+    this.debugSphere.position.copy(this.targetPosition)
+    this.experience.scene.add(this.debugSphere)
+  }
+
+  /**
+   * 设置按键事件监听
+   */
+  setupEventListeners() {
+    // 监听 F 键按下事件
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'f' && this.isInteractionAvailable) {
+        this.triggerInteraction()
+      }
+    })
+  }
+
+  /**
+   * 触发交互事件
+   */
+  triggerInteraction() {
+    if (this.isInteractionAvailable) {
+      console.warn(`触发交互事件: ${this.targetPosition.toArray().join(',')}`)
+      this.callback()
     }
   }
 
   /**
-   * 每帧更新，检查英雄位置并触发事件
+   * 显示交互提示
+   * 注意：这里只是一个示例，实际实现可能需要根据你的 UI 系统进行调整
+   */
+  showInteractionPrompt() {
+    // TODO: 实现显示交互提示的逻辑
+    console.warn(`显示交互提示: ${this.interactionText}`)
+  }
+
+  /**
+   * 隐藏交互提示
+   */
+  hideInteractionPrompt() {
+    // TODO: 实现隐藏交互提示的逻辑
+    console.warn('隐藏交互提示')
+  }
+
+  /**
+   * 每帧更新，检查英雄位置并更新状态
    */
   update() {
     // 如果英雄实例尚不可用，则尝试再次获取
     if (!this.hero) {
       this.hero = this.experience.world?.hero
       if (!this.hero || !this.hero.hero) {
-        // console.warn('事件点 update 中英雄或 hero.hero 不可用');
         return // 如果英雄仍然不可用，则退出
       }
     }
@@ -47,26 +105,45 @@ export default class EventPoint {
     const wasHeroNearby = this.isHeroNearby // 记录上一帧英雄是否在附近
     this.isHeroNearby = distance < this.radius // 更新当前帧英雄是否在半径内
 
-    // 检查英雄是否刚进入触发半径
-    if (this.isHeroNearby && !wasHeroNearby) {
-      // 如果事件尚未触发或允许重复触发，则执行回调
-      if (!this.triggered || !this.triggerOnce) {
-        console.warn(`英雄进入触发区域: ${this.targetPosition.toArray().join(',')}`)
-        this.callback()
-        this.triggered = true // 标记为已触发
+    // 更新交互可用状态
+    this.isInteractionAvailable = this.isHeroNearby
+
+    // 处理状态变化
+    if (this.isHeroNearby !== wasHeroNearby) {
+      if (this.isHeroNearby) {
+        // 英雄进入范围
+        this.showInteractionPrompt()
+        if (this.debugSphere) {
+          this.debugSphere.material.color.setHex(0xFF0000)
+        }
+      }
+      else {
+        // 英雄离开范围
+        this.hideInteractionPrompt()
+        if (this.debugSphere) {
+          this.debugSphere.material.color.setHex(0x00FF00)
+        }
       }
     }
-    // 可选: 如果英雄离开区域且 triggerOnce 为 true，可以重置触发状态
-    // else if (!this.isHeroNearby && wasHeroNearby && this.triggerOnce) {
-    //   // console.warn('英雄离开触发区域，若 triggerOnce=true 则可再次触发');
-    //   // 如果希望离开后能再次触发:
-    //   // this.triggered = false;
-    // }
 
-    // 如果不允许只触发一次 (triggerOnce is false)，则在英雄离开时重置触发状态
-    if (!this.isHeroNearby && wasHeroNearby && !this.triggerOnce) {
-      console.warn(`英雄离开触发区域: ${this.targetPosition.toArray().join(',')}`)
-      this.triggered = false // 允许非一次性事件重新触发
+    // 更新调试球体的颜色（如果存在）
+    if (this.debugSphere && this.isInteractionAvailable) {
+      this.debugSphere.material.opacity = 0.5
+    }
+    else if (this.debugSphere) {
+      this.debugSphere.material.opacity = 0.3
+    }
+  }
+
+  /**
+   * 销毁事件点
+   */
+  destroy() {
+    // 移除调试球体（如果存在）
+    if (this.debugSphere) {
+      this.experience.scene.remove(this.debugSphere)
+      this.debugSphere.geometry.dispose()
+      this.debugSphere.material.dispose()
     }
   }
 }
