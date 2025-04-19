@@ -53,13 +53,38 @@ export default class Experience {
   resize() {
     this.camera.resize()
     this.renderer.resize()
+    if (this.world && this.world.resize) {
+      this.world.resize()
+    }
   }
 
   update() {
+    if (this.stats) {
+      this.stats.update()
+    }
     this.camera.update()
-    this.world.update()
+
+    if (this.world) {
+      this.world.update()
+      if (this.world.area && this.world.area.update) {
+        this.world.area.update()
+      }
+    }
+
+    if (this.physics) {
+      // ... existing code ...
+    }
+
     // this.renderer.update()
-    this.stats.update()
+
+    if (this.debug.active) {
+      // ... existing code ...
+    }
+
     this.iMouse.update()
+  }
+
+  destroy() {
+    // ... existing code ...
   }
 }
