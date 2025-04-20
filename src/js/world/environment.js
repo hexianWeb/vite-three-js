@@ -16,11 +16,6 @@ export default class Environment extends EventEmitter {
     this.debug = this.experience.debug.ui
     this.debugActive = this.experience.debug.active
 
-    // Axes Helper
-    this.axesHelper = new THREE.AxesHelper(5)
-    this.axesHelper.visible = false
-    this.scene.add(this.axesHelper)
-
     // Setup
     this.setSunLight()
     // this.setEnvironmentMap()

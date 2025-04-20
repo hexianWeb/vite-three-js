@@ -29,7 +29,6 @@ export default class World {
     this.initCSS2DRenderer()
 
     this.eventPointManager = new EventPointManager() // 实例化事件点管理器
-    this.scene.add(new THREE.AxesHelper(5))
     // Environment
     this.resources.on('ready', () => {
       // Setup
