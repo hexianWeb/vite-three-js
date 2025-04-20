@@ -5,8 +5,7 @@ export default class IntroDialog {
     // DOM elements
     this.dialogText = document.getElementById('dialogText')
     this.dialogContainer = this.dialogText.closest('.fixed')
-
-    // Introduction content
+    // 常规介绍内容
     this.introContent = [
       '本专栏的愿景是通过分享 Three.js 的中高级应用和实战技巧，帮助开发者更好地将 3D 技术应用到实际项目中，打造令人印象深刻的 Hero Section。',
       '我们希望通过本专栏的内容，能够激发开发者的创造力，推动 Web3D 技术的普及和应用。',
@@ -19,71 +18,132 @@ export default class IntroDialog {
       '如果您对 Threejs 这个 3D 图像框架很感兴趣，或者您也深信未来国内会涌现越来越多 3D 设计风格的网站，欢迎加入 ice 图形学社区。',
       '这里是国内 Web 图形学最全的知识库，致力于打造一个全新的图形学生态体系！您可以在认证达人里找到我这个 Threejs 爱好者和其他大佬。',
     ]
+    // 交互区域内容
+    this.interactionContent = {
+      bed_area: '这是我的休息区，',
+      beer_area: '这是我的收藏区，',
+      workbench_area: '这是我的技能区，',
+      weapon_area: '这里展示了我参与过的项目经验，',
+      dining_area: '这里记录了我的一些生活爱好，',
+      kitchen_area: '这里是我的个人技能展示区，',
+      well_area: '这里是我的厨房',
+    }
 
     this.currentIndex = 0
     this.typed = null
     this.isVisible = true
-
-    // Initialize the dialog
-    this.initializeDialog()
+    this.hideTimer = null // 添加隐藏计时器
+    this.introLoopTimer = null // 添加轮询计时器
+    this.lastInteractionTime = Date.now() // 记录最后一次交互时间
   }
 
-  initializeDialog() {
-    // Initial setup of Typed.js
-    this.setupTyped()
-
-    // Start the content rotation
-    this.startContentRotation()
-  }
-
-  setupTyped() {
+  setupTyped(content, autoHide = true) {
     if (this.typed) {
       this.typed.destroy()
     }
 
+    // 清除之前的隐藏计时器
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer)
+      this.hideTimer = null
+    }
+
     this.typed = new Typed(this.dialogText, {
-      strings: [this.introContent[this.currentIndex]],
-      typeSpeed: 50,
+      strings: [content],
+      typeSpeed: 70,
       backSpeed: 30,
       showCursor: true,
       cursorChar: '|',
       onComplete: () => {
-        // After typing is complete, wait 5s then hide
-        setTimeout(() => this.hideDialog(), 5000)
+        if (autoHide) {
+          // 设置新的隐藏计时器
+          this.hideTimer = setTimeout(() => {
+            this.hideDialog()
+          }, 5000)
+        }
       },
     })
   }
 
   hideDialog() {
+    // 清除隐藏计时器
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer)
+      this.hideTimer = null
+    }
+
     this.isVisible = false
     this.dialogContainer.style.transition = 'opacity 0.5s ease-out'
     this.dialogContainer.style.opacity = '0'
-
-    // After hiding, wait 2s then show next content
-    setTimeout(() => {
-      this.showNextContent()
-    }, 2000)
   }
 
   showDialog() {
     this.isVisible = true
     this.dialogContainer.style.opacity = '1'
-    this.setupTyped()
   }
 
-  showNextContent() {
-    // Update current index
-    this.currentIndex = (this.currentIndex + 1) % this.introContent.length
+  /**
+   * 显示特定区域的内容
+   * @param {string} areaId 区域ID
+   */
+  showAreaContent(areaId) {
+    // 更新最后交互时间
+    this.lastInteractionTime = Date.now()
 
-    // Clear the text
+    // 获取区域内容
+    const content = this.interactionContent[areaId]
+    if (!content) {
+      console.warn(`未找到区域 ${areaId} 的内容`)
+      return
+    }
+
+    // 清空文本
     this.dialogText.textContent = ''
 
-    // Show dialog with new content
+    // 显示对话框和内容
     this.showDialog()
+    this.setupTyped(content, true) // 自动隐藏
   }
 
-  startContentRotation() {
-    // Initial display
-    this.showDialog()
+  /**
+   * 开始轮询显示介绍内容
+   */
+  startIntroContentLoop() {
+    // 显示第一条内容
+    this.setupTyped(this.introContent[0], false)
+    this.currentIndex = 0
+
+    // 设置轮询检查
+    this.introLoopTimer = setInterval(() => {
+      // 检查是否已经超过5秒没有交互
+      const timeSinceLastInteraction = Date.now() - this.lastInteractionTime
+      if (timeSinceLastInteraction >= 5000) {
+        this.currentIndex = (this.currentIndex + 1) % this.introContent.length
+        this.setupTyped(this.introContent[this.currentIndex], false)
+      }
+    }, 5000)
+  }
+
+  /**
+   * 停止轮询
+   */
+  stopIntroContentLoop() {
+    if (this.introLoopTimer) {
+      clearInterval(this.introLoopTimer)
+      this.introLoopTimer = null
+    }
+  }
+
+  /**
+   * 销毁实例
+   */
+  destroy() {
+    this.stopIntroContentLoop()
+    if (this.typed) {
+      this.typed.destroy()
+    }
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer)
+    }
   }
 }

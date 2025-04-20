@@ -6,6 +6,7 @@ import Effects from './effect.js'
 import Environment from './environment.js'
 import EventPointManager from './eventPointManager.js' // 引入事件点管理器类
 import Hero from './hero.js'
+import IntroDialog from './introDialog.js'
 import Lava from './lava.js'
 import Ocean from './ocean.js'
 import PortalEffect from './portal-effect.js'
@@ -17,6 +18,12 @@ export default class World {
     this.resources = this.experience.resources
     this.sizes = this.experience.sizes
     this.camera = this.experience.camera
+
+    // 初始化对话框管理器
+    this.introDialog = new IntroDialog()
+
+    // 开始轮询显示介绍内容
+    this.startIntroContentLoop()
 
     // 初始化 CSS2D 渲染器
     this.initCSS2DRenderer()
@@ -44,6 +51,21 @@ export default class World {
   }
 
   /**
+   * 开始轮询显示介绍内容
+   */
+  startIntroContentLoop() {
+    // 显示第一条内容
+    this.introDialog.setupTyped(this.introDialog.introContent[0], false)
+
+    let currentIndex = 0
+    // 每5秒切换一次内容
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % this.introDialog.introContent.length
+      this.introDialog.setupTyped(this.introDialog.introContent[currentIndex], false)
+    }, 5000)
+  }
+
+  /**
    * 初始化 CSS2D 渲染器
    */
   initCSS2DRenderer() {
@@ -59,79 +81,79 @@ export default class World {
    * 设置场景中的所有事件触发点
    */
   setupEventPoints() {
-    // 床铺区域 (以 bedroll 位置为准)
+    // 床铺区域
     this.eventPointManager.createEventPoint(
       'bed_area',
-      new THREE.Vector3(-15.91, -0.21, -10.34), // bedroll位置
+      new THREE.Vector3(-15.91, -0.21, -10.34),
       3,
       () => {
-        console.warn('触发了床铺区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('bed_area')
       },
       '按 F 键查看休息区信息',
     )
 
-    // 啤酒区域 (以 chest 位置为准)
+    // 啤酒区域
     this.eventPointManager.createEventPoint(
       'beer_area',
-      new THREE.Vector3(-22.98, -0.21, -5.02), // chest位置
+      new THREE.Vector3(-22.98, -0.21, -5.02),
       2,
       () => {
-        console.warn('触发了啤酒区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('beer_area')
       },
       '按 F 键查看收藏区信息',
     )
 
-    // 工作台区域 (以 workbench-anvil 位置为准)
+    // 工作台区域
     this.eventPointManager.createEventPoint(
       'workbench_area',
-      new THREE.Vector3(-18.57, -0.21, -13.22), // workbench-anvil位置
+      new THREE.Vector3(-18.57, -0.21, -13.22),
       2,
       () => {
-        console.warn('触发了工作台区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('workbench_area')
       },
       '按 F 键查看技能区信息',
     )
 
-    // 武器区域 (以 weapon-rack 位置为准)
+    // 武器区域
     this.eventPointManager.createEventPoint(
       'weapon_area',
-      new THREE.Vector3(-12.68, -0.18, -7.16), // weapon-rack位置
+      new THREE.Vector3(-12.68, -0.18, -7.16),
       2,
       () => {
-        console.warn('触发了武器区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('weapon_area')
       },
       '按 F 键查看项目经验',
     )
 
-    // 用餐区域 (以 bench 位置为准)
+    // 用餐区域
     this.eventPointManager.createEventPoint(
       'dining_area',
-      new THREE.Vector3(-10.71, 1.5, -12), // bench位置
+      new THREE.Vector3(-10.71, 1.5, -12),
       2.5,
       () => {
-        console.warn('触发了用餐区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('dining_area')
       },
       '按 F 键查看生活爱好',
     )
 
-    // 厨房区域 (以 pan 位置为准)
+    // 厨房区域
     this.eventPointManager.createEventPoint(
       'kitchen_area',
-      new THREE.Vector3(-22.69, 0.71, -1.39), // pan位置
+      new THREE.Vector3(-22.69, 0.71, -1.39),
       2,
       () => {
-        console.warn('触发了厨房区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('kitchen_area')
       },
       '按 F 键查看个人技能',
     )
 
-    // 水井区域 (以 spawn-round 位置为准)
+    // 水井区域
     this.eventPointManager.createEventPoint(
       'well_area',
-      new THREE.Vector3(-5.71, 0.76, -10.10), // spawn-round位置
+      new THREE.Vector3(-5.71, 0.76, -10.10),
       3,
       () => {
-        console.warn('触发了水井区域交互！按 F 键进行交互')
+        this.introDialog.showAreaContent('well_area')
       },
       '按 F 键查看联系方式',
     )

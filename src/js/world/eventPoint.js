@@ -25,6 +25,7 @@ export default class EventPoint {
 
     this.isHeroNearby = false // 标记英雄当前是否在半径内
     this.isInteractionAvailable = false // 标记是否可以进行交互
+    this.isKeyPressed = false // 标记F键是否正在被按下
 
     // 创建 CSS2D 管理器
     this.css2dManager = new EventPointCSS2D()
@@ -61,8 +62,16 @@ export default class EventPoint {
   setupEventListeners() {
     // 监听 F 键按下事件
     window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'f' && this.isInteractionAvailable) {
+      if (e.key.toLowerCase() === 'f' && !this.isKeyPressed && this.isInteractionAvailable) {
+        this.isKeyPressed = true
         this.triggerInteraction()
+      }
+    })
+
+    // 监听 F 键释放事件
+    window.addEventListener('keyup', (e) => {
+      if (e.key.toLowerCase() === 'f') {
+        this.isKeyPressed = false
       }
     })
   }
@@ -72,7 +81,6 @@ export default class EventPoint {
    */
   triggerInteraction() {
     if (this.isInteractionAvailable) {
-      console.warn(`触发交互事件: ${this.targetPosition.toArray().join(',')}`)
       this.callback()
     }
   }
@@ -150,6 +158,10 @@ export default class EventPoint {
    * 销毁事件点
    */
   destroy() {
+    // 移除按键事件监听器
+    window.removeEventListener('keydown', this.setupEventListeners)
+    window.removeEventListener('keyup', this.setupEventListeners)
+
     // 移除 CSS2D 对象
     this.experience.scene.remove(this.css2dManager.getObject())
     // 销毁 CSS2D 管理器
