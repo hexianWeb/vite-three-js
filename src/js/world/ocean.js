@@ -196,7 +196,7 @@ export default class Ocean {
     // 创建调试面板
     this.debugFolder = this.debug.ui.addFolder({
       title: '海洋',
-      expanded: true,
+      expanded: false,
     })
 
     // 添加海面颜色控制

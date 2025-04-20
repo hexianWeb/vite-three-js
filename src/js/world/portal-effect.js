@@ -99,7 +99,7 @@ export default class PortalEffect {
     // 创建调试面板
     this.debugFolder = this.debug.ui.addFolder({
       title: '传送门效果',
-      expanded: true,
+      expanded: false,
     })
 
     // 添加材质可见性控制

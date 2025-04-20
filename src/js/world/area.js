@@ -129,7 +129,6 @@ export default class Area {
     this.model.scene.traverse((child) => {
       if (this.homeStuffs.includes(child.name)) {
         this.homeStuffsObject.push(child)
-        console.log(child.name, child.position.toArray())
 
         // 确保子对象是 Mesh 并且有几何体
         if (child instanceof THREE.Mesh && child.geometry) {
@@ -229,7 +228,7 @@ export default class Area {
     // ===== 轮廓发光控制面板 =====
     this.debugFolder = this.debug.ui.addFolder({
       title: '轮廓发光效果',
-      expanded: true,
+      expanded: false,
     })
 
     // ----- 基本属性控制 -----
