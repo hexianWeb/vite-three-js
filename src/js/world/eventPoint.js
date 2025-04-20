@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import Experience from '../experience.js'
+import EventPointCSS2D from './eventPointCSS2D.js'
 
 /**
  * 事件触发点类
@@ -11,17 +12,23 @@ export default class EventPoint {
    * @param {number} radius 触发半径
    * @param {Function} callback 触发时执行的回调函数
    * @param {string} [interactionText] 交互提示文本
+   * @param {string} [iconName] 交互图标名称
    */
-  constructor(targetPosition, radius, callback, interactionText = '按 F 键互动') {
+  constructor(targetPosition, radius, callback, interactionText = '按 F 键互动', iconName = 'chat.png') {
     this.experience = new Experience()
     this.hero = this.experience.world?.hero // 获取英雄实例 (初始可能为 null)
     this.targetPosition = targetPosition // 目标位置
     this.radius = radius // 触发半径
     this.callback = callback // 回调函数
     this.interactionText = interactionText // 交互提示文本
+    this.iconName = iconName // 交互图标名称
 
     this.isHeroNearby = false // 标记英雄当前是否在半径内
     this.isInteractionAvailable = false // 标记是否可以进行交互
+
+    // 创建 CSS2D 管理器
+    this.css2dManager = new EventPointCSS2D()
+    this.experience.scene.add(this.css2dManager.getObject())
 
     // 创建辅助球体来可视化交互范围（调试用）
     if (this.experience.debug?.active) {
@@ -72,19 +79,18 @@ export default class EventPoint {
 
   /**
    * 显示交互提示
-   * 注意：这里只是一个示例，实际实现可能需要根据你的 UI 系统进行调整
    */
   showInteractionPrompt() {
-    // TODO: 实现显示交互提示的逻辑
-    console.warn(`显示交互提示: ${this.interactionText}`)
+    // 使用英雄当前位置而不是目标位置
+    const heroPosition = this.hero.hero.position
+    this.css2dManager.showInteractionPrompt(heroPosition, this.iconName)
   }
 
   /**
    * 隐藏交互提示
    */
   hideInteractionPrompt() {
-    // TODO: 实现隐藏交互提示的逻辑
-    console.warn('隐藏交互提示')
+    this.css2dManager.hideInteractionPrompt()
   }
 
   /**
@@ -126,6 +132,11 @@ export default class EventPoint {
       }
     }
 
+    // 如果英雄在范围内，持续更新图标位置
+    if (this.isHeroNearby) {
+      this.css2dManager.updatePosition(heroPosition)
+    }
+
     // 更新调试球体的颜色（如果存在）
     if (this.debugSphere && this.isInteractionAvailable) {
       this.debugSphere.material.opacity = 0.5
@@ -139,6 +150,11 @@ export default class EventPoint {
    * 销毁事件点
    */
   destroy() {
+    // 移除 CSS2D 对象
+    this.experience.scene.remove(this.css2dManager.getObject())
+    // 销毁 CSS2D 管理器
+    this.css2dManager.destroy()
+
     // 移除调试球体（如果存在）
     if (this.debugSphere) {
       this.experience.scene.remove(this.debugSphere)

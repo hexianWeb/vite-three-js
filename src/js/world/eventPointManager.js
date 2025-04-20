@@ -51,9 +51,10 @@ export default class EventPointManager {
    * @param {number} radius 触发半径
    * @param {Function} callback 触发时执行的回调函数
    * @param {string} [interactionText] 交互提示文本
+   * @param {string} [iconName] 交互图标名称
    * @returns {EventPoint} 创建的事件点实例
    */
-  createEventPoint(id, position, radius, callback, interactionText) {
+  createEventPoint(id, position, radius, callback, interactionText, iconName) {
     // 检查是否已存在同ID的事件点
     if (this.eventPoints.has(id)) {
       console.warn(`事件点 ${id} 已存在，将被替换`)
@@ -61,7 +62,7 @@ export default class EventPointManager {
     }
 
     // 创建新的事件点
-    const eventPoint = new EventPoint(position, radius, callback, interactionText)
+    const eventPoint = new EventPoint(position, radius, callback, interactionText, iconName)
     this.eventPoints.set(id, eventPoint)
 
     console.warn(`创建事件点 ${id}，位置: ${position.toArray().join(',')}`)
