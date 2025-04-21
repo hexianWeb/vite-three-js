@@ -54,14 +54,7 @@ export default class World {
    */
   startIntroContentLoop() {
     // 显示第一条内容
-    this.introDialog.setupTyped(this.introDialog.introContent[0], false)
-
-    let currentIndex = 0
-    // 每5秒切换一次内容
-    setInterval(() => {
-      currentIndex = (currentIndex + 1) % this.introDialog.introContent.length
-      this.introDialog.setupTyped(this.introDialog.introContent[currentIndex], false)
-    }, 10000)
+    this.introDialog.startIntroContentLoop()
   }
 
   /**

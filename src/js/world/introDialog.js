@@ -79,13 +79,10 @@ export default class IntroDialog extends EventEmitter {
     }
 
     // 如果当前正在显示内容，重新显示当前内容的翻译
-    if (this.isVisible) {
-      const currentContent = this.typed ? this.typed.strings[0] : this.introContent[this.currentIndex]
-      this.setupTyped(currentContent, true)
-    }
+    this.setupTyped(this.introContent, true)
   }
 
-  setupTyped(content, autoHide = true) {
+  setupTyped(content, autoLoop = true) {
     if (this.typed) {
       this.typed.destroy()
     }
@@ -97,19 +94,13 @@ export default class IntroDialog extends EventEmitter {
     }
 
     this.typed = new Typed(this.dialogText, {
-      strings: [content],
-      typeSpeed: 70,
-      backSpeed: 30,
+      strings: content,
+      typeSpeed: 30,
+      backSpeed: 25,
+      backDelay: 1500, // 第一句话打完后，会停顿 1.5 秒再开始退格
       showCursor: true,
       cursorChar: '|',
-      onComplete: () => {
-        if (autoHide) {
-          // 设置新的隐藏计时器
-          this.hideTimer = setTimeout(() => {
-            this.hideDialog()
-          }, 10000)
-        }
-      },
+      loop: autoLoop, // 示例中让它循环
     })
   }
 
@@ -139,7 +130,7 @@ export default class IntroDialog extends EventEmitter {
     this.lastInteractionTime = Date.now()
 
     // 获取区域内容
-    const content = this.interactionContent[areaId]
+    const content = [this.interactionContent[areaId]]
     if (!content) {
       console.warn(`未找到区域 ${areaId} 的内容`)
       return
@@ -150,7 +141,7 @@ export default class IntroDialog extends EventEmitter {
 
     // 显示对话框和内容
     this.showDialog()
-    this.setupTyped(content, true) // 自动隐藏
+    this.setupTyped(content, false) // 自动隐藏
   }
 
   /**
@@ -158,18 +149,7 @@ export default class IntroDialog extends EventEmitter {
    */
   startIntroContentLoop() {
     // 显示第一条内容
-    this.setupTyped(this.introContent[0], false)
-    this.currentIndex = 0
-
-    // 设置轮询检查
-    this.introLoopTimer = setInterval(() => {
-      // 检查是否已经超过5秒没有交互
-      const timeSinceLastInteraction = Date.now() - this.lastInteractionTime
-      if (timeSinceLastInteraction >= 20000) {
-        this.currentIndex = (this.currentIndex + 1) % this.introContent.length
-        this.setupTyped(this.introContent[this.currentIndex], false)
-      }
-    }, 5000)
+    this.setupTyped(this.introContent, true)
   }
 
   /**
