@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import Camera from './camera.js'
+import LanguageSwitcher from './components/languageSwitcher'
 import Renderer from './renderer.js'
 import sources from './sources.js'
 import Debug from './utils/debug.js'
@@ -40,6 +41,16 @@ export default class Experience {
     this.physics = new PhysicsWorld()
     this.iMouse = new IMouse()
     this.world = new World()
+
+    // 初始化语言切换器
+    this.languageSwitcher = new LanguageSwitcher()
+
+    // 连接语言切换事件
+    if (this.world.introDialog) {
+      this.languageSwitcher.on('languageChanged', (lang) => {
+        this.world.introDialog.trigger('languageChanged', lang)
+      })
+    }
 
     this.sizes.on('resize', () => {
       this.resize()

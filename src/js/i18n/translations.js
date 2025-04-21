@@ -1,0 +1,48 @@
+export const translations = {
+  zh: {
+    intro: {
+      vision: '本专栏的愿景是通过分享 Three.js 的中高级应用和实战技巧，帮助开发者更好地将 3D 技术应用到实际项目中，打造令人印象深刻的 Hero Section。',
+      purpose: '我们希望通过本专栏的内容，能够激发开发者的创造力，推动 Web3D 技术的普及和应用。',
+      about: '我是一位 Three.js 和计算机图形学爱好者，拥有前端开发的专业背景。我热衷于使用现代 JavaScript 框架和库创建视觉震撼且高度交互的网页体验。',
+      skills: '技术栈：JavaScript (ES6+)、Three.js、Vue.js、HTML & CSS、WebGL。擅长构建动态和响应式的用户界面。',
+      contact: '如果您对 Web 开发和计算机图形学领域的合作感兴趣，欢迎通过以下方式联系我：\nWeChat: hexianWeb\nEmail: hexianweb@gmail.com',
+      passion: '我热爱探索新技术，喜欢研究前沿的 Web3D 开发技术。',
+      frameworks: '此外，如果您很喜欢 Threejs 又在烦恼其原生开发的繁琐，那么我诚邀您尝试  Tresjs 和 TvTjs, 他们都是基于 Vue 的 Threejs 框架。',
+      community: 'TvTjs 也为您提供了大量的可使用案例，并且拥有较为活跃的开发社区，在这里你能碰到志同道合的朋友一起做开源！',
+      interest: '如果您对 Threejs 这个 3D 图像框架很感兴趣，或者您也深信未来国内会涌现越来越多 3D 设计风格的网站，欢迎加入 ice 图形学社区。',
+      knowledge: '这里是国内 Web 图形学最全的知识库，致力于打造一个全新的图形学生态体系！您可以在认证达人里找到我这个 Threejs 爱好者和其他大佬。',
+    },
+    areas: {
+      bed_area: '这里是我休息的地方，也许可以在睡前学习一下 Threejs 的入门知识',
+      beer_area: '这里放着很多我收藏的啤酒，也许可以喝一杯放松一下',
+      workbench_area: '这里是我工作的地方，也许可以在这里学习一下 Threejs 的进阶知识',
+      weapon_area: '这里是我放置武器的地方，也许可以在这里学习一下 Threejs 的实战技巧',
+      dining_area: '这里是我用餐的地方, 学习虽然重要，但是身体更重要',
+      kitchen_area: '这里是我做饭的地方,但是锅里空空如也，我可不会做饭',
+      well_area: '这里是我打水的地方，看起来已经很久没有打水了',
+    },
+  },
+  en: {
+    intro: {
+      vision: 'Our vision is to help developers better apply 3D technology to real projects by sharing advanced Three.js applications and practical tips, creating impressive Hero Sections.',
+      purpose: 'We hope that through the content of this column, we can inspire developers\' creativity and promote the popularization and application of Web3D technology.',
+      about: 'I am a Three.js and computer graphics enthusiast with a professional background in front-end development. I am passionate about creating visually stunning and highly interactive web experiences using modern JavaScript frameworks and libraries.',
+      skills: 'Tech Stack: JavaScript (ES6+), Three.js, Vue.js, HTML & CSS, WebGL. Skilled in building dynamic and responsive user interfaces.',
+      contact: 'If you are interested in collaboration in Web development and computer graphics, please contact me via:\nWeChat: hexianWeb\nEmail: hexianweb@gmail.com',
+      passion: 'I love exploring new technologies and researching cutting-edge Web3D development technologies.',
+      frameworks: 'Additionally, if you like Threejs but are troubled by its native development complexity, I invite you to try Tresjs and TvTjs, which are Vue-based Threejs frameworks.',
+      community: 'TvTjs also provides you with many usable cases and has an active development community where you can meet like-minded friends to do open source together!',
+      interest: 'If you are interested in Threejs, this 3D graphics framework, or you also believe that more 3D design-style websites will emerge in China in the future, welcome to join the ice graphics community.',
+      knowledge: 'This is the most comprehensive knowledge base for Web graphics in China, dedicated to creating a new graphics ecosystem! You can find me, a Threejs enthusiast, and other experts in the certified masters section.',
+    },
+    areas: {
+      bed_area: 'This is where I rest, maybe I can learn some basic Threejs knowledge before bed',
+      beer_area: 'Here are many of my collected beers, maybe I can have a drink to relax',
+      workbench_area: 'This is where I work, maybe I can learn some advanced Threejs knowledge here',
+      weapon_area: 'This is where I store my weapons, maybe I can learn some Threejs combat skills here',
+      dining_area: 'This is where I dine, learning is important, but health is more important',
+      kitchen_area: 'This is where I cook, but the pot is empty, I can\'t cook',
+      well_area: 'This is where I draw water, it seems I haven\'t drawn water for a long time',
+    },
+  },
+}

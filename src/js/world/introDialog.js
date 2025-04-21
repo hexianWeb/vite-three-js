@@ -1,40 +1,88 @@
 import Typed from 'typed.js'
+import I18nManager from '../i18n/i18nManager'
+import EventEmitter from '../utils/event-emitter'
 
-export default class IntroDialog {
+export default class IntroDialog extends EventEmitter {
   constructor() {
+    super()
+
     // DOM elements
     this.dialogText = document.getElementById('dialogText')
     this.dialogContainer = this.dialogText.closest('.fixed')
-    // 常规介绍内容
+
+    // 获取 i18n 管理器实例
+    this.i18n = new I18nManager()
+
+    // 初始化介绍内容
     this.introContent = [
-      '本专栏的愿景是通过分享 Three.js 的中高级应用和实战技巧，帮助开发者更好地将 3D 技术应用到实际项目中，打造令人印象深刻的 Hero Section。',
-      '我们希望通过本专栏的内容，能够激发开发者的创造力，推动 Web3D 技术的普及和应用。',
-      '我是一位 Three.js 和计算机图形学爱好者，拥有前端开发的专业背景。我热衷于使用现代 JavaScript 框架和库创建视觉震撼且高度交互的网页体验。',
-      '技术栈：JavaScript (ES6+)、Three.js、Vue.js、HTML & CSS、WebGL。擅长构建动态和响应式的用户界面。',
-      '如果您对 Web 开发和计算机图形学领域的合作感兴趣，欢迎通过以下方式联系我：\nWeChat: hexianWeb\nEmail: hexianweb@gmail.com',
-      '我热爱探索新技术，喜欢研究前沿的 Web3D 开发技术。',
-      '此外，如果您很喜欢 Threejs 又在烦恼其原生开发的繁琐，那么我诚邀您尝试  Tresjs 和 TvTjs, 他们都是基于 Vue 的 Threejs 框架。 ',
-      'TvTjs 也为您提供了大量的可使用案例，并且拥有较为活跃的开发社区，在这里你能碰到志同道合的朋友一起做开源！',
-      '如果您对 Threejs 这个 3D 图像框架很感兴趣，或者您也深信未来国内会涌现越来越多 3D 设计风格的网站，欢迎加入 ice 图形学社区。',
-      '这里是国内 Web 图形学最全的知识库，致力于打造一个全新的图形学生态体系！您可以在认证达人里找到我这个 Threejs 爱好者和其他大佬。',
+      this.i18n.t('intro.vision'),
+      this.i18n.t('intro.purpose'),
+      this.i18n.t('intro.about'),
+      this.i18n.t('intro.skills'),
+      this.i18n.t('intro.contact'),
+      this.i18n.t('intro.passion'),
+      this.i18n.t('intro.frameworks'),
+      this.i18n.t('intro.community'),
+      this.i18n.t('intro.interest'),
+      this.i18n.t('intro.knowledge'),
     ]
+
     // 交互区域内容
     this.interactionContent = {
-      bed_area: '这里是我休息的地方，也许可以在睡前学习一下 Threejs 的入门知识',
-      beer_area: '这里放着很多我收藏的啤酒，也许可以喝一杯放松一下',
-      workbench_area: '这里是我工作的地方，也许可以在这里学习一下 Threejs 的进阶知识',
-      weapon_area: '这里是我放置武器的地方，也许可以在这里学习一下 Threejs 的实战技巧',
-      dining_area: '这里是我用餐的地方, 学习虽然重要，但是身体更重要',
-      kitchen_area: '这里是我做饭的地方,但是锅里空空如也，我可不会做饭',
-      well_area: '这里是我打水的地方，看起来已经很久没有打水了',
+      bed_area: this.i18n.t('areas.bed_area'),
+      beer_area: this.i18n.t('areas.beer_area'),
+      workbench_area: this.i18n.t('areas.workbench_area'),
+      weapon_area: this.i18n.t('areas.weapon_area'),
+      dining_area: this.i18n.t('areas.dining_area'),
+      kitchen_area: this.i18n.t('areas.kitchen_area'),
+      well_area: this.i18n.t('areas.well_area'),
     }
 
     this.currentIndex = 0
     this.typed = null
     this.isVisible = true
-    this.hideTimer = null // 添加隐藏计时器
-    this.introLoopTimer = null // 添加轮询计时器
-    this.lastInteractionTime = Date.now() // 记录最后一次交互时间
+    this.hideTimer = null
+    this.introLoopTimer = null
+    this.lastInteractionTime = Date.now()
+
+    // 监听语言变更事件
+    this.on('languageChanged', () => this.updateTranslations())
+  }
+
+  /**
+   * 更新所有翻译内容
+   */
+  updateTranslations() {
+    // 更新介绍内容
+    this.introContent = [
+      this.i18n.t('intro.vision'),
+      this.i18n.t('intro.purpose'),
+      this.i18n.t('intro.about'),
+      this.i18n.t('intro.skills'),
+      this.i18n.t('intro.contact'),
+      this.i18n.t('intro.passion'),
+      this.i18n.t('intro.frameworks'),
+      this.i18n.t('intro.community'),
+      this.i18n.t('intro.interest'),
+      this.i18n.t('intro.knowledge'),
+    ]
+
+    // 更新交互区域内容
+    this.interactionContent = {
+      bed_area: this.i18n.t('areas.bed_area'),
+      beer_area: this.i18n.t('areas.beer_area'),
+      workbench_area: this.i18n.t('areas.workbench_area'),
+      weapon_area: this.i18n.t('areas.weapon_area'),
+      dining_area: this.i18n.t('areas.dining_area'),
+      kitchen_area: this.i18n.t('areas.kitchen_area'),
+      well_area: this.i18n.t('areas.well_area'),
+    }
+
+    // 如果当前正在显示内容，重新显示当前内容的翻译
+    if (this.isVisible) {
+      const currentContent = this.typed ? this.typed.strings[0] : this.introContent[this.currentIndex]
+      this.setupTyped(currentContent, true)
+    }
   }
 
   setupTyped(content, autoHide = true) {
@@ -59,7 +107,7 @@ export default class IntroDialog {
           // 设置新的隐藏计时器
           this.hideTimer = setTimeout(() => {
             this.hideDialog()
-          }, 5000)
+          }, 10000)
         }
       },
     })
@@ -117,7 +165,7 @@ export default class IntroDialog {
     this.introLoopTimer = setInterval(() => {
       // 检查是否已经超过5秒没有交互
       const timeSinceLastInteraction = Date.now() - this.lastInteractionTime
-      if (timeSinceLastInteraction >= 5000) {
+      if (timeSinceLastInteraction >= 20000) {
         this.currentIndex = (this.currentIndex + 1) % this.introContent.length
         this.setupTyped(this.introContent[this.currentIndex], false)
       }
@@ -145,5 +193,7 @@ export default class IntroDialog {
     if (this.hideTimer) {
       clearTimeout(this.hideTimer)
     }
+    // 移除所有事件监听器
+    this.off('languageChanged')
   }
 }
