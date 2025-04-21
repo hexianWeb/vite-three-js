@@ -15,10 +15,12 @@ export default class DayNightManager extends EventEmitter {
     this.updateIcon()
 
     // Bind event listener
-    this.toggleDayNightDom.addEventListener('click', () => {
+    this.toggleDayNightDom.addEventListener('click', (event) => {
       this.isNightMode = !this.isNightMode
       this.updateIcon()
       this.trigger('dayNightToggle', [this.isNightMode])
+      // --- 关键步骤：在处理完逻辑后调用 blur() ---
+      event.currentTarget.blur() // event.currentTarget 指向被点击的按钮
     })
   }
 

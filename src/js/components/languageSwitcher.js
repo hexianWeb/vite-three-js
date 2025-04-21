@@ -21,7 +21,7 @@ export default class LanguageSwitcher extends EventEmitter {
     }
 
     // 添加点击事件
-    i18nButton.addEventListener('click', () => {
+    i18nButton.addEventListener('click', (event) => {
       const currentLang = this.i18n.getCurrentLang()
       // 切换语言
       const newLang = currentLang === 'zh' ? 'en' : 'zh'
@@ -32,6 +32,9 @@ export default class LanguageSwitcher extends EventEmitter {
 
       // 更新按钮图标状态
       this.updateButtonState(newLang)
+
+      // --- 关键步骤：在处理完逻辑后调用 blur() ---
+      event.currentTarget.blur() // event.currentTarget 指向被点击的按钮
     })
 
     // 初始化按钮状态

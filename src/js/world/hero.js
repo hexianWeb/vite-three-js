@@ -128,7 +128,7 @@ export default class Hero {
   }
 
   setHero() {
-    this.hero.position.set(36, 10, 5)
+    this.hero.position.set(-26, 10, 5)
     this.hero.scale.set(2, 2, 2)
     this.hero.rotation.set(0, Math.PI / 2, 0) // Set initial rotation to face -X direction
     this.hero.castShadow = true
@@ -248,53 +248,53 @@ export default class Hero {
   setupEventListeners() {
     // Add key down event listener
     window.addEventListener('keydown', (e) => {
-      const key = e.key.toLowerCase()
+      const code = e.code.toLowerCase()
 
-      if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
-        this.keys[key] = true
+      if (Object.prototype.hasOwnProperty.call(this.keys, code)) {
+        this.keys[code] = true
       }
 
       // Handle special cases like arrow keys
-      if (e.key === 'ArrowUp')
+      if (e.code === 'ArrowUp')
         this.keys.arrowUp = true
-      if (e.key === 'ArrowDown')
+      if (e.code === 'ArrowDown')
         this.keys.arrowDown = true
-      if (e.key === 'ArrowLeft')
+      if (e.code === 'ArrowLeft')
         this.keys.arrowLeft = true
-      if (e.key === 'ArrowRight')
+      if (e.code === 'ArrowRight')
         this.keys.arrowRight = true
-      if (e.key === ' ' || e.code === 'Space')
+      if (e.code === 'Space')
         this.keys.space = true
 
       // Z key for sitting
-      if (key === 'z') {
+      if (code === 'keyz') {
         this.toggleSit()
       }
 
       // Jump when space is pressed and player is on floor
-      if ((e.key === ' ' || e.code === 'Space') && this.playerOnFloor && !this.character.isSitting) {
+      if (e.code === 'Space' && this.playerOnFloor && !this.character.isSitting) {
         this.jump()
       }
     })
 
     // Add key up event listener
     window.addEventListener('keyup', (e) => {
-      const key = e.key.toLowerCase()
+      const code = e.code.toLowerCase()
 
-      if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
-        this.keys[key] = false
+      if (Object.prototype.hasOwnProperty.call(this.keys, code)) {
+        this.keys[code] = false
       }
 
       // Handle special cases like arrow keys
-      if (e.key === 'ArrowUp')
+      if (e.code === 'ArrowUp')
         this.keys.arrowUp = false
-      if (e.key === 'ArrowDown')
+      if (e.code === 'ArrowDown')
         this.keys.arrowDown = false
-      if (e.key === 'ArrowLeft')
+      if (e.code === 'ArrowLeft')
         this.keys.arrowLeft = false
-      if (e.key === 'ArrowRight')
+      if (e.code === 'ArrowRight')
         this.keys.arrowRight = false
-      if (e.key === ' ' || e.code === 'Space')
+      if (e.code === 'Space')
         this.keys.space = false
     })
   }
