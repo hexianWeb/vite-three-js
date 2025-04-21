@@ -27,9 +27,16 @@ export default class EventPoint {
     this.isInteractionAvailable = false // 标记是否可以进行交互
     this.isKeyPressed = false // 标记F键是否正在被按下
 
-    // 创建 CSS2D 管理器
+    // 创建动态 CSS2D 管理器（跟随角色）
     this.css2dManager = new EventPointCSS2D()
     this.experience.scene.add(this.css2dManager.getObject())
+
+    // 创建固定位置的 CSS2D 标识（标记互动点）
+    this.fixedCss2dManager = new EventPointCSS2D()
+    this.fixedCss2dManager.getObject().position.copy(this.targetPosition)
+    this.fixedCss2dManager.getObject().position.y += 2 // 在目标位置上方2个单位
+    this.experience.scene.add(this.fixedCss2dManager.getObject())
+    this.fixedCss2dManager.showInteractionPrompt(this.targetPosition, 'marker.png') // 使用一个标记图标
 
     // 创建辅助球体来可视化交互范围（调试用）
     if (this.experience.debug?.active) {
@@ -162,10 +169,13 @@ export default class EventPoint {
     window.removeEventListener('keydown', this.setupEventListeners)
     window.removeEventListener('keyup', this.setupEventListeners)
 
-    // 移除 CSS2D 对象
+    // 移除动态 CSS2D 对象
     this.experience.scene.remove(this.css2dManager.getObject())
-    // 销毁 CSS2D 管理器
     this.css2dManager.destroy()
+
+    // 移除固定位置的 CSS2D 对象
+    this.experience.scene.remove(this.fixedCss2dManager.getObject())
+    this.fixedCss2dManager.destroy()
 
     // 移除调试球体（如果存在）
     if (this.debugSphere) {

@@ -61,7 +61,7 @@ export default class World {
     setInterval(() => {
       currentIndex = (currentIndex + 1) % this.introDialog.introContent.length
       this.introDialog.setupTyped(this.introDialog.introContent[currentIndex], false)
-    }, 5000)
+    }, 10000)
   }
 
   /**

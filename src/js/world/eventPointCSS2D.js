@@ -11,9 +11,8 @@ export default class EventPointCSS2D {
     this.iconContainer = document.createElement('div')
     this.iconContainer.className = 'hidden'
 
-    // 创建图标图片元素
-    this.iconImage = document.createElement('img')
-    this.iconImage.className = 'w-12 h-8 pixel-art transition-opacity duration-300 opacity-0'
+    // 创建并添加图标图片元素
+    this.iconImage = this.createIconImage()
     this.iconContainer.appendChild(this.iconImage)
 
     // 将容器添加到 body
@@ -24,6 +23,16 @@ export default class EventPointCSS2D {
 
     // 跟踪状态
     this.isVisible = false
+  }
+
+  /**
+   * 创建图标图片元素
+   * @returns {HTMLImageElement} 创建的图片元素
+   */
+  createIconImage() {
+    const image = document.createElement('img')
+    image.className = 'w-12 h-8 pixel-art transition-opacity duration-300 opacity-0 animate-bounce'
+    return image
   }
 
   /**

@@ -20,13 +20,13 @@ export default class IntroDialog {
     ]
     // 交互区域内容
     this.interactionContent = {
-      bed_area: '这是我的休息区，',
-      beer_area: '这是我的收藏区，',
-      workbench_area: '这是我的技能区，',
-      weapon_area: '这里展示了我参与过的项目经验，',
-      dining_area: '这里记录了我的一些生活爱好，',
-      kitchen_area: '这里是我的个人技能展示区，',
-      well_area: '这里是我的厨房',
+      bed_area: '这里是我休息的地方，也许可以在睡前学习一下 Threejs 的入门知识',
+      beer_area: '这里放着很多我收藏的啤酒，也许可以喝一杯放松一下',
+      workbench_area: '这里是我工作的地方，也许可以在这里学习一下 Threejs 的进阶知识',
+      weapon_area: '这里是我放置武器的地方，也许可以在这里学习一下 Threejs 的实战技巧',
+      dining_area: '这里是我用餐的地方, 学习虽然重要，但是身体更重要',
+      kitchen_area: '这里是我做饭的地方,但是锅里空空如也，我可不会做饭',
+      well_area: '这里是我打水的地方，看起来已经很久没有打水了',
     }
 
     this.currentIndex = 0
