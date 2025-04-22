@@ -62,7 +62,6 @@ export default class Hero {
       arrowDown: false,
       arrowLeft: false,
       arrowRight: false,
-      z: false,
       space: false,
     }
 
@@ -135,7 +134,7 @@ export default class Hero {
   }
 
   setHero() {
-    this.hero.position.set(-26, 10, 5)
+    this.hero.position.set(37, 10, 6)
     this.hero.scale.set(2, 2, 2)
     this.hero.rotation.set(0, Math.PI / 2, 0) // Set initial rotation to face -X direction
     this.hero.castShadow = true
@@ -255,13 +254,22 @@ export default class Hero {
   setupEventListeners() {
     // Add key down event listener
     window.addEventListener('keydown', (e) => {
+      // 使用 e.key 获取按键对应的字符（区分大小写）
+      const key = e.key.toLowerCase()
+      // 使用 e.code 获取物理按键标识符（转换为小写以匹配 keys 对象）
       const code = e.code.toLowerCase()
 
-      if (Object.prototype.hasOwnProperty.call(this.keys, code)) {
-        this.keys[code] = true
-      }
+      // 更新移动键状态 (基于物理按键 code)
+      if (code === 'keyw')
+        this.keys.w = true
+      if (code === 'keya')
+        this.keys.a = true
+      if (code === 'keys')
+        this.keys.s = true
+      if (code === 'keyd')
+        this.keys.d = true
 
-      // Handle special cases like arrow keys
+      // 更新方向键状态
       if (e.code === 'ArrowUp')
         this.keys.arrowUp = true
       if (e.code === 'ArrowDown')
@@ -273,8 +281,8 @@ export default class Hero {
       if (e.code === 'Space')
         this.keys.space = true
 
-      // Z key for sitting
-      if (code === 'keyz') {
+      // Z 键坐下 (基于字符 key)
+      if (key === 'z') {
         this.toggleSit()
       }
 
@@ -286,13 +294,20 @@ export default class Hero {
 
     // Add key up event listener
     window.addEventListener('keyup', (e) => {
+      // 使用 e.code 获取物理按键标识符（转换为小写）
       const code = e.code.toLowerCase()
 
-      if (Object.prototype.hasOwnProperty.call(this.keys, code)) {
-        this.keys[code] = false
-      }
+      // 更新移动键状态
+      if (code === 'keyw')
+        this.keys.w = false
+      if (code === 'keya')
+        this.keys.a = false
+      if (code === 'keys')
+        this.keys.s = false
+      if (code === 'keyd')
+        this.keys.d = false
 
-      // Handle special cases like arrow keys
+      // 更新方向键状态
       if (e.code === 'ArrowUp')
         this.keys.arrowUp = false
       if (e.code === 'ArrowDown')

@@ -101,11 +101,20 @@
     <noscript class="text-center text-lg text-red-500">
       Enable JavaScript to enjoy all the features of this app.
     </noscript>
-    <main class="flex h-full bg-primary text-color">
+    <main class="flex h-full bg-primary text-color select-none">
       <canvas id="canvas" class="z-[0] h-full w-full"></canvas>
 
+      <!-- Health Bar (Decorative) -->
+      <div class="fixed top-7 left-7 z-20 flex gap-2 select-none">
+        <img src="/icon/heart.png" alt="Heart" class="w-10 h-8 pixel-art">
+        <img src="/icon/heart.png" alt="Heart" class="w-10 h-8 pixel-art">
+        <img src="/icon/heart.png" alt="Heart" class="w-10 h-8 pixel-art">
+        <img src="/icon/heart.png" alt="Heart" class="w-10 h-8 pixel-art">
+        <img src="/icon/heart.png" alt="Heart" class="w-10 h-8 pixel-art">
+      </div>
+
       <!-- Control Buttons -->
-      <div class="fixed top-4 right-4 z-20 flex gap-4">
+      <div class="fixed top-4 right-4 z-20 flex gap-4 select-none">
         <!-- Day/Night Toggle Button -->
         <button id="dayNightToggle" class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-all duration-200  flex items-center justify-center pixel-border2">
           <img src="/icon/sun.png" alt="Switch to Night" class="w-12 h-12 pixel-art">
@@ -136,10 +145,10 @@
       </div>
 
       <!-- Dialog Box -->
-      <div class="fixed bottom-0 left-0 right-0 z-99 p-4">
-        <div class="w-5/6 h-[24vh] p-6 mx-auto mb-10 ">
+      <div class="fixed bottom-0 left-0 right-0 z-99 p-4 select-none">
+        <div class="w-5/6 h-[24vh] p-6 mx-auto mb-10 select-none">
           <!-- Character Portrait -->
-           <div class="pixel">
+           <div class="pixel select-non">
              <div class="flex items-start gap-4 h-full ">
                <div class="h-full pixel-border">
                  <img id="characterPortrait" src="/assets/images/hexianWeb.png" alt="Character" class="w-full h-full object-cover pixel-art">
