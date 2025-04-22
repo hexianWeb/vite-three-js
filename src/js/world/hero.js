@@ -931,21 +931,20 @@ export default class Hero {
   }
 
   updateCamera() {
-    // 如果用户正在通过鼠标控制相机，则不执行自动更新
-    if (this.isUserInteracting) {
-      this.camera.lookAt(this.hero.position)
-      return
-    }
-
     // Calculate target camera position based on character's position and rotation
     const characterPosition = this.hero.position.clone()
-
-    // Set camera target position
-    this.cameraTarget.copy(characterPosition).add(new THREE.Vector3(10, 12, 15))
 
     // Set camera look-at point (slightly above character's position)
     this.cameraLookAt.copy(characterPosition)
     this.cameraLookAt.y += 1.5 // Look at character's upper body
+    // 如果用户正在通过鼠标控制相机，则不执行自动更新
+    if (this.isUserInteracting) {
+      this.camera.lookAt(this.cameraLookAt)
+      return
+    }
+
+    // Set camera target position
+    this.cameraTarget.copy(characterPosition).add(new THREE.Vector3(10, 12, 15))
 
     // Smoothly move camera to target position
     this.camera.position.lerp(this.cameraTarget, this.cameraLerpFactor)
