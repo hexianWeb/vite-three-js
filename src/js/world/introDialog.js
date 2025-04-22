@@ -95,8 +95,8 @@ export default class IntroDialog extends EventEmitter {
 
     this.typed = new Typed(this.dialogText, {
       strings: content,
-      typeSpeed: 30,
-      backSpeed: 25,
+      typeSpeed: 10,
+      backSpeed: 5,
       backDelay: 1500, // 第一句话打完后，会停顿 1.5 秒再开始退格
       showCursor: true,
       cursorChar: '|',

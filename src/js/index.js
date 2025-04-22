@@ -1,4 +1,5 @@
 import Three from './experience'
+import GameGuide from './world/gameGuide'
 import IntroDialog from './world/introDialog'
 import '../css/global.css'
 
@@ -15,6 +16,13 @@ window.addEventListener('load', () => {
 
   // Initialize the intro dialog
   new IntroDialog()
+
+  // Initialize and show game guide
+  const gameGuide = new GameGuide()
+  // 检查是否完成了新手指引
+  if (!localStorage.getItem('hasCompletedGuide')) {
+    gameGuide.showGuide()
+  }
 })
 
 const toggleDebugHashDom = document.getElementById('menuButton')
