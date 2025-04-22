@@ -56,7 +56,7 @@ export default class Camera {
     this.orbitControls.noPan = true // 禁用平移
     this.orbitControls.enableZoom = false // 禁用缩放
     this.orbitControls.minPolarAngle = 0
-    this.orbitControls.maxPolarAngle = Math.PI / 2
+    this.orbitControls.maxPolarAngle = Math.PI / 2.2
     this.orbitControls.target.copy(this.target)
 
     // TrackballControls 设置

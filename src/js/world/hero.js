@@ -15,6 +15,10 @@ export default class Hero {
     this.time = this.experience.time
     this.debug = this.experience.debug
 
+    // Camera controls interaction flag
+    this.controls = this.experience.camera.orbitControls // 获取 OrbitControls 实例
+    this.isUserInteracting = false // 标志位，指示用户是否正在与相机交互
+
     // Camera follow parameters
     this.cameraOffset = new THREE.Vector3(0, 2, 5) // Camera offset from character
     this.cameraLerpFactor = 0.1 // Smoothing factor for camera movement
@@ -120,6 +124,9 @@ export default class Hero {
     this.setupAnimations()
     this.setupEventListeners()
     this.setupCollider()
+
+    // Listen for user interaction with OrbitControls
+    this.setupControlsListeners()
 
     // Setup debug if active
     if (this.debug.active) {
@@ -297,6 +304,23 @@ export default class Hero {
       if (e.code === 'Space')
         this.keys.space = false
     })
+  }
+
+  /**
+   * 监听 OrbitControls 的 start 和 end 事件
+   */
+  setupControlsListeners() {
+    if (this.controls) {
+      this.controls.addEventListener('start', () => {
+        this.isUserInteracting = true
+      })
+      this.controls.addEventListener('end', () => {
+        this.isUserInteracting = false
+      })
+    }
+    else {
+      console.warn('OrbitControls not found in Camera instance.')
+    }
   }
 
   moveCharacter(deltaTime) {
@@ -892,6 +916,12 @@ export default class Hero {
   }
 
   updateCamera() {
+    // 如果用户正在通过鼠标控制相机，则不执行自动更新
+    if (this.isUserInteracting) {
+      this.camera.lookAt(this.hero.position)
+      return
+    }
+
     // Calculate target camera position based on character's position and rotation
     const characterPosition = this.hero.position.clone()
 
