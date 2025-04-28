@@ -30,6 +30,16 @@ export default [
     ],
   },
   {
+    name: 'dayTexture',
+    type: 'texture',
+    path: 'textures/environmentMap/day.webp',
+  },
+  {
+    name: 'nightTexture',
+    type: 'texture',
+    path: 'textures/environmentMap/night.webp',
+  },
+  {
     name: 'sceneModel',
     type: 'gltfModel',
     path: 'models/scene.glb',

@@ -1,6 +1,7 @@
 import GSAP from 'gsap'
 import * as THREE from 'three'
 import Experience from '../experience.js'
+import DayNightManager from '../ui/day-night-manager.js'
 
 export default class Ocean {
   constructor() {
@@ -30,7 +31,8 @@ export default class Ocean {
     this.setMesh()
 
     // 监听日夜切换
-    this.experience.world.environment.dayNightManager.on('dayNightToggle', (isNight) => {
+    this.dayNightManager = new DayNightManager()
+    this.dayNightManager.on('dayNightToggle', (isNight) => {
       // 使用GSAP创建过渡动画
       GSAP.to(this.material.uniforms.uNightTransition, {
         value: isNight ? 1 : 0,

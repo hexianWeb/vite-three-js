@@ -7,6 +7,7 @@ import outlineVertexShader from '../../shaders/outline/vertex.glsl'
 
 import Experience from '../experience.js'
 import BrandDialog from './brandDialog.js'
+import Skybox from './skybox.js'
 
 export default class Area {
   constructor() {
@@ -156,6 +157,10 @@ export default class Area {
       }
     })
     this.scene.add(this.model.scene)
+
+    // ====== 天空盒迁移 ======
+    // 原有天空盒代码已移除
+    this.skybox = new Skybox()
   }
 
   onMouseMove() {

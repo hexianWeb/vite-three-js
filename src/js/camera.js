@@ -33,7 +33,7 @@ export default class Camera {
         this.frustumSize,
         -this.frustumSize,
         -50,
-        100,
+        200,
       )
     }
     else {
