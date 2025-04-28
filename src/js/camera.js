@@ -105,11 +105,10 @@ export default class Camera {
   resize() {
     if (this.orthographic) {
       const aspect = this.sizes.width / this.sizes.height
-
-      this.instance.left = (-this.frustumSize * aspect) / 2
-      this.instance.right = (this.frustumSize * aspect) / 2
-      this.instance.top = this.frustumSize / 2
-      this.instance.bottom = -this.frustumSize / 2
+      this.instance.left = (-this.frustumSize * aspect)
+      this.instance.right = (this.frustumSize * aspect)
+      this.instance.top = this.frustumSize
+      this.instance.bottom = -this.frustumSize
 
       this.instance.updateProjectionMatrix()
     }
