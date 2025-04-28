@@ -312,7 +312,8 @@ export default class Hero {
 
         case 'KeyR':
           this.actions.reset = true
-          // this.trigger('action', ['reset'])
+          // 按下R键时重置角色位置
+          this.resetPosition()
           break
 
         case 'KeyZ':
@@ -971,6 +972,11 @@ export default class Hero {
       this.updateModelFromCollider()
     }
 
+    // 判断角色是否掉落到Y轴-20以下，自动重置
+    if (this.hero.position.y < -20) {
+      this.resetPosition()
+    }
+
     // 相机更新
     this.updateCamera()
   }
@@ -996,5 +1002,29 @@ export default class Hero {
 
     // Make camera look at the target point
     this.camera.lookAt(this.cameraLookAt)
+  }
+
+  // 重置角色到初始位置的方法
+  resetPosition() {
+    // 设置角色初始位置、旋转、缩放
+    this.hero.position.set(37, 10, 6)
+    this.hero.scale.set(2, 2, 2)
+    this.hero.rotation.set(0, Math.PI / 2, 0)
+    this.hero.visible = true
+    // 重置碰撞体位置
+    this.playerCollider.start.set(
+      this.hero.position.x,
+      this.hero.position.y + 2.35,
+      this.hero.position.z,
+    )
+    this.playerCollider.end.set(
+      this.hero.position.x,
+      this.hero.position.y + 3,
+      this.hero.position.z,
+    )
+    // 重置速度
+    this.playerVelocity.set(0, 0, 0)
+    // 重置动画为idle
+    this.playAnimation('idle')
   }
 }

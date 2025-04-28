@@ -93,6 +93,14 @@ export default class Experience {
     }
 
     this.iMouse.update()
+
+    // 全局监听 R 键重置角色位置
+    window.addEventListener('keydown', (event) => {
+      // 只在主场景激活时响应
+      if ((event.key === 'r' || event.key === 'R') && this.world && this.world.hero && typeof this.world.hero.resetPosition === 'function') {
+        this.world.hero.resetPosition()
+      }
+    })
   }
 
   destroy() {

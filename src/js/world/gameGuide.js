@@ -55,6 +55,7 @@ export default class GameGuide extends EventEmitter {
     guideDialog.querySelector('#iconText').textContent = this.i18n.t('guide.icon')
     guideDialog.querySelector('#guideButtonText').textContent = this.i18n.t('guide.guide_button')
     guideDialog.querySelector('#championText').textContent = this.i18n.t('guide.champion')
+    guideDialog.querySelector('#resetHeroText').textContent = this.i18n.t('guide.reset_hero')
 
     // Page 2 Content
     guideDialog.querySelector('#guideTitle2').textContent = this.i18n.t('guide.page_title_2')
@@ -102,7 +103,7 @@ export default class GameGuide extends EventEmitter {
             <!-- Special Actions -->
             <div class="mb-8">
               <h3 class="text-2xl font-pixelify text-gray-200 mb-4">${this.i18n.t('guide.special_actions')}</h3>
-              <div class="grid grid-cols-2 gap-6">
+              <div class="grid grid-cols-3 gap-6">
                 <div class="flex items-center justify-around gap-4">
                   <div class="flex flex-col items-center gap-2 ">
                     <img src="/keyboard/keyboard_z.png" alt="Z Key" class="w-24 h-24 pixel-art">
@@ -113,6 +114,12 @@ export default class GameGuide extends EventEmitter {
                   <div class="flex flex-col items-center gap-2">
                     <img src="/keyboard/keyboard_f.png" alt="F Key" class="w-24 h-24 pixel-art">
                     <p id="interactText" class="text-lg font-pixelify text-gray-200">${this.i18n.t('guide.interact')}</p>
+                  </div>
+                </div>
+                <div class="flex items-center justify-around gap-4">
+                  <div class="flex flex-col items-center gap-2">
+                    <img src="/keyboard/keyboard_r.png" alt="R Key" class="w-24 h-24 pixel-art">
+                    <p id="resetHeroText" class="text-lg font-pixelify text-gray-200">${this.i18n.t('guide.reset_hero')}</p>
                   </div>
                 </div>
               </div>
