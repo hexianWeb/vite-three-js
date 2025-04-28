@@ -252,72 +252,122 @@ export default class Hero {
   }
 
   setupEventListeners() {
-    // Add key down event listener
+    // 定义动作映射
+    this.actions = {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+      brake: false,
+      boost: false,
+      reset: false,
+    }
+
+    // 按键按下事件
     window.addEventListener('keydown', (e) => {
-      // 使用 e.key 获取按键对应的字符（区分大小写）
-      const key = e.key.toLowerCase()
-      // 使用 e.code 获取物理按键标识符（转换为小写以匹配 keys 对象）
-      const code = e.code.toLowerCase()
+      switch (e.code) {
+        case 'ArrowUp':
+        case 'KeyW':
+          this.actions.up = true
+          this.keys.w = true
+          this.keys.arrowUp = true
+          break
 
-      // 更新移动键状态 (基于物理按键 code)
-      if (code === 'keyw')
-        this.keys.w = true
-      if (code === 'keya')
-        this.keys.a = true
-      if (code === 'keys')
-        this.keys.s = true
-      if (code === 'keyd')
-        this.keys.d = true
+        case 'ArrowDown':
+        case 'KeyS':
+          this.actions.down = true
+          this.keys.s = true
+          this.keys.arrowDown = true
+          break
 
-      // 更新方向键状态
-      if (e.code === 'ArrowUp')
-        this.keys.arrowUp = true
-      if (e.code === 'ArrowDown')
-        this.keys.arrowDown = true
-      if (e.code === 'ArrowLeft')
-        this.keys.arrowLeft = true
-      if (e.code === 'ArrowRight')
-        this.keys.arrowRight = true
-      if (e.code === 'Space')
-        this.keys.space = true
+        case 'ArrowLeft':
+        case 'KeyA':
+          this.actions.left = true
+          this.keys.a = true
+          this.keys.arrowLeft = true
+          break
 
-      // Z 键坐下 (基于字符 key)
-      if (key === 'z') {
-        this.toggleSit()
-      }
+        case 'ArrowRight':
+        case 'KeyD':
+          this.actions.right = true
+          this.keys.d = true
+          this.keys.arrowRight = true
+          break
 
-      // Jump when space is pressed and player is on floor
-      if (e.code === 'Space' && this.playerOnFloor && !this.character.isSitting) {
-        this.jump()
+        case 'ControlLeft':
+        case 'ControlRight':
+        case 'Space':
+          this.actions.brake = true
+          this.keys.space = true
+          // 跳跃逻辑
+          if (e.code === 'Space' && this.playerOnFloor && !this.character.isSitting) {
+            this.jump()
+          }
+          break
+
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          this.actions.boost = true
+          break
+
+        case 'KeyR':
+          this.actions.reset = true
+          // this.trigger('action', ['reset'])
+          break
+
+        case 'KeyZ':
+          this.toggleSit()
+          break
       }
     })
 
-    // Add key up event listener
+    // 按键松开事件
     window.addEventListener('keyup', (e) => {
-      // 使用 e.code 获取物理按键标识符（转换为小写）
-      const code = e.code.toLowerCase()
+      switch (e.code) {
+        case 'ArrowUp':
+        case 'KeyW':
+          this.actions.up = false
+          this.keys.w = false
+          this.keys.arrowUp = false
+          break
 
-      // 更新移动键状态
-      if (code === 'keyw')
-        this.keys.w = false
-      if (code === 'keya')
-        this.keys.a = false
-      if (code === 'keys')
-        this.keys.s = false
-      if (code === 'keyd')
-        this.keys.d = false
+        case 'ArrowDown':
+        case 'KeyS':
+          this.actions.down = false
+          this.keys.s = false
+          this.keys.arrowDown = false
+          break
 
-      // 更新方向键状态
-      if (e.code === 'ArrowUp')
-        this.keys.arrowUp = false
-      if (e.code === 'ArrowDown')
-        this.keys.arrowDown = false
-      if (e.code === 'ArrowLeft')
-        this.keys.arrowLeft = false
-      if (e.code === 'ArrowRight')
-        this.keys.arrowRight = false
-      if (e.code === 'Space')
-        this.keys.space = false
+        case 'ArrowLeft':
+        case 'KeyA':
+          this.actions.left = false
+          this.keys.a = false
+          this.keys.arrowLeft = false
+          break
+
+        case 'ArrowRight':
+        case 'KeyD':
+          this.actions.right = false
+          this.keys.d = false
+          this.keys.arrowRight = false
+          break
+
+        case 'ControlLeft':
+        case 'ControlRight':
+        case 'Space':
+          this.actions.brake = false
+          this.keys.space = false
+          break
+
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          this.actions.boost = false
+          break
+
+        case 'KeyR':
+          this.actions.reset = false
+          break
+      }
     })
   }
 
@@ -342,47 +392,48 @@ export default class Hero {
     if (this.character.isSitting)
       return
 
-    // Calculate movement direction
+    // 计算移动方向
     let moveX = 0
     let moveZ = 0
     let newDirection = null
 
-    // Apply gravity if not on floor
+    // 重力
     if (!this.playerOnFloor) {
       this.playerVelocity.y -= this.GRAVITY * deltaTime
     }
 
-    // Calculate movement based on key inputs
+    // 速度
     const speedDelta = deltaTime * (this.playerOnFloor ? 25 : 8)
 
-    if (this.keys.w || this.keys.arrowUp) {
+    // 用 actions 判断移动
+    if (this.actions.up) {
       moveZ = -speedDelta
-      newDirection = new THREE.Vector3(0, 0, 1) // Facing -Z
+      newDirection = new THREE.Vector3(0, 0, 1) // 朝向-Z
     }
-    else if (this.keys.s || this.keys.arrowDown) {
+    else if (this.actions.down) {
       moveZ = speedDelta
-      newDirection = new THREE.Vector3(0, 0, -1) // Facing +Z
+      newDirection = new THREE.Vector3(0, 0, -1) // 朝向+Z
     }
-    else if (this.keys.a || this.keys.arrowLeft) {
+    else if (this.actions.left) {
       moveX = -speedDelta
-      newDirection = new THREE.Vector3(1, 0, 0) // Facing -X
+      newDirection = new THREE.Vector3(1, 0, 0) // 朝向-X
     }
-    else if (this.keys.d || this.keys.arrowRight) {
+    else if (this.actions.right) {
       moveX = speedDelta
-      newDirection = new THREE.Vector3(-1, 0, 0) // Facing +X
+      newDirection = new THREE.Vector3(-1, 0, 0) // 朝向+X
     }
 
-    // Add velocity in the movement direction
+    // 添加速度
     if (moveX !== 0 || moveZ !== 0) {
-      // Update character rotation to face new direction if needed
+      // 更新角色朝向
       this.updateCharacterRotation(newDirection)
 
-      // Only play walk animation if on floor and not already playing jump
+      // 只有在地面且不是跳跃时才播放行走动画
       if (this.playerOnFloor && this.currentAnimation !== this.animations.jump) {
         this.playAnimation('walk')
       }
 
-      // Add velocity in the direction
+      // 添加速度
       if (moveX !== 0) {
         this.playerVelocity.x += moveX
       }
@@ -391,40 +442,37 @@ export default class Hero {
       }
     }
     else if (this.playerOnFloor) {
-      // If no movement keys are pressed and on floor, play idle animation
-      // But only if not already jumping
+      // 没有移动时播放待机动画
       if (!this.character.isSitting && this.currentAnimation !== this.animations.jump) {
         this.playAnimation('idle')
       }
     }
 
-    // Apply damping to slow down movement over time
+    // 阻尼
     const damping = Math.exp(-4 * deltaTime) - 1
     this.playerVelocity.addScaledVector(this.playerVelocity, damping)
 
-    // Move player with velocity
+    // 位置更新
     const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
     this.playerCollider.translate(deltaPosition)
 
-    // Check for collisions and adjust position
+    // 碰撞检测
     this.playerCollisions()
 
-    // Handle animation transitions
+    // 动画状态更新
     this.updateAnimationState()
 
-    // Update model position to match collider
+    // 同步模型位置
     this.updateModelFromCollider()
   }
 
   updateAnimationState() {
-    // If just landed on the floor
+    // 如果刚落地
     if (this.playerOnFloor && this.currentAnimation === this.animations.jump) {
-      // Check if any movement keys are pressed
-      const isMoving = this.keys.w || this.keys.a || this.keys.s || this.keys.d
-        || this.keys.arrowUp || this.keys.arrowDown
-        || this.keys.arrowLeft || this.keys.arrowRight
+      // 判断是否有移动动作
+      const isMoving = this.actions.up || this.actions.down || this.actions.left || this.actions.right
 
-      // Play walk animation if moving, otherwise play idle
+      // 播放行走或待机动画
       if (isMoving) {
         this.playAnimation('walk')
       }
@@ -433,7 +481,7 @@ export default class Hero {
       }
     }
 
-    // If falling (not on floor and moving down)
+    // 下落动画
     if (!this.playerOnFloor && this.playerVelocity.y < 0 && this.currentAnimation !== this.animations.fall) {
       this.playAnimation('fall')
     }
@@ -899,34 +947,31 @@ export default class Hero {
   update() {
     const deltaTime = this.time.delta / 1000
 
-    // Update animation mixer
+    // 动画更新
     if (this.mixer) {
       this.mixer.update(deltaTime)
     }
 
-    // Check if any movement keys are pressed
-    const isAnyMovementKeyPressed
-      = this.keys.w || this.keys.a || this.keys.s || this.keys.d
-        || this.keys.arrowUp || this.keys.arrowDown
-        || this.keys.arrowLeft || this.keys.arrowRight
+    // 判断是否有移动动作
+    const isAnyMovementKeyPressed = this.actions.up || this.actions.down || this.actions.left || this.actions.right
 
-    // Move character with collision detection
+    // 角色移动
     if (!this.character.isSitting) {
       this.moveCharacter(deltaTime)
     }
     else if (!isAnyMovementKeyPressed && this.playerOnFloor) {
-      // Apply small damping when not pressing keys
+      // 阻尼
       const damping = Math.exp(-10 * deltaTime) - 1
       this.playerVelocity.addScaledVector(this.playerVelocity, damping)
 
-      // Still update position for gravity
+      // 位置更新
       const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
       this.playerCollider.translate(deltaPosition)
       this.playerCollisions()
       this.updateModelFromCollider()
     }
 
-    // Update camera position
+    // 相机更新
     this.updateCamera()
   }
 
