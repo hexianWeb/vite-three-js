@@ -32,7 +32,7 @@ export default class Skybox {
   // 创建天空盒球体
   createSkybox() {
     // 创建球体几何体
-    this.geometry = new THREE.SphereGeometry(64)
+    this.geometry = new THREE.SphereGeometry(128)
     // 默认使用白天贴图
     this.resources.items.dayTexture.colorSpace = THREE.SRGBColorSpace
     this.material = new THREE.MeshBasicMaterial({
