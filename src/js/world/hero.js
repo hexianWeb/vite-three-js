@@ -457,14 +457,8 @@ export default class Hero {
     const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
     this.playerCollider.translate(deltaPosition)
 
-    // 碰撞检测
-    this.playerCollisions()
-
     // 动画状态更新
     this.updateAnimationState()
-
-    // 同步模型位置
-    this.updateModelFromCollider()
   }
 
   updateAnimationState() {
@@ -968,9 +962,9 @@ export default class Hero {
       // 位置更新
       const deltaPosition = this.playerVelocity.clone().multiplyScalar(deltaTime)
       this.playerCollider.translate(deltaPosition)
-      this.playerCollisions()
-      this.updateModelFromCollider()
     }
+    this.playerCollisions()
+    this.updateModelFromCollider()
 
     // 判断角色是否掉落到Y轴-20以下，自动重置
     if (this.hero.position.y < -20) {

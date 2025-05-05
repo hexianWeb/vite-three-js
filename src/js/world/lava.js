@@ -90,7 +90,7 @@ export default class Lava {
         vec2 flow = texture2D(flowMap, vUv).rg * 2.0 - 1.0;
         
         // 计算流动偏移
-        vec2 flowOffset = flow * flowSpeed * sin(iTime * 0.5)*20.0;
+        vec2 flowOffset = flow * flowSpeed * sin(iTime * 0.5)*1.0;
         
         // 应用流动偏移到UV坐标
         vec2 uv = vUv + flowOffset;
@@ -279,10 +279,12 @@ export default class Lava {
       {
         label: '波纹强度',
         min: 0.1,
-        max: 0.3,
+        max: 1.0,
         step: 0.01,
       },
-    )
+    ).on('change', () => {
+      this.uniforms.distanceFactor.value = this.debugObject.distanceFactor
+    })
 
     lavaFolder.addBinding(
       this.debugObject,
