@@ -549,13 +549,8 @@ export default class Hero {
     // Calculate the difference between the current rotation and the target rotation
     let deltaRotation = targetRotation - currentRotation
 
-    // Normalize the delta rotation to the range [-PI, PI]
-    if (deltaRotation > Math.PI) {
-      deltaRotation -= 2 * Math.PI
-    }
-    else if (deltaRotation < -Math.PI) {
-      deltaRotation += 2 * Math.PI
-    }
+    // 归一化 deltaRotation 到 [-PI, PI] 区间
+    deltaRotation = ((deltaRotation + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI
 
     // Calculate the new target rotation
     const newTargetRotation = currentRotation + deltaRotation
