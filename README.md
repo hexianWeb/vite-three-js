@@ -1,180 +1,120 @@
-[node]: https://nodejs.org/en
-[yarn]: https://yarnpkg.com
-[pnpm]: https://pnpm.io
-[demo]: https://vite-three-js.d1a.app
-[license]: https://github.com/doinel1a/vite-three-js/blob/main/LICENSE
-[code-of-conduct]: https://github.com/doinel1a/vite-three-js/blob/main/CODE_OF_CONDUCT.md
-[issues]: https://github.com/doinel1a/vite-three-js/issues
-[pulls]: https://github.com/doinel1a/vite-three-js/pulls
-[browserslist]: https://browsersl.ist/#q=last+3+versions%2C%3E+0.2%25%2C+not+dead
-[graphviz]: https://www.graphviz.org/download
-[commitlint]: https://github.com/conventional-changelog/commitlint/#what-is-commitlint
-[webpack-three-js]: https://github.com/doinel1a/webpack-three-js
-[react-icon]: https://skillicons.dev/icons?i=react
-[ts-icon]: https://skillicons.dev/icons?i=ts
-[js-icon]: https://skillicons.dev/icons?i=js
-[tailwind-icon]: https://skillicons.dev/icons?i=tailwind
-[chrome-icon]: https://github.com/alrra/browser-logos/blob/main/src/chrome/chrome_64x64.png
-[firefox-icon]: https://github.com/alrra/browser-logos/blob/main/src/firefox/firefox_64x64.png
-[edge-icon]: https://github.com/alrra/browser-logos/blob/main/src/edge/edge_64x64.png
-[opera-icon]: https://github.com/alrra/browser-logos/blob/main/src/opera/opera_64x64.png
-[safari-icon]: https://github.com/alrra/browser-logos/blob/main/src/safari/safari_64x64.png
+# 2.5D 像素风 Three.js 个人简历网站 ✨
 
-# Vite Three JS — Template
+![项目预览 | Project Preview](./readme.webp)
 
-This boilerplate starter template is the ultimate solution to help you getting started on your project in no time, without the hassle of setting up and configuring your environment from scratch each time you start developing. <br />
-It's ideal for front-end engineers who want to build modern, fast and reliable **webgl** web applications with the latest cutting edge technologies such as **Three.JS**, **GLSL**, **JavaScript**, **TailwindCSS**, **Vite**, **ESLint**, **Prettier**, **Husky** and much more!
+## 📖 项目简介 | Project Introduction
 
-**[Demo][demo]** | **[Bug(label: bug)][issues]** | **[Feature(label: enhancement)][issues]**
+本项目是一个基于 Three.js 的 2.5D 像素风格交互式个人简历网站，通过游戏化方式展示个人信息、项目经历和技能，兼顾趣味性与实用性，优先优化移动端体验。
+This project is an interactive 2.5D pixel-style resume website built with Three.js, gamifying the presentation of personal info, projects, and skills, with a mobile-first approach.
 
-## :bookmark: Table of contents
-
-- :computer: [Getting started](#computer-getting-started "Go to 'Getting started' section")
-- :battery: [Features](#battery-features "Go to 'Features' section")
-- :arrows_clockwise: [Versions](#arrows_clockwise-versions "Go to 'Versions' section")
-- :globe_with_meridians: [Browsers support](#globe_with_meridians-browsers-support "Go to 'Browsers support' section")
-- :busts_in_silhouette: [Contribute](#busts_in_silhouette-contribute "Go to 'Contribute' section")
-- :bookmark_tabs: [License](#bookmark_tabs-license "Go to 'License' section")
-- :gem: [Acknowledgements](#gem-acknowledgements "Go to 'Acknowledgements' section")
+![移动端预览 | Mobile Preview](./readme2.webp)
 
 ---
 
-## :computer: Getting started
+## ✨ 主要特性 | Key Features
 
-### Prerequisites:
-
-- JavaScript runtime **[node.js][node]**;
-- **(OPTIONAL)** Alternative package manager:
-  - **[PNPM][pnpm]** `npm install --global pnpm` <br /> or
-  - **[Yarn][yarn]** `npm install --global yarn`
-
-### Start developing:
-
-- Get the repository:
-  - click **"Use this template"** &nbsp; or &nbsp; **"Fork"** button <br /> alternately
-  - **clone** the repository through your terminal: <br />
-    `git clone https://github.com/doinel1a/vite-three-js YOUR-PROJECT-NAME`;
-- Open your terminal or code editor to the path your project is located, and run:
-  | | **NPM** | **PNPM** | **Yarn** |
-  | ------------------------------------------------ | ----------------- | -------------- | -------------- |
-  | To **install** the dependencies | `npm install` | `pnpm install` | `yarn install` |
-  | To **run** the **development server** | `npm run dev` | `pnpm dev` | `yarn dev` |
-  | To **build** your app **for production** | `npm run build` | `pnpm build` | `yarn build` |
-  | To **preview** your **production optimized app** | `npm run preview` | `pnpm preview` | `yarn preview` |
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- 🕹️ **2.5D 像素风场景 / 2.5D Pixel Art Scene**：独特的像素化 3D 场景，沉浸式体验。
+  Unique pixelated 3D scene for immersive experience.
+- 🧑‍💻 **角色模型与移动 / Character Control**：用户可控制像素角色在场景中自由移动。
+  Control a pixel character to explore the scene.
+- 💬 **对话框交互 / Dialog Interaction**：靠近特定物体或 NPC 时自动弹出对话框，展示个人简介、项目介绍、技能说明等。
+  Dialogs pop up near objects/NPCs to show info.
+- 🎁 **收集元素系统 / Collectibles System**：场景中分布可收集物品，代表技能或项目，收集后可在 UI 查看。
+  Collect items representing skills/projects.
+- 🏆 **成就系统 / Achievement System**：设定成就目标，达成后获得徽章或称号，提升互动乐趣。
+  Unlock badges/titles by achieving goals.
+- 🌗 **日夜切换 / Day-Night Switch**：支持一键切换场景白天/夜晚效果。
+  Switch between day and night scenes.
+- 📱 **响应式设计 / Responsive Design**：适配桌面与移动端，优先优化触摸操作与加载速度。
+  Fully responsive, optimized for mobile.
 
 ---
 
-## :battery: Features
+## 🚀 快速开始 | Getting Started
 
-This repository comes 🔋 packed with:
+### 环境要求 / Requirements
+- Node.js
+- 推荐使用 Yarn 或 PNPM / Yarn or PNPM recommended
 
-- **Three.JS**: A JavaScript library built on top of **WebGL** that provides an abstraction layer for rendering interactive 3D and 2D scenes in the web browser;
-- **TailwindCSS**: A utility-first CSS framework that provides predefined classes for common styles and layout patterns, allowing quick styling without writing custom CSS;
-- **SASS**: A CSS preprocessor that adds features such as variables, nesting, and mixins to CSS, making it easier to write and maintain large CSS codebases;
-- **PostCSS**: A tool for transforming CSS with JavaScript plugins, allowing to add new features to CSS and improve the development process;
-- **Playwright**: A library for automating web browser interactions, allowing the writing of end-to-end tests and perform browser automation tasks;
-- **Vite**: A build tool and development server that provides fast and efficient development and production builds for modern web applications;
+### 安装依赖 / Install Dependencies
+```bash
+yarn install
+# 或 or
+npm install
+```
 
-And with tools that enhance the development experience:
+### 启动开发服务器 / Start Dev Server
+```bash
+yarn dev
+# 或 or
+npm run dev
+```
 
-- **ESLint**: A tool for enforcing coding standards and identifying potential errors in the code;
-- **Prettier**: A code formatter that automatically formats code to conform to a consistent style, making it easier to read and maintain;
-- **Husky**: A Git hook manager that allows easy set up and configuration of Git hooks, which are scripts that run at certain points in the Git workflow;
-- **Commitlint**: A tool for enforcing commit message conventions in Git repositories, helping to ensure consistent and informative commit messages;
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
-
----
-
-## :arrows_clockwise: Versions
-
-This repository comes configured with 2 of the industry standards for development tools: **Webpack** and **Vite**. <br />
-Both tools support **SWC (Speedy Web Compiler)**, a **Rust-based compiler**; Vite is optimized for it out of the box.
-
-### Vite (SWC compiler)
-
-Is a simple and fast solution thanks to it's "zero-config" approach which offers a smoother development experience.
-
-|                   React - TypeScript                   |                   React - JavaScript                   |     |       Vanilla TypeScript        |     Vanilla JavaScript      |
-| :----------------------------------------------------: | :----------------------------------------------------: | :-: | :-----------------------------: | :-------------------------: |
-| ![React][react-icon] & ![TS][ts-icon] <br /> **Soon!** | ![React][react-icon] & ![JS][js-icon] <br /> **Soon!** |     | ![TS][ts-icon] <br /> **Soon!** | ![JS][js-icon] <br /> **/** |
-
-### Webpack (Babel compiler)
-
-Is more a flexible solution, capable of handling complex configurations.
-
-|                   React - TypeScript                   |                   React - JavaScript                   |     |       Vanilla TypeScript        |                 Vanilla JavaScript                 |
-| :----------------------------------------------------: | :----------------------------------------------------: | :-: | :-----------------------------: | :------------------------------------------------: |
-| ![React][react-icon] & ![TS][ts-icon] <br /> **Soon!** | ![React][react-icon] & ![JS][js-icon] <br /> **Soon!** |     | ![TS][ts-icon] <br /> **Soon!** | ![JS][js-icon] <br /> **[Repo][webpack-three-js]** |
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+### 构建生产环境 / Build for Production
+```bash
+yarn build
+# 或 or
+npm run build
+```
 
 ---
 
-## :globe_with_meridians: Browsers support
+## 🛠️ 技术栈 | Tech Stack
 
-The provided configuration ensures **92.3%** coverage for all browsers, in particular of the following:
-
-|            Chrome             |             Firefox              |             Edge             |        Opera         | Safari                       |
-| :---------------------------: | :------------------------------: | :--------------------------: | :------------------: | ---------------------------- |
-| ![Google Chrome][chrome-icon] | ![Mozilla Firefox][firefox-icon] | ![Microsoft Edge][edge-icon] | ![Opera][opera-icon] | ![Apple Safari][safari-icon] |
-
-**\*** In order to support a wider percentage of browsers, update the `./.browserslistrc` configuration file:
-
-1. `last 3 versions`: browser version;
-2. `> 0.2%`: browser usage statistics;
-3. `not dead`: whether the browser is officially supported;
-
-Update the configuration [here][browserslist] and check in real-time the **global browsers support**.
-
-**\* The more versions to support, larger JS and CSS bundles size will be.**
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- Three.js  —— 3D 渲染核心库 / 3D rendering core
+- Vite  —— 极速前端构建工具 / Fast frontend build tool
+- TailwindCSS  —— 原子化 CSS 框架 / Utility-first CSS
+- SASS/PostCSS  —— CSS 预处理 / CSS preprocessors
+- ESLint/Prettier  —— 代码规范与格式化 / Lint & format
+- Playwright  —— 端到端自动化测试 / E2E testing
+- Husky/Commitlint  —— Git 提交规范 / Git hooks & commit lint
 
 ---
 
-## :busts_in_silhouette: Contribute
+## 🚩 开发阶段 / Milestones
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create.
-Any contribution is greatly appreciated: big or small, it can be documentation updates, adding new features or something bigger.
-Please check the [**contributing guide**][code-of-conduct] for details on how to help out and keep in mind that all commits must follow the **[conventional commit format][commitlint]**.
-
-### How to contribute:
-
-1.  **[Get started](#computer-getting-started "Go to 'Getting started' section");**
-2.  **For a new feature:**
-    1.  Create a new branch: `git checkout -b feat/NEW-FEATURE`;
-    2.  Add your changes to the staging area: `git add PATH/TO/FILENAME.EXTENSION`;
-    3.  Commit your changes: `git commit -m "feat: NEW FEATURE"`;
-    4.  Push your new branch: `git push origin feat/NEW-FEATURE`;
-3.  **For a bug fix:**
-    1.  Create a new branch: `git checkout -b fix/BUG-FIX`;
-    2.  Add your changes to the staging area: `git add PATH/TO/FILENAME.EXTENSION`;
-    3.  Commit your changes: `git commit -m "fix: BUG FIX"`;
-    4.  Push your new branch: `git push origin fix/BUG-FIX`;
-4.  **Open a new [pull request][pulls];**
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+1. 🏗️ 基础场景搭建、角色模型与移动、日夜切换原型、对话框静态 UI（已完成）  
+   Basic scene, character, day/night, dialog UI (done)
+2. 💬 对话框交互逻辑（已完成）  
+   Dialog interaction logic (done)
+3. 🎁 收集元素系统及其 UI（开发中）  
+   Collectibles system & UI (in progress)
+4. 🏆 成就系统及其 UI  
+   Achievement system & UI
+5. 📱 全面响应式设计，移动端优化  
+   Full responsive design, mobile optimization
+6. 📝 内容填充与测试  
+   Content & testing
 
 ---
 
-## :bookmark_tabs: License
+## 📱 移动端优化 | Mobile Optimization
 
-All logos and trademarks are the property of their respective owners.
-Everything else is distributed under the **MIT License**.
-See the [LICENSE][license] file for more informations.
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- 使用 CSS 媒体查询自适应不同屏幕尺寸，特别优化小屏幕体验。
+  CSS media queries for all screens, mobile-first.
+- 所有交互按钮和 UI 元素均适配触摸操作。
+  Touch-friendly UI elements.
+- 优化资源加载，提升移动端访问速度。
+  Optimized asset loading for speed.
 
 ---
 
-## :gem: Acknowledgements
+## 🤝 贡献指南 | Contribution Guide
 
-Special thanks to:
+欢迎任何形式的贡献！  
+All contributions are welcome!
 
-- [alrra](https://github.com/alrra) for [browser-logos](https://github.com/alrra/browser-logos);
-- [tandpfun](https://github.com/tandpfun) for [skill-icons](https://github.com/tandpfun/skill-icons);
+1. Fork 本仓库并创建新分支 / Fork & create a new branch
+2. 提交更改并发起 Pull Request / Commit & open a PR
+3. 遵循规范的提交信息格式 / Use conventional commit messages
 
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+---
+
+## 📝 License
+
+MIT
+
+---
+
+> 本项目灵感来源于像素风游戏与创意简历，欢迎交流与建议！  
+> Inspired by pixel games & creative resumes. Feedback welcome!
