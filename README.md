@@ -1,180 +1,99 @@
-[node]: https://nodejs.org/en
-[yarn]: https://yarnpkg.com
-[pnpm]: https://pnpm.io
-[demo]: https://vite-three-js.d1a.app
-[license]: https://github.com/doinel1a/vite-three-js/blob/main/LICENSE
-[code-of-conduct]: https://github.com/doinel1a/vite-three-js/blob/main/CODE_OF_CONDUCT.md
-[issues]: https://github.com/doinel1a/vite-three-js/issues
-[pulls]: https://github.com/doinel1a/vite-three-js/pulls
-[browserslist]: https://browsersl.ist/#q=last+3+versions%2C%3E+0.2%25%2C+not+dead
-[graphviz]: https://www.graphviz.org/download
-[commitlint]: https://github.com/conventional-changelog/commitlint/#what-is-commitlint
-[webpack-three-js]: https://github.com/doinel1a/webpack-three-js
-[react-icon]: https://skillicons.dev/icons?i=react
-[ts-icon]: https://skillicons.dev/icons?i=ts
-[js-icon]: https://skillicons.dev/icons?i=js
-[tailwind-icon]: https://skillicons.dev/icons?i=tailwind
-[chrome-icon]: https://github.com/alrra/browser-logos/blob/main/src/chrome/chrome_64x64.png
-[firefox-icon]: https://github.com/alrra/browser-logos/blob/main/src/firefox/firefox_64x64.png
-[edge-icon]: https://github.com/alrra/browser-logos/blob/main/src/edge/edge_64x64.png
-[opera-icon]: https://github.com/alrra/browser-logos/blob/main/src/opera/opera_64x64.png
-[safari-icon]: https://github.com/alrra/browser-logos/blob/main/src/safari/safari_64x64.png
+# 🎨 Fluid Light — 概念艺术工作室官网
 
-# Vite Three JS — Template
+![网站预览](./readme.webp)
 
-This boilerplate starter template is the ultimate solution to help you getting started on your project in no time, without the hassle of setting up and configuring your environment from scratch each time you start developing. <br />
-It's ideal for front-end engineers who want to build modern, fast and reliable **webgl** web applications with the latest cutting edge technologies such as **Three.JS**, **GLSL**, **JavaScript**, **TailwindCSS**, **Vite**, **ESLint**, **Prettier**, **Husky** and much more!
-
-**[Demo][demo]** | **[Bug(label: bug)][issues]** | **[Feature(label: enhancement)][issues]**
-
-## :bookmark: Table of contents
-
-- :computer: [Getting started](#computer-getting-started "Go to 'Getting started' section")
-- :battery: [Features](#battery-features "Go to 'Features' section")
-- :arrows_clockwise: [Versions](#arrows_clockwise-versions "Go to 'Versions' section")
-- :globe_with_meridians: [Browsers support](#globe_with_meridians-browsers-support "Go to 'Browsers support' section")
-- :busts_in_silhouette: [Contribute](#busts_in_silhouette-contribute "Go to 'Contribute' section")
-- :bookmark_tabs: [License](#bookmark_tabs-license "Go to 'License' section")
-- :gem: [Acknowledgements](#gem-acknowledgements "Go to 'Acknowledgements' section")
+> 让灵感流动，让创意发光 ✨
 
 ---
 
-## :computer: Getting started
+## 🚀 预览地址
 
-### Prerequisites:
-
-- JavaScript runtime **[node.js][node]**;
-- **(OPTIONAL)** Alternative package manager:
-  - **[PNPM][pnpm]** `npm install --global pnpm` <br /> or
-  - **[Yarn][yarn]** `npm install --global yarn`
-
-### Start developing:
-
-- Get the repository:
-  - click **"Use this template"** &nbsp; or &nbsp; **"Fork"** button <br /> alternately
-  - **clone** the repository through your terminal: <br />
-    `git clone https://github.com/doinel1a/vite-three-js YOUR-PROJECT-NAME`;
-- Open your terminal or code editor to the path your project is located, and run:
-  | | **NPM** | **PNPM** | **Yarn** |
-  | ------------------------------------------------ | ----------------- | -------------- | -------------- |
-  | To **install** the dependencies | `npm install` | `pnpm install` | `yarn install` |
-  | To **run** the **development server** | `npm run dev` | `pnpm dev` | `yarn dev` |
-  | To **build** your app **for production** | `npm run build` | `pnpm build` | `yarn build` |
-  | To **preview** your **production optimized app** | `npm run preview` | `pnpm preview` | `yarn preview` |
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+👉 [立即体验 Fluid Light 官网](https://fluid-light.vercel.app/)
 
 ---
 
-## :battery: Features
+## 🖌️ 关于 Fluid Light
 
-This repository comes 🔋 packed with:
+Fluid Light 是一家专注于概念艺术与数字创意的工作室。我们相信，艺术与技术的结合能点亮每一个灵感瞬间。无论是游戏、影视、动画还是品牌视觉，我们都能为你带来独特的视觉盛宴。
 
-- **Three.JS**: A JavaScript library built on top of **WebGL** that provides an abstraction layer for rendering interactive 3D and 2D scenes in the web browser;
-- **TailwindCSS**: A utility-first CSS framework that provides predefined classes for common styles and layout patterns, allowing quick styling without writing custom CSS;
-- **SASS**: A CSS preprocessor that adds features such as variables, nesting, and mixins to CSS, making it easier to write and maintain large CSS codebases;
-- **PostCSS**: A tool for transforming CSS with JavaScript plugins, allowing to add new features to CSS and improve the development process;
-- **Playwright**: A library for automating web browser interactions, allowing the writing of end-to-end tests and perform browser automation tasks;
-- **Vite**: A build tool and development server that provides fast and efficient development and production builds for modern web applications;
-
-And with tools that enhance the development experience:
-
-- **ESLint**: A tool for enforcing coding standards and identifying potential errors in the code;
-- **Prettier**: A code formatter that automatically formats code to conform to a consistent style, making it easier to read and maintain;
-- **Husky**: A Git hook manager that allows easy set up and configuration of Git hooks, which are scripts that run at certain points in the Git workflow;
-- **Commitlint**: A tool for enforcing commit message conventions in Git repositories, helping to ensure consistent and informative commit messages;
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- 🌈 **创意无限**：每一笔都源自灵感，每一帧都追求极致。
+- 🧑‍🎨 **专业团队**：由资深概念艺术家、3D 设计师和开发者组成。
+- 🛠️ **技术驱动**：采用 Three.js、WebGL、Vite 等前沿技术，打造沉浸式互动体验。
+- 🖼️ **多元风格**：科幻、奇幻、写实、极简……你想要的风格我们都能实现！
 
 ---
 
-## :arrows_clockwise: Versions
+## ✨ 主要特性
 
-This repository comes configured with 2 of the industry standards for development tools: **Webpack** and **Vite**. <br />
-Both tools support **SWC (Speedy Web Compiler)**, a **Rust-based compiler**; Vite is optimized for it out of the box.
-
-### Vite (SWC compiler)
-
-Is a simple and fast solution thanks to it's "zero-config" approach which offers a smoother development experience.
-
-|                   React - TypeScript                   |                   React - JavaScript                   |     |       Vanilla TypeScript        |     Vanilla JavaScript      |
-| :----------------------------------------------------: | :----------------------------------------------------: | :-: | :-----------------------------: | :-------------------------: |
-| ![React][react-icon] & ![TS][ts-icon] <br /> **Soon!** | ![React][react-icon] & ![JS][js-icon] <br /> **Soon!** |     | ![TS][ts-icon] <br /> **Soon!** | ![JS][js-icon] <br /> **/** |
-
-### Webpack (Babel compiler)
-
-Is more a flexible solution, capable of handling complex configurations.
-
-|                   React - TypeScript                   |                   React - JavaScript                   |     |       Vanilla TypeScript        |                 Vanilla JavaScript                 |
-| :----------------------------------------------------: | :----------------------------------------------------: | :-: | :-----------------------------: | :------------------------------------------------: |
-| ![React][react-icon] & ![TS][ts-icon] <br /> **Soon!** | ![React][react-icon] & ![JS][js-icon] <br /> **Soon!** |     | ![TS][ts-icon] <br /> **Soon!** | ![JS][js-icon] <br /> **[Repo][webpack-three-js]** |
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- 🎬 **沉浸式 3D 场景**：基于 Three.js，浏览器中畅享高质量实时渲染。
+- ⚡ **极速体验**：Vite 构建，开发与上线都快人一步。
+- 🎨 **TailwindCSS + SASS**：灵活美观，快速定制你的专属风格。
+- 🧹 **代码规范**：ESLint、Prettier、Husky 保驾护航，代码整洁如新。
+- 🧪 **自动化测试**：Playwright 端到端测试，保障每一次发布的稳定。
 
 ---
 
-## :globe_with_meridians: Browsers support
+## 🛠️ 快速开始
 
-The provided configuration ensures **92.3%** coverage for all browsers, in particular of the following:
-
-|            Chrome             |             Firefox              |             Edge             |        Opera         | Safari                       |
-| :---------------------------: | :------------------------------: | :--------------------------: | :------------------: | ---------------------------- |
-| ![Google Chrome][chrome-icon] | ![Mozilla Firefox][firefox-icon] | ![Microsoft Edge][edge-icon] | ![Opera][opera-icon] | ![Apple Safari][safari-icon] |
-
-**\*** In order to support a wider percentage of browsers, update the `./.browserslistrc` configuration file:
-
-1. `last 3 versions`: browser version;
-2. `> 0.2%`: browser usage statistics;
-3. `not dead`: whether the browser is officially supported;
-
-Update the configuration [here][browserslist] and check in real-time the **global browsers support**.
-
-**\* The more versions to support, larger JS and CSS bundles size will be.**
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
-
----
-
-## :busts_in_silhouette: Contribute
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create.  
-Any contribution is greatly appreciated: big or small, it can be documentation updates, adding new features or something bigger.  
-Please check the [**contributing guide**][code-of-conduct] for details on how to help out and keep in mind that all commits must follow the **[conventional commit format][commitlint]**.
-
-### How to contribute:
-
-1.  **[Get started](#computer-getting-started "Go to 'Getting started' section");**
-2.  **For a new feature:**
-    1.  Create a new branch: `git checkout -b feat/NEW-FEATURE`;
-    2.  Add your changes to the staging area: `git add PATH/TO/FILENAME.EXTENSION`;
-    3.  Commit your changes: `git commit -m "feat: NEW FEATURE"`;
-    4.  Push your new branch: `git push origin feat/NEW-FEATURE`;
-3.  **For a bug fix:**
-    1.  Create a new branch: `git checkout -b fix/BUG-FIX`;
-    2.  Add your changes to the staging area: `git add PATH/TO/FILENAME.EXTENSION`;
-    3.  Commit your changes: `git commit -m "fix: BUG FIX"`;
-    4.  Push your new branch: `git push origin fix/BUG-FIX`;
-4.  **Open a new [pull request][pulls];**
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+1. 克隆项目：
+   ```bash
+   git clone https://github.com/doinel1a/vite-three-js YOUR-PROJECT-NAME
+   cd YOUR-PROJECT-NAME
+   ```
+2. 安装依赖：
+   ```bash
+   pnpm install # 推荐，也可用 npm/yarn
+   ```
+3. 启动开发服务器：
+   ```bash
+   pnpm dev
+   ```
+4. 构建生产版本：
+   ```bash
+   pnpm build
+   ```
+5. 预览生产环境：
+   ```bash
+   pnpm preview
+   ```
 
 ---
 
-## :bookmark_tabs: License
+## 🌍 浏览器支持
 
-All logos and trademarks are the property of their respective owners.  
-Everything else is distributed under the **MIT License**.  
-See the [LICENSE][license] file for more informations.
-
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+- Chrome、Firefox、Edge、Opera、Safari
+- 兼容 92% 以上主流浏览器
 
 ---
 
-## :gem: Acknowledgements
+## 🤝 贡献指南
 
-Special thanks to:
+欢迎任何形式的贡献！
 
-- [alrra](https://github.com/alrra) for [browser-logos](https://github.com/alrra/browser-logos);
-- [tandpfun](https://github.com/tandpfun) for [skill-icons](https://github.com/tandpfun/skill-icons);
+1. Fork 本仓库
+2. 新建分支：`git checkout -b feat/你的功能`
+3. 提交更改：`git commit -m "feat: 新功能描述"`
+4. 推送分支：`git push origin feat/你的功能`
+5. 提交 Pull Request
 
-[Back to :arrow_up:](#vite-three-js--template "Back to 'Table of contents' section")
+请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 💎 鸣谢
+
+- [Three.js](https://threejs.org/)
+- [Vite](https://vitejs.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Playwright](https://playwright.dev/)
+- 以及所有开源社区的贡献者！
+
+---
+
+> Fluid Light —— 让每一束灵感之光，照亮数字世界的每个角落。
