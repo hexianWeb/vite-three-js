@@ -7,6 +7,7 @@ import outlineVertexShader from '../../shaders/outline/vertex.glsl'
 
 import Experience from '../experience.js'
 import BrandDialog from './brandDialog.js'
+import Chicken from './chicken.js'
 import Skybox from './skybox.js'
 
 export default class Area {
@@ -71,6 +72,9 @@ export default class Area {
 
     // Store the currently hovered object
     this.hoveredObject = null
+
+    // 小鸡实例
+    this.chicken = new Chicken()
 
     this.setupArea()
     window.addEventListener('mousemove', this.onMouseMove.bind(this))
@@ -161,6 +165,9 @@ export default class Area {
     // ====== 天空盒迁移 ======
     // 原有天空盒代码已移除
     this.skybox = new Skybox()
+
+    // 显示小鸡交互提示
+    this.chicken.showInteractionPrompt()
   }
 
   onMouseMove() {
@@ -213,6 +220,15 @@ export default class Area {
   }
 
   onMouseDown() {
+    // 检查是否点击到小鸡
+    if (this.chicken && this.chicken.chickenObject) {
+      this.raycaster.setFromCamera(this.iMouse.normalizedMouse, this.camera)
+      const chickenIntersects = this.raycaster.intersectObject(this.chicken.chickenObject, true)
+      if (chickenIntersects.length > 0) {
+        this.chicken.onClick()
+        return // 避免后续 brandStuffsObject 检测
+      }
+    }
     const intersects = this.raycaster.intersectObjects(this.brandStuffsObject)
     if (intersects.length > 0) {
       const brandName = intersects[0].object.parent.name
@@ -225,6 +241,10 @@ export default class Area {
     const time = this.time.elapsed * 0.002
     for (const { material } of this.outlineMeshes) {
       material.uniforms.uTime.value = time
+    }
+    // 更新小鸡动画
+    if (this.chicken) {
+      this.chicken.update()
     }
   }
 

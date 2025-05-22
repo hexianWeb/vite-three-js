@@ -55,6 +55,11 @@ export default [
     path: 'models/collision-world.glb',
   },
   {
+    name: 'chickenModel',
+    type: 'gltfModel',
+    path: 'models/chicken.glb',
+  },
+  {
     name: 'perlinNoiseTexture',
     type: 'texture',
     path: 'textures/noise/perlin.png',
