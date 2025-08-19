@@ -19,8 +19,6 @@ void main() {
   modelPosition.z = sin(angle);
 
   modelPosition.xyz += aRandom * 0.1;
-  // modelPosition.x += aRandom.x;
-  // modelPosition.z += aRandom.z;
   vec4 viewPosition = viewMatrix * modelPosition;
 
 
@@ -28,7 +26,7 @@ void main() {
   gl_Position = projectedPosition;
 
   gl_PointSize = uSize * aScale;
-  gl_PointSize *= ( 1.0 / - viewPosition.z );
+  gl_PointSize *= ( 1.0 / - viewPosition.z *(modelPosition.y*0.2) );
 
 
   /**

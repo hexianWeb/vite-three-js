@@ -11,27 +11,34 @@ export default class Galaxy {
     this.debug = this.experience.debug.ui
     this.debugActive = this.experience.debug.active
     this.time = this.experience.time
+    this.textures = this.experience.resources.items
 
     // Point Params
     this.parameters = {
-      size: 18,
-      count: 70000,
-      radius: 5,
+      size: 25,
+      count: 47000,
+      radius: 2.8,
       branches: 10,
       spin: 1,
       randomness: 9.6,
       randomnessPower: 5,
-      insideColor: '#ff7005',
-      outsideColor: '#007cec',
+      insideColor: '#ff9231',
+      outsideColor: '#1f11da',
       timeActive: true,
       // 圆环约束参数
       innerRadius: 0.12, // 内环半径（相对于总半径的比例）
       ringFalloff: 0.1, // 环形衰减强度
-      constraintStrength: 0.4, // 约束强度（0-1）
+      constraintStrength: 0.25, // 约束强度（0-1）
+      // 纹理选择参数
+      textureIndex: 1, // 0: starTexture, 1: starTexture2
+      // 混合模式参数
+      blendMode: 5, // 0: 线性混合, 1: 噪声混合, 2: 感知混合, 3: 多层混合, 4: 动态混合, 5: 光谱混合
+      blendIntensity: 1.7, // 混合强度
     }
 
     // Point Material
     this.material = new THREE.ShaderMaterial({
+      transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       uniforms: {
@@ -41,6 +48,9 @@ export default class Galaxy {
         uInnerRadius: { value: this.parameters.innerRadius },
         uRingFalloff: { value: this.parameters.ringFalloff },
         uConstraintStrength: { value: this.parameters.constraintStrength },
+        uTexture: { value: this.textures.starTexture }, // 默认使用第一个纹理
+        uBlendMode: { value: this.parameters.blendMode },
+        uBlendIntensity: { value: this.parameters.blendIntensity },
       },
       vertexColors: true,
       vertexShader: vertex,
@@ -81,7 +91,7 @@ export default class Galaxy {
 
       // 生成约束后的随机偏移
       const randomX = effectiveRandomness * radius * (Math.random() < 0.5 ? 1 : -1) * Math.random() ** this.parameters.randomnessPower
-      const randomY = effectiveRandomness * radius * (Math.random() < 0.5 ? 1 : -0.1) * Math.random() ** this.parameters.randomnessPower * 40
+      const randomY = effectiveRandomness * radius * (Math.random() < 0.7 ? 1 : -0.1) * Math.random() ** this.parameters.randomnessPower * 40
       const randomZ = effectiveRandomness * radius * (Math.random() < 0.5 ? 1 : -1) * Math.random() ** this.parameters.randomnessPower
 
       const x = Math.cos(branchAngle + spinAngle) * radius
@@ -165,7 +175,7 @@ export default class Galaxy {
       fl.addBinding(this.parameters, 'size', {
         min: 10,
         max: 80,
-        step: 10,
+        step: 1,
       }).on('change', () => {
         this.material.uniforms.uSize.value = this.parameters.size
       })
@@ -237,6 +247,47 @@ export default class Galaxy {
         this.material.uniforms.uConstraintStrength.value = this.parameters.constraintStrength
         this.scene.remove(this.galaxy)
         this.setGalaxy()
+      })
+
+      // 纹理选择控制
+      const textureFolder = fl.addFolder({
+        title: '纹理选择',
+        expanded: true,
+      })
+
+      textureFolder.addBinding(this.parameters, 'textureIndex', {
+        min: 0,
+        max: 1,
+        step: 1,
+        label: '纹理',
+      }).on('change', () => {
+        // 根据索引选择对应的纹理
+        const textureNames = ['starTexture', 'starTexture2']
+        this.material.uniforms.uTexture.value = this.textures[textureNames[this.parameters.textureIndex]]
+      })
+
+      // 混合模式控制
+      const blendFolder = fl.addFolder({
+        title: '混合模式',
+        expanded: true,
+      })
+
+      blendFolder.addBinding(this.parameters, 'blendMode', {
+        min: 0,
+        max: 5,
+        step: 1,
+        label: '混合模式',
+      }).on('change', () => {
+        this.material.uniforms.uBlendMode.value = this.parameters.blendMode
+      })
+
+      blendFolder.addBinding(this.parameters, 'blendIntensity', {
+        min: 0.0,
+        max: 2.0,
+        step: 0.1,
+        label: '混合强度',
+      }).on('change', () => {
+        this.material.uniforms.uBlendIntensity.value = this.parameters.blendIntensity
       })
     }
   }

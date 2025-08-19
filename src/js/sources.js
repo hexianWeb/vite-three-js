@@ -29,5 +29,15 @@ export default [
       'textures/environmentMap/nz.jpg',
     ],
   },
+  {
+    name: 'starTexture',
+    type: 'texture',
+    path: 'textures/galaxy/1.png',
+  },
 
+  {
+    name: 'starTexture2',
+    type: 'texture',
+    path: 'textures/galaxy/4.png',
+  },
 ]
