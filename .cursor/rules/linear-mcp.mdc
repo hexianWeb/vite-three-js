@@ -23,6 +23,6 @@ alwaysApply: false
 - **git commit 需要遵守 commitizen 提交规范**
 - git commit message 最后文字需要将 **linear ID 序号为 HX-{number} 的 issue** 所关联的 GitHub issue 序号填在最后
 - commit 粒度合理，能清晰反映每个 issue 的工作内容
- 例如:  linear HX-24 关联的 github issue 序号为 9
+ 例如:  linear HX-24 关联的 github issue 序号为 24
  commit meg 为: refactor(building): 基类实现通用 upgrade，清理子类冗余升级逻辑，修复升级扣费依据目标等级 cost 的 BUG (#9)
 - **IDE 拥有调用 git 的权限，当我确认上述所有内容无误后，你自行执行 git add 相应 file, 并且 git commit message 命令。**

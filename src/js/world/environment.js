@@ -34,17 +34,17 @@ export default class Environment {
     this.sunLight.shadow.normalBias = 0.05
     this.sunLightPosition = new THREE.Vector3(18, 10, 4.5)
     this.sunLight.position.copy(this.sunLightPosition)
-    this.scene.add(this.sunLight)
+    // this.scene.add(this.sunLight)
 
     // 设置 sunLight Target
     this.sunLight.target = new THREE.Object3D()
     this.sunLightTarget = new THREE.Vector3(6.7, 2.3, -7)
     this.sunLight.target.position.copy(this.sunLightTarget)
-    this.scene.add(this.sunLight.target)
+    // this.scene.add(this.sunLight.target)
 
     this.helper = new THREE.CameraHelper(this.sunLight.shadow.camera)
     this.helper.visible = false
-    this.scene.add(this.helper)
+    // this.scene.add(this.helper)
   }
 
   setEnvironmentMap() {
@@ -53,8 +53,8 @@ export default class Environment {
     this.environmentMap.texture = this.resources.items.environmentMapTexture
     this.environmentMap.texture.colorSpace = THREE.SRGBColorSpace
 
-    this.scene.environment = this.environmentMap.texture
-    this.scene.background = this.environmentMap.texture
+    // this.scene.environment = this.environmentMap.texture
+    // this.scene.background = this.environmentMap.texture
   }
 
   updateSunLightPosition() {
