@@ -1,10 +1,8 @@
 uniform float uSize;
 uniform float uTime;
-uniform float uRadius;
 attribute float aScale;
 attribute vec3 aRandom;
 
-varying vec2 vUv;
 varying vec3 vColor;
 
 void main() {
@@ -18,7 +16,7 @@ void main() {
   modelPosition.x = cos(angle);
   modelPosition.z = sin(angle);
 
-  modelPosition.xyz += aRandom * 0.1;
+  // modelPosition.xyz += aRandom * 0.1;
   vec4 viewPosition = viewMatrix * modelPosition;
 
 
@@ -26,7 +24,7 @@ void main() {
   gl_Position = projectedPosition;
 
   gl_PointSize = uSize * aScale;
-  gl_PointSize *= ( 1.0 / - viewPosition.z *(modelPosition.y*0.2) );
+  gl_PointSize *= ( 1.0 / - viewPosition.z);
 
 
   /**
