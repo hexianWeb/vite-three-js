@@ -4,6 +4,26 @@ import Experience from './js/experience.js'
 
 const threeCanvas = ref(null)
 
+// Header 导航处理函数
+function handleNavigation(section, event) {
+  // 这里可以添加具体的导航逻辑
+  // 例如：路由跳转、滚动到指定区域、打开弹窗等
+
+  // 示例：可以通过 mitt 事件总线通知其他组件
+  // emitter.emit('navigation', { section })
+
+  // 添加点击反馈动效
+  if (event) {
+    const button = event.target.closest('.nav-button')
+    if (button) {
+      button.style.transform = 'scale(0.95)'
+      setTimeout(() => {
+        button.style.transform = ''
+      }, 150)
+    }
+  }
+}
+
 onMounted(() => {
   // 初始化 three.js 场景
   const _experience = new Experience(threeCanvas.value)
@@ -22,6 +42,38 @@ onMounted(() => {
       class="absolute inset-0 z-[1]"
       style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), rgba(0, 0, 0, 0.1) ;pointer-events: none;"
     />
+
+    <!-- Header 导航栏 -->
+    <header class="header-container">
+      <!-- 背景装饰线条 -->
+      <div class="header-decoration" />
+
+      <div class="header-content">
+        <!-- 左侧标题 -->
+        <div class="header-logo">
+          <h1 class="logo-text">
+            MAESTROM
+          </h1>
+        </div>
+
+        <!-- 右侧导航按钮 -->
+        <nav class="header-nav">
+          <button class="nav-button" data-text="ABOUT" @click="(event) => handleNavigation('ABOUT', event)">
+            <span class="nav-text">ABOUT</span>
+          </button>
+          <button class="nav-button" data-text="WORK" @click="(event) => handleNavigation('WORK', event)">
+            <span class="nav-text">WORK</span>
+          </button>
+          <button class="nav-button" data-text="LAB" @click="(event) => handleNavigation('LAB', event)">
+            <span class="nav-text">LAB</span>
+          </button>
+          <button class="nav-button contact-special" data-text="CONTACT" @click="(event) => handleNavigation('CONTACT', event)">
+            <span class="nav-text">CONTACT</span>
+            <div class="contact-flow-light" />
+          </button>
+        </nav>
+      </div>
+    </header>
 
     <!-- 标题区域 - 底部呼吸灯之上 -->
     <div class="title-container">
@@ -57,6 +109,446 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   display: block;
+  position: relative;
+  /* top: -; */
+}
+
+/* ===== Header 样式 ===== */
+.header-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  pointer-events: auto;
+  padding: 1.5rem 2rem;
+}
+
+.header-decoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.3) 10%,
+    rgba(178, 107, 245, 0.8) 50%,
+    rgba(168, 85, 247, 0.3) 90%,
+    transparent 100%);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  animation: headerGlow 4s ease-in-out infinite;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 90vw;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Logo 样式 */
+.header-logo {
+  position: relative;
+}
+
+.logo-text {
+  font-family: "Orbitron", sans-serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  margin: 0;
+  color: transparent;
+  -webkit-text-stroke: 2px #e9adfa;
+  text-shadow:
+    0 0 10px rgba(168, 85, 247, 0.6),
+    0 0 20px rgba(139, 92, 246, 0.4),
+    0 0 30px rgba(192, 132, 252, 0.2);
+  animation: logoGlow 3s ease-in-out infinite;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logo-text:hover {
+  -webkit-text-stroke: 1px rgba(168, 85, 247, 1);
+  text-shadow:
+    0 0 15px rgba(168, 85, 247, 0.8),
+    0 0 25px rgba(139, 92, 246, 0.6),
+    0 0 35px rgba(192, 132, 252, 0.4);
+  transform: scale(1.05);
+}
+
+/* 导航按钮样式 */
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-button {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+}
+
+.nav-text {
+  position: relative;
+  z-index: 2;
+  font-size: 1.5rem;
+  color: #f0d9f7;
+  text-shadow: 0 0 5px rgba(168, 85, 247, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* 按钮背景效果 */
+.nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.1) 50%,
+    transparent 100%);
+  transition: left 0.5s ease;
+  z-index: 1;
+}
+
+/* 按钮边框效果 */
+.nav-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid transparent;
+  background: linear-gradient(45deg,
+    rgba(168, 85, 247, 0.3),
+    rgba(139, 92, 246, 0.2),
+    rgba(192, 132, 252, 0.3)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+/* 悬停效果 */
+.nav-button:hover::before {
+  left: 0;
+}
+
+.nav-button:hover::after {
+  opacity: 1;
+}
+
+.nav-button:hover .nav-text {
+  background: linear-gradient(180deg, #fff, #f0d9f7 50%, #e785f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.6),
+    0 0 6px rgba(255, 255, 255, 0.4),
+    0 0 8px rgba(200, 191, 211, 0.3);
+  -webkit-text-stroke: 0.6px rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+/* 按钮激活效果 */
+.nav-button:active {
+  transform: scale(0.98);
+}
+
+.nav-button:active .nav-text {
+  background: linear-gradient(180deg, #d8b4fe, #a855f7 50%, #9333ea);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 3px rgba(168, 85, 247, 0.8),
+    0 0 6px rgba(139, 92, 246, 0.6),
+    0 0 12px rgba(124, 58, 237, 0.4);
+  -webkit-text-stroke: 0.8px rgba(168, 85, 247, 0.8);
+}
+
+/* ===== CONTACT 按钮特殊流光效果 ===== */
+.contact-special {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  background: linear-gradient(45deg,
+    rgba(168, 85, 247, 0.05),
+    rgba(139, 92, 246, 0.08),
+    rgba(192, 132, 252, 0.05));
+}
+
+/* CONTACT 按钮的流光效果 */
+.contact-flow-light {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(168, 85, 247, 0.3) 40%,
+    rgba(192, 132, 252, 0.5) 50%,
+    rgba(168, 85, 247, 0.3) 60%,
+    rgba(255, 255, 255, 0.1) 80%,
+    transparent 100%);
+  animation: contactFlowLight 3s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* CONTACT 按钮边框流光 */
+.contact-special::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg,
+    rgba(168, 85, 247, 0.6),
+    rgba(139, 92, 246, 0.8),
+    rgba(192, 132, 252, 0.6),
+    rgba(168, 85, 247, 0.4),
+    rgba(139, 92, 246, 0.6));
+  background-size: 300% 300%;
+  border-radius: 10px;
+  z-index: -1;
+  animation: contactBorderFlow 4s linear infinite;
+}
+
+/* CONTACT 按钮内部背景 */
+.contact-special::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  background: linear-gradient(45deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(20, 20, 30, 0.9),
+    rgba(0, 0, 0, 0.8));
+  border-radius: 7px;
+  z-index: 0;
+}
+
+/* CONTACT 按钮文字层级调整 */
+.contact-special .nav-text {
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, #fff, #f0d9f7 50%, #e785f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.6),
+    0 0 6px rgba(255, 255, 255, 0.4),
+    0 0 8px rgba(168, 85, 247, 0.4);
+  -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* CONTACT 流光动画 */
+@keyframes contactFlowLight {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes contactBorderFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 300%;
+  }
+}
+
+/* Header 动画 */
+@keyframes headerGlow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(168, 85, 247, 0.6),
+      0 0 20px rgba(139, 92, 246, 0.4),
+      0 0 30px rgba(192, 132, 252, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 15px rgba(168, 85, 247, 0.8),
+      0 0 25px rgba(139, 92, 246, 0.6),
+      0 0 35px rgba(192, 132, 252, 0.4);
+  }
+}
+
+/* 响应式设计 - Header */
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .header-nav {
+    gap: 1.5rem;
+  }
+
+    .nav-button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .contact-special {
+    border-radius: 6px;
+  }
+
+  .logo-text {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 1rem;
+  }
+
+  .header-nav {
+    gap: 1rem;
+  }
+
+    .nav-button {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .contact-special {
+    border-radius: 5px;
+  }
+
+  .contact-special::before {
+    border-radius: 7px;
+  }
+
+  .contact-special::after {
+    border-radius: 4px;
+  }
+
+  .logo-text {
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .header-nav {
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+    .nav-button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .contact-special {
+    border-radius: 4px;
+  }
+
+  .contact-special::before {
+    border-radius: 6px;
+  }
+
+  .contact-special::after {
+    border-radius: 3px;
+  }
+
+  .logo-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0.8rem;
+  }
+
+  .header-nav {
+    gap: 0.5rem;
+  }
+
+    .nav-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  .contact-special {
+    border-radius: 3px;
+  }
+
+  .contact-special::before {
+    border-radius: 5px;
+  }
+
+  .contact-special::after {
+    border-radius: 2px;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+  }
 }
 
 /* 标题容器 - 定位到呼吸灯之上 */

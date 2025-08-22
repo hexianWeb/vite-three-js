@@ -40,4 +40,10 @@ export default [
     type: 'texture',
     path: 'textures/galaxy/4.png',
   },
+  {
+    name: 'spaceTexture',
+    type: 'texture',
+    path: 'textures/galaxy/2k_stars_milky_way.jpg',
+  },
+
 ]

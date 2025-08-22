@@ -13,6 +13,7 @@ export default class World {
     this.debugActive = this.experience.debug.active
 
     this.axesHelper = new THREE.AxesHelper(5)
+    this.axesHelper.visible = false
     this.scene.add(this.axesHelper)
 
     // Environment
