@@ -45,5 +45,29 @@ export default [
     type: 'texture',
     path: 'textures/galaxy/2k_stars_milky_way.jpg',
   },
-
+  {
+    name: 'planetTexture',
+    type: 'texture',
+    path: 'textures/galaxy/2k_ceres_fictional.jpg',
+  },
+  {
+    name: 'planetTexture2',
+    type: 'texture',
+    path: 'textures/galaxy/2k_eris_fictional.jpg',
+  },
+  {
+    name: 'planetTexture3',
+    type: 'texture',
+    path: 'textures/galaxy/2k_haumea_fictional.jpg',
+  },
+  {
+    name: 'planetNormal',
+    type: 'texture',
+    path: 'textures/galaxy/red_sand_nor_gl_1k.jpg',
+  },
+  {
+    name: 'planetDisplacement',
+    type: 'texture',
+    path: 'textures/galaxy/red_sand_disp_1k.png',
+  },
 ]

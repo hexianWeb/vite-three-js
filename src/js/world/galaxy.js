@@ -135,7 +135,7 @@ export default class Galaxy {
     if (this.debugActive) {
       const fl = this.debug.addFolder({
         title: 'Galaxy',
-        expanded: true,
+        expanded: false,
       })
 
       fl.addBinding(this.parameters, 'count', {

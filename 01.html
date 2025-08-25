@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紫色呼吸灯效果</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #0a0015;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .breathing-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* 主呼吸灯 */
+        .breathing-light {
+            position: relative;
+            width: 400px;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(139, 92, 246, 0.3) 15%,
+                rgba(139, 92, 246, 0.8) 25%, 
+                rgba(168, 85, 247, 1) 40%, 
+                rgba(192, 132, 252, 1) 50%, 
+                rgba(168, 85, 247, 1) 60%, 
+                rgba(139, 92, 246, 0.8) 75%,
+                rgba(139, 92, 246, 0.3) 85%,
+                transparent 100%);
+            animation: breathe 3s ease-in-out infinite;
+            clip-path: ellipse(200px 2px at center);
+        }
+
+        /* 外层光晕 */
+        .breathing-light::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 20px;
+            background: radial-gradient(ellipse, 
+                rgba(168, 85, 247, 0.4) 0%, 
+                rgba(139, 92, 246, 0.25) 30%, 
+                rgba(124, 58, 237, 0.1) 60%, 
+                transparent 100%);
+            border-radius: 50px;
+            animation: breatheGlow 3s ease-in-out infinite;
+            filter: blur(8px);
+        }
+
+        /* 内层高光 */
+        .breathing-light::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.2) 15%,
+                rgba(255, 255, 255, 0.6) 25%,
+                rgba(255, 255, 255, 1) 50%, 
+                rgba(255, 255, 255, 0.6) 75%,
+                rgba(255, 255, 255, 0.2) 85%,
+                transparent 100%);
+            border-radius: 1px;
+            animation: breatheCore 3s ease-in-out infinite;
+            filter: blur(1px);
+            clip-path: ellipse(100px 1px at center);
+        }
+
+        /* 环境光晕 */
+        .ambient-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 40px;
+            background: radial-gradient(ellipse, 
+                rgba(139, 92, 246, 0.08) 0%, 
+                rgb(159, 61, 250) 10%, 
+                rgba(88, 28, 135, 0.02) 70%, 
+                transparent 100%);
+            border-radius: 50%;
+            animation: ambientBreathe 3s ease-in-out infinite;
+            filter: blur(20px);
+        }
+
+
+
+        /* 主呼吸动画 */
+        @keyframes breathe {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scaleX(0.8) scaleY(0.8);
+                filter: brightness(0.7);
+            }
+            50% {
+                opacity: 1;
+                transform: scaleX(1.2) scaleY(1.5);
+                filter: brightness(1.3);
+            }
+        }
+
+        @keyframes breatheGlow {
+            0%, 100% {
+                opacity: 0.4;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+        }
+
+        @keyframes breatheCore {
+            0%, 100% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scaleX(0.7) scaleY(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scaleX(1.1) scaleY(1.2);
+            }
+        }
+
+        @keyframes ambientBreathe {
+            0%, 100% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            50% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+        }
+
+
+
+        @keyframes float {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5);
+            }
+            50% {
+                opacity: 0.6;
+                transform: translateY(-20px) scale(1);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .breathing-light {
+                width: 300px;
+                height: 2px;
+            }
+            
+            .breathing-light::after {
+                width: 200px;
+                height: 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breathing-container">
+        <!-- 环境光晕 -->
+        <div class="ambient-glow"></div>
+        
+        <!-- 主呼吸灯 -->
+        <div class="breathing-light"></div>
+    </div>
+</body>
+</html>
