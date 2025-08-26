@@ -33,20 +33,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full relative bg-black" style="pointer-events: none;">
+  <div class=" w-full bg-black overflow-hidden h-screen" style="pointer-events: none;">
     <!-- three.js 渲染的 canvas -->
     <canvas ref="threeCanvas" class="three-canvas relative inset-0 z-0 " style="pointer-events: auto;" />
 
     <!-- Indigo Cosmos Background with Top Glow -->
     <div
-      class="absolute inset-0 z-[1]"
+      class="fixed inset-0 z-[1]"
       style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), rgba(0, 0, 0, 0.1) ;pointer-events: none;"
     />
 
     <!-- Header 导航栏 -->
     <header class="header-container">
       <!-- 背景装饰线条 -->
-      <div class="header-decoration" />
+      <!-- <div class="header-decoration" /> -->
 
       <div class="header-content">
         <!-- 左侧标题 -->
@@ -93,6 +93,50 @@ onMounted(() => {
       </h2>
     </div>
 
+    <!-- 右侧社交媒体导航栏 -->
+    <div class="social-nav-container">
+      <div class="social-nav-buttons">
+        <!-- Twitter/X 按钮 -->
+        <a
+          href="https://twitter.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-button twitter-button"
+          title="Follow on Twitter"
+        >
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+        </a>
+
+        <!-- GitHub 按钮 -->
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-button github-button"
+          title="View on GitHub"
+        >
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+          </svg>
+        </a>
+
+        <!-- LinkedIn 按钮 -->
+        <a
+          href="https://linkedin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-button linkedin-button"
+          title="Connect on LinkedIn"
+        >
+          <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
     <!-- 呼吸灯效果 - 底部10%位置 -->
     <div class="breathing-container">
       <!-- 环境光晕 -->
@@ -110,7 +154,7 @@ onMounted(() => {
   height: 100%;
   display: block;
   position: relative;
-  /* top: -; */
+  transform: translateY(-252px);
 }
 
 /* ===== Header 样式 ===== */
@@ -548,6 +592,255 @@ onMounted(() => {
   .logo-text {
     font-size: 1rem;
     letter-spacing: 0.08em;
+  }
+}
+
+/* ===== 右侧社交媒体导航栏样式 ===== */
+.social-nav-container {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  pointer-events: auto;
+}
+
+.social-nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* 社交媒体按钮基础样式 */
+.social-button {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg,
+    rgba(20, 20, 30, 0.9),
+    rgba(40, 40, 60, 0.8),
+    rgba(20, 20, 30, 0.9));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(168, 85, 247, 0.1);
+}
+
+/* 社交媒体图标样式 */
+.social-icon {
+  width: 24px;
+  height: 24px;
+  color: rgba(240, 217, 247, 0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+/* 按钮悬停背景效果 */
+.social-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+    rgba(168, 85, 247, 0.1) 0%,
+    rgba(139, 92, 246, 0.15) 50%,
+    rgba(192, 132, 252, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+/* 按钮边框流光效果 */
+.social-button::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg,
+    rgba(168, 85, 247, 0.6),
+    rgba(139, 92, 246, 0.8),
+    rgba(192, 132, 252, 0.6),
+    rgba(168, 85, 247, 0.4));
+  background-size: 300% 300%;
+  border-radius: 13px;
+  z-index: -1;
+  opacity: 0;
+  animation: socialBorderFlow 3s linear infinite;
+  transition: opacity 0.3s ease;
+}
+
+/* 悬停效果 */
+.social-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(168, 85, 247, 0.3);
+}
+
+.social-button:hover::before {
+  opacity: 1;
+}
+
+.social-button:hover::after {
+  opacity: 1;
+}
+
+.social-button:hover .social-icon {
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+}
+
+/* 按钮激活效果 */
+.social-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+/* 各平台特定悬停颜色 */
+.twitter-button:hover {
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(29, 161, 242, 0.3);
+}
+
+.twitter-button:hover .social-icon {
+  filter: drop-shadow(0 0 8px rgba(29, 161, 242, 0.6));
+}
+
+.github-button:hover {
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.github-button:hover .social-icon {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.linkedin-button:hover {
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 119, 181, 0.3);
+}
+
+.linkedin-button:hover .social-icon {
+  filter: drop-shadow(0 0 8px rgba(0, 119, 181, 0.6));
+}
+
+/* 社交按钮边框流光动画 */
+@keyframes socialBorderFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 300%;
+  }
+}
+
+/* 响应式设计 - 社交媒体导航栏 */
+@media (max-width: 1024px) {
+  .social-nav-container {
+    right: 1.5rem;
+  }
+
+  .social-button {
+    width: 45px;
+    height: 45px;
+  }
+
+  .social-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .social-nav-container {
+    right: 1rem;
+    top: auto;
+    bottom: 15%;
+    transform: none;
+  }
+
+  .social-nav-buttons {
+    flex-direction: row;
+    gap: 0.8rem;
+  }
+
+  .social-button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .social-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .social-nav-container {
+    right: 0.8rem;
+    bottom: 12%;
+  }
+
+  .social-nav-buttons {
+    gap: 0.6rem;
+  }
+
+  .social-button {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .social-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-nav-container {
+    right: 0.5rem;
+    bottom: 10%;
+  }
+
+  .social-nav-buttons {
+    gap: 0.5rem;
+  }
+
+  .social-button {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+  }
+
+  .social-button::after {
+    border-radius: 9px;
+  }
+
+  .social-icon {
+    width: 16px;
+    height: 16px;
   }
 }
 

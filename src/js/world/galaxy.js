@@ -15,7 +15,7 @@ export default class Galaxy {
 
     // Point Params
     this.parameters = {
-      size: 49,
+      size: 55,
       count: 140000 / 1.5,
       radius: 5,
       branches: 10,
@@ -50,7 +50,7 @@ export default class Galaxy {
     })
 
     this.setGalaxy()
-    this.debuggerInit()
+    // this.debuggerInit()
   }
 
   setGalaxy() {

@@ -53,7 +53,7 @@ export default class Environment {
     this.environmentMap.texture = this.resources.items.environmentMapTexture
     this.environmentMap.texture.colorSpace = THREE.SRGBColorSpace
     this.scene.background = this.resources.items.spaceTexture
-    this.scene.backgroundIntensity = 0.5
+    this.scene.backgroundIntensity = 0.25
   }
 
   updateSunLightPosition() {

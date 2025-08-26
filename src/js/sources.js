@@ -58,7 +58,7 @@ export default [
   {
     name: 'planetTexture3',
     type: 'texture',
-    path: 'textures/galaxy/2k_haumea_fictional.jpg',
+    path: 'textures/galaxy/2k_venus_surface.jpg',
   },
   {
     name: 'planetNormal',
