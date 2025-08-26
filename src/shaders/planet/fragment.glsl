@@ -9,6 +9,7 @@ uniform float uPointLightIntensity;
 uniform vec3 uPointLightPosition;
 uniform float uRoughness;
 uniform float uMetalness;
+
   
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -73,15 +74,14 @@ void main() {
   
   // 镜面反射（简化版）
   vec3 reflectDirection = reflect(-lightDirection, normal);
-  float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 32.0 * roughnessFactor);
+  float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 4.0 * roughnessFactor);
   vec3 specularColor = uPointLightColor * specular * metallic * fresnel * attenuation;
   
   // 最终颜色组合
   vec3 finalColor = ambient + diffuse + specularColor * 0.3;
-  
+
   // 确保颜色在合理范围内
-  finalColor = clamp(finalColor, 0.0, 1.7);
-  
+  finalColor = clamp(finalColor, 0.0, 1.0);
   gl_FragColor = vec4(finalColor, 1.0);
   
     #include <tonemapping_fragment>

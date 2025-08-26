@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import atmosphereFragmentShader from '../../shaders/atmosphere/fragment.glsl'
+import atmosphereVertexShader from '../../shaders/atmosphere/vertex.glsl'
 // 导入着色器
 import planetFragmentShader from '../../shaders/planet/fragment.glsl'
 import planetVertexShader from '../../shaders/planet/vertex.glsl'
@@ -24,20 +26,41 @@ export default class Plant {
     this.position = { x: 0, y: 0, z: 0 } // 星球位置
     this.rotation = { x: 0, y: 0, z: 0 } // 星球旋转速度
 
-    this.params = {
-      ambientLight: '#8282d2',
+    // 默认参数
+    const defaultParams = {
+      ambientLight: '#a08ebd',
       ambientLightIntensity: 0.25,
       pointLightColor: '#d8aaf5',
       pointLightIntensity: 6.0,
       pointLightPosition: {
-        x: -5.0,
-        y: 0.5,
+        x: 0.0,
+        y: 0.0,
       },
       roughness: 0.7,
       metalness: 0.1,
       normalScale: 1.0,
       displacementScale: 0.1,
+      // 大气层颜色
+      atmosphereDayColor: '#7248eb',
+      atmosphereTwilightColor: '#3c40e1',
+      atmosphereIntensity: 3.0,
+      atmosphereThickness: 1.5,
+      // 自转属性
+      rotationSpeed: {
+        x: 0.2,
+        y: 0.2,
+        z: 0.0,
+      },
     }
+
+    // 合并参数
+    this.params = this.deepMerge(defaultParams, options.params || {})
+
+    // 应用自转速度
+    this.rotation.x = this.params.rotationSpeed.x
+    this.rotation.y = this.params.rotationSpeed.y
+    this.rotation.z = this.params.rotationSpeed.z
+
     // 初始化星球
     this.init()
 
@@ -52,16 +75,16 @@ export default class Plant {
     // 创建星球几何体（增加细分以支持置换）
     this.geometry = new THREE.SphereGeometry(this.radius, 128, 64)
 
-    // 设置主纹理
+    // 设置主纹理 & 各项异性过滤
     const texture = this.resources.items[this.textureName]
     texture.colorSpace = THREE.SRGBColorSpace
     texture.anisotropy = 16
 
-    // 设置法线贴图
+    // 设置法线贴图 & 各项异性过滤
     const normalMap = this.resources.items.planetNormal
     normalMap.anisotropy = 16
 
-    // 设置置换贴图
+    // 设置置换贴图 & 各项异性过滤
     const displacementMap = this.resources.items.planetDisplacement
     displacementMap.anisotropy = 16
     // 创建着色器材质，模拟光照
@@ -87,11 +110,12 @@ export default class Plant {
         uPointLightIntensity: { value: this.params.pointLightIntensity },
 
         // 点光源位置
-        uPointLightPosition: { value: new THREE.Vector3(this.params.pointLightPosition.x, 0, this.params.pointLightPosition.y) },
+        uPointLightPosition: { value: new THREE.Vector3(this.params.pointLightPosition.x, 1, this.params.pointLightPosition.y) },
 
         // 材质属性
         uRoughness: { value: this.params.roughness },
         uMetalness: { value: this.params.metalness },
+
       },
     })
 
@@ -99,11 +123,47 @@ export default class Plant {
     this.planet = new THREE.Mesh(this.geometry, this.material)
     this.planet.position.set(this.position.x, this.position.y, this.position.z)
 
+    // 创建大气层
+    this.createAtmosphere()
+
     // 创建点光源位置指示器
     this.createLightIndicator()
 
     // 添加到场景
     this.scene.add(this.planet)
+  }
+
+  // 创建大气层
+  createAtmosphere() {
+    // 创建大气层几何体，半径比星球大 4%
+    const atmosphereRadius = this.radius * 1.15
+    this.atmosphereGeometry = new THREE.IcosahedronGeometry(atmosphereRadius, 64, 32)
+
+    // 创建大气层材质
+    this.atmosphereMaterial = new THREE.ShaderMaterial({
+      vertexShader: atmosphereVertexShader,
+      fragmentShader: atmosphereFragmentShader,
+      uniforms: {
+        // 点光源位置
+        uPointLightPosition: { value: new THREE.Vector3(this.params.pointLightPosition.x, 0, this.params.pointLightPosition.y) },
+
+        // 大气效果参数
+        uAtmosphereDayColor: { value: new THREE.Color(this.params.atmosphereDayColor) },
+        uAtmosphereTwilightColor: { value: new THREE.Color(this.params.atmosphereTwilightColor) },
+        uAtmosphereIntensity: { value: this.params.atmosphereIntensity },
+        uAtmosphereThickness: { value: this.params.atmosphereThickness },
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide, // 从内部渲染
+    })
+
+    // 创建大气层网格
+    this.atmosphere = new THREE.Mesh(this.atmosphereGeometry, this.atmosphereMaterial)
+    this.atmosphere.position.copy(this.planet.position)
+
+    // 添加到场景
+    this.scene.add(this.atmosphere)
   }
 
   // 创建点光源位置指示器
@@ -120,7 +180,7 @@ export default class Plant {
 
     // 创建光源指示器网格
     this.lightIndicator = new THREE.Mesh(this.lightIndicatorGeometry, this.lightIndicatorMaterial)
-
+    this.lightIndicator.visible = false
     // 设置初始位置
     this.updateLightIndicatorPosition()
 
@@ -150,7 +210,7 @@ export default class Plant {
   update() {
     if (this.planet) {
       // 星球自转
-      this.planet.rotation.y -= this.rotation.y * this.time.delta * 0.0005
+      this.planet.rotation.y += this.rotation.y * this.time.delta * 0.0005
     }
 
     // 让光源指示器缓慢旋转，增加视觉效果
@@ -162,174 +222,7 @@ export default class Plant {
 
   // 调试控制面板
   debugInit() {
-    // ===== 星球控制面板 =====
-    this.debugFolder = this.debug.ui.addFolder({
-      title: '星球控制',
-      expanded: true,
-    })
-
-    // ----- 基本属性控制 -----
-    const basicFolder = this.debugFolder.addFolder({
-      title: '基本属性',
-      expanded: true,
-    })
-
-    // 星球半径控制
-    basicFolder.addBinding(
-      this,
-      'radius',
-      {
-        label: '星球半径',
-        min: 0.1,
-        max: 5.0,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.updateGeometry()
-    })
-
-    // 位置控制
-    const positionFolder = this.debugFolder.addFolder({
-      title: '位置控制',
-      expanded: false,
-    })
-
-    positionFolder.addBinding(
-      this.position,
-      'x',
-      {
-        label: 'X 位置',
-        min: -10,
-        max: 10,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.updatePosition()
-    })
-
-    positionFolder.addBinding(
-      this.position,
-      'y',
-      {
-        label: 'Y 位置',
-        min: -10,
-        max: 10,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.updatePosition()
-    })
-
-    positionFolder.addBinding(
-      this.position,
-      'z',
-      {
-        label: 'Z 位置',
-        min: -10,
-        max: 10,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.updatePosition()
-    })
-
-    // 旋转速度控制
-    const rotationFolder = this.debugFolder.addFolder({
-      title: '自转速度',
-      expanded: false,
-    })
-
-    rotationFolder.addBinding(
-      this.rotation,
-      'y',
-      {
-        label: 'Y轴旋转速度',
-        min: -5,
-        max: 5,
-        step: 0.1,
-      },
-    )
-    // 材质控制
-    const materialFolder = this.debugFolder.addFolder({
-      title: '材质属性',
-      expanded: false,
-    })
-
-    materialFolder.addBinding(
-      this.material.uniforms.uRoughness,
-      'value',
-      {
-        label: '粗糙度',
-        min: 0,
-        max: 1,
-        step: 0.01,
-      },
-    )
-
-    materialFolder.addBinding(
-      this.material.uniforms.uMetalness,
-      'value',
-      {
-        label: '金属度',
-        min: 0,
-        max: 1,
-        step: 0.01,
-      },
-    )
-
-    // 贴图强度控制
-    const textureFolder = this.debugFolder.addFolder({
-      title: '表面细节',
-      expanded: false,
-    })
-
-    // 法线贴图强度
-    textureFolder.addBinding(
-      this.params,
-      'normalScale',
-      {
-        label: '法线强度',
-        min: 0.0,
-        max: 3.0,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.material.uniforms.uNormalScale.value = this.params.normalScale
-    })
-
-    // 置换贴图强度
-    textureFolder.addBinding(
-      this.params,
-      'displacementScale',
-      {
-        label: '置换强度',
-        min: 0.0,
-        max: 1.0,
-        step: 0.01,
-      },
-    ).on('change', () => {
-      this.material.uniforms.uDisplacementScale.value = this.params.displacementScale
-    })
-
-    // 纹理切换
-    const textureOptions = [
-      { text: '星球纹理1', value: 'planetTexture' },
-      { text: '星球纹理2', value: 'planetTexture2' },
-      { text: '星球纹理3', value: 'planetTexture3' },
-    ]
-
-    const currentTexture = this.textureName
-    materialFolder.addBinding(
-      { texture: currentTexture },
-      'texture',
-      {
-        label: '纹理选择',
-        options: textureOptions,
-      },
-    ).on('change', (event) => {
-      this.material.uniforms.uTexture.value = this.resources.items[event.value]
-      this.textureName = event.value
-    })
+    // 星球控制改由 Plants 统一管理，此处不再创建星球控制面板
   }
 
   // 更新几何体
@@ -344,6 +237,10 @@ export default class Plant {
   updatePosition() {
     if (this.planet) {
       this.planet.position.set(this.position.x, this.position.y, this.position.z)
+      // 同时更新大气层位置
+      if (this.atmosphere) {
+        this.atmosphere.position.copy(this.planet.position)
+      }
     }
   }
 
@@ -372,124 +269,84 @@ export default class Plant {
 
   // 新增光照调节面板
   debuggerInit() {
-    // ===== 光照调节面板 =====
+    // ===== 大气层调节（光照共享，局部仅保留大气颜色） =====
     this.lightingDebugFolder = this.debug.ui.addFolder({
-      title: '🌟 光照调节面板',
+      title: '🌫️ 大气层调节',
       expanded: true,
     })
 
-    // ----- 环境光控制 -----
-    const ambientFolder = this.lightingDebugFolder.addFolder({
-      title: '环境光设置',
+    // ----- 大气层控制（仅颜色） -----
+    const atmosphereFolder = this.lightingDebugFolder.addFolder({
+      title: '大气层颜色',
       expanded: true,
     })
 
-    // 环境光颜色
-    ambientFolder.addBinding(
+    // 大气层颜色
+    atmosphereFolder.addBinding(
       this.params,
-      'ambientLight',
+      'atmosphereDayColor',
       {
-        label: '环境光颜色',
+        label: '白天大气颜色',
         picker: 'inline',
-        type: 'color',
       },
     ).on('change', ({ value }) => {
-      this.material.uniforms.uAmbientLight.value = new THREE.Color(value)
+      if (this.atmosphereMaterial) {
+        this.atmosphereMaterial.uniforms.uAtmosphereDayColor.value = new THREE.Color(value)
+      }
     })
 
-    // 环境光强度
-    ambientFolder.addBinding(
+    // 黄昏大气颜色
+    atmosphereFolder.addBinding(
       this.params,
-      'ambientLightIntensity',
+      'atmosphereTwilightColor',
       {
-        label: '环境光强度',
-        min: 0.0,
-        max: 3.0,
-        step: 0.1,
+        label: '黄昏大气颜色',
+        picker: 'inline',
       },
-    ).on('change', () => {
+    ).on('change', ({ value }) => {
+      if (this.atmosphereMaterial) {
+        this.atmosphereMaterial.uniforms.uAtmosphereTwilightColor.value = new THREE.Color(value)
+      }
+    })
+  }
+
+  // 与上层共享光照参数同步（由 Plants 统一调控）
+  syncLighting(shared) {
+    if (!shared)
+      return
+
+    // 更新内部参数
+    this.params.ambientLight = shared.ambientLight
+    this.params.ambientLightIntensity = shared.ambientLightIntensity
+    this.params.pointLightColor = shared.pointLightColor
+    this.params.pointLightIntensity = shared.pointLightIntensity
+    this.params.pointLightPosition = { x: shared.pointLightPosition.x, y: shared.pointLightPosition.y }
+
+    // 同步材质 uniforms
+    if (this.material && this.material.uniforms) {
+      this.material.uniforms.uAmbientLight.value = new THREE.Color(this.params.ambientLight)
       this.material.uniforms.uAmbientLightIntensity.value = this.params.ambientLightIntensity
-    })
+      this.material.uniforms.uPointLightColor.value = new THREE.Color(this.params.pointLightColor)
+      this.material.uniforms.uPointLightIntensity.value = this.params.pointLightIntensity
+      this.material.uniforms.uPointLightPosition.value.set(
+        this.params.pointLightPosition.x,
+        0,
+        this.params.pointLightPosition.y,
+      )
+    }
 
-    // ----- 点光源控制 -----
-    const pointLightFolder = this.lightingDebugFolder.addFolder({
-      title: '点光源设置',
-      expanded: true,
-    })
+    // 同步大气层中的光源位置
+    if (this.atmosphereMaterial && this.atmosphereMaterial.uniforms) {
+      this.atmosphereMaterial.uniforms.uPointLightPosition.value.set(
+        this.params.pointLightPosition.x,
+        0,
+        this.params.pointLightPosition.y,
+      )
+    }
 
-    // 点光源颜色
-    pointLightFolder.addBinding(
-      this.params,
-      'pointLightColor',
-      {
-        label: '点光源颜色',
-        picker: 'inline',
-      },
-    ).on('change', ({ value }) => {
-      this.material.uniforms.uPointLightColor.value = new THREE.Color(value)
-      this.updateLightIndicatorColor()
-    })
-
-    // 点光源强度
-    pointLightFolder.addBinding(
-      this.params,
-      'pointLightIntensity',
-      {
-        label: '点光源强度',
-        min: 0.0,
-        max: 5.0,
-        step: 0.1,
-      },
-    ).on('change', ({ value }) => {
-      this.material.uniforms.uPointLightIntensity.value = value
-    })
-
-    // ----- 点光源位置控制 -----
-    const lightPositionFolder = pointLightFolder.addFolder({
-      title: '光源位置',
-      expanded: true,
-    })
-
-    lightPositionFolder.addBinding(
-      this.params,
-      'pointLightPosition',
-      {
-        label: '光源位置',
-        min: -5,
-        max: 5,
-        step: 0.1,
-      },
-    ).on('change', () => {
-      this.material.uniforms.uPointLightPosition.value.set(this.params.pointLightPosition.x, 0, this.params.pointLightPosition.y)
-      this.updateLightIndicatorPosition()
-    })
-
-    // ----- 快速预设 -----
-    const presetFolder = this.lightingDebugFolder.addFolder({
-      title: '光照预设',
-      expanded: false,
-    })
-
-    // 预设选项
-    const lightPresets = [
-      { text: '默认设置', value: 'default' },
-      { text: '暖色调', value: 'warm' },
-      { text: '冷色调', value: 'cool' },
-      { text: '强光照', value: 'bright' },
-      { text: '柔和光照', value: 'soft' },
-      { text: '戏剧性光照', value: 'dramatic' },
-    ]
-
-    presetFolder.addBinding(
-      { preset: 'default' },
-      'preset',
-      {
-        label: '选择预设',
-        options: lightPresets,
-      },
-    ).on('change', (event) => {
-      this.applyLightingPreset(event.value)
-    })
+    // 更新指示器
+    this.updateLightIndicatorPosition()
+    this.updateLightIndicatorColor()
   }
 
   // 应用光照预设
@@ -571,6 +428,19 @@ export default class Plant {
     this.material.uniforms.uNormalScale.value = this.params.normalScale
     this.material.uniforms.uDisplacementScale.value = this.params.displacementScale
 
+    // 更新大气效果
+    if (this.atmosphereMaterial) {
+      this.atmosphereMaterial.uniforms.uAtmosphereDayColor.value = new THREE.Color(this.params.atmosphereDayColor)
+      this.atmosphereMaterial.uniforms.uAtmosphereTwilightColor.value = new THREE.Color(this.params.atmosphereTwilightColor)
+      this.atmosphereMaterial.uniforms.uAtmosphereIntensity.value = this.params.atmosphereIntensity
+      this.atmosphereMaterial.uniforms.uAtmosphereThickness.value = this.params.atmosphereThickness
+      this.atmosphereMaterial.uniforms.uPointLightPosition.value.set(
+        this.params.pointLightPosition.x,
+        0,
+        this.params.pointLightPosition.y,
+      )
+    }
+
     // 更新指示器
     this.updateLightIndicatorPosition()
     this.updateLightIndicatorColor()
@@ -584,11 +454,34 @@ export default class Plant {
       this.material.dispose()
     }
 
+    // 清理大气层
+    if (this.atmosphere) {
+      this.scene.remove(this.atmosphere)
+      this.atmosphereGeometry.dispose()
+      this.atmosphereMaterial.dispose()
+    }
+
     // 清理光源指示器
     if (this.lightIndicator) {
       this.scene.remove(this.lightIndicator)
       this.lightIndicatorGeometry.dispose()
       this.lightIndicatorMaterial.dispose()
     }
+  }
+
+  // 深度合并对象的工具方法
+  deepMerge(target, source) {
+    const result = { ...target }
+
+    for (const key in source) {
+      if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        result[key] = this.deepMerge(target[key] || {}, source[key])
+      }
+      else {
+        result[key] = source[key]
+      }
+    }
+
+    return result
   }
 }
