@@ -136,7 +136,7 @@ export default class Plant {
   // 创建大气层
   createAtmosphere() {
     // 创建大气层几何体，半径比星球大 4%
-    const atmosphereRadius = this.radius * 1.15
+    const atmosphereRadius = this.radius * 1.14
     this.atmosphereGeometry = new THREE.IcosahedronGeometry(atmosphereRadius, 64, 32)
 
     // 创建大气层材质

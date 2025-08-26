@@ -16,7 +16,7 @@ export default class Galaxy {
     // Point Params
     this.parameters = {
       size: 55,
-      count: 140000 / 1.5,
+      count: 140000,
       radius: 5,
       branches: 10,
       spin: 1,
