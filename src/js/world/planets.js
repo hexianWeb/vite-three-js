@@ -1,10 +1,10 @@
 import Experience from '../experience.js'
-import Plant from './plant.js'
+import Planet from './planet.js'
 
 const RADIUS = 0.7
 
 // 构建三星运动系统
-export default class Plants {
+export default class Planets {
   constructor() {
     // 获取 Experience 单例实例
     this.experience = new Experience()
@@ -41,7 +41,95 @@ export default class Plants {
       yOffsetScale: 1.5, // Y轴偏移缩放因子
     }
 
-    // 全局共享光照参数（由 Plants 统一调控）
+    // 多频共振全局控制参数
+    this.harmonicsGlobal = {
+      enabled: true, // 是否启用多频共振
+      strength: 1.0, // 全局强度调节
+    }
+
+    // 每颗星体的谐波配置（可通过调试面板动态调整）
+    this.harmonicsConfig = [
+      {
+        enabled: true,
+        label: 'Planet A',
+        harmonics: [
+          {
+            enabled: true,
+            freqRatio: 1.618,
+            radialStrength: 0.18,
+            angleStrength: 0.12,
+            skewStrength: 0.10,
+            verticalStrength: 0.08,
+            phase: 0.0,
+            verticalPhase: Math.PI / 2,
+          },
+          {
+            enabled: true,
+            freqRatio: 2.618,
+            radialStrength: 0.12,
+            angleStrength: -0.10,
+            skewStrength: -0.06,
+            verticalStrength: 0.04,
+            phase: Math.PI / 3,
+            verticalPhase: Math.PI / 4,
+          },
+        ],
+      },
+      {
+        enabled: true,
+        label: 'Planet B',
+        harmonics: [
+          {
+            enabled: true,
+            freqRatio: 2.0,
+            radialStrength: 0.22,
+            angleStrength: 0.16,
+            skewStrength: -0.12,
+            verticalStrength: 0.05,
+            phase: Math.PI / 5,
+            verticalPhase: 0,
+          },
+          {
+            enabled: true,
+            freqRatio: 3.0,
+            radialStrength: 0.10,
+            angleStrength: 0.08,
+            skewStrength: 0.05,
+            verticalStrength: 0.06,
+            phase: Math.PI * 0.75,
+            verticalPhase: Math.PI / 6,
+          },
+        ],
+      },
+      {
+        enabled: true,
+        label: 'Planet C',
+        harmonics: [
+          {
+            enabled: true,
+            freqRatio: 1.0,
+            radialStrength: 0.15,
+            angleStrength: -0.18,
+            skewStrength: 0.14,
+            verticalStrength: 0.07,
+            phase: Math.PI / 4,
+            verticalPhase: Math.PI / 3,
+          },
+          {
+            enabled: true,
+            freqRatio: 2.414,
+            radialStrength: 0.11,
+            angleStrength: 0.09,
+            skewStrength: -0.05,
+            verticalStrength: 0.05,
+            phase: Math.PI * 0.45,
+            verticalPhase: Math.PI / 2,
+          },
+        ],
+      },
+    ]
+
+    // 全局共享光照参数（由 Planets 统一调控）
     this.sharedLighting = {
       ambientLight: '#a08ebd',
       ambientLightIntensity: 0.25,
@@ -61,11 +149,11 @@ export default class Plants {
     this.planetSpeeds = [
       {
         baseSpeed: 1.0, // Planet A (radius: RADIUS * 1.2) - 最大，最慢
-        speedMultiplier: 0.8, // 相对速度倍数
+        speedMultiplier: 1.0, // 相对速度倍数（默认统一速度）
       },
       {
         baseSpeed: 1.0, // Planet B (radius: RADIUS * 0.7) - 最小，最快
-        speedMultiplier: 1.3,
+        speedMultiplier: 1.0,
       },
       {
         baseSpeed: 1.0, // Planet C (radius: RADIUS * 1.0) - 中等，中等速度
@@ -74,7 +162,7 @@ export default class Plants {
     ]
 
     // 速度模式配置
-    this.speedMode = 'size_based' // 'uniform', 'size_based', 'custom'
+    this.speedMode = 'uniform' // 'uniform', 'size_based', 'custom'
 
     // 创建三颗星球
     this.createThreeStarSystem()
@@ -126,7 +214,7 @@ export default class Plants {
 
     // 创建三颗星球
     planetConfigs.forEach((config) => {
-      const planet = new Plant({
+      const planet = new Planet({
         radius: config.radius,
         texture: config.texture,
         params: config.params,
@@ -148,8 +236,7 @@ export default class Plants {
     })
 
     // 应用初始速度配置
-    this.speedMode = 'size_based' // 默认基于大小的速度
-    this.updateSpeedMultipliers()
+    this.speedMode = 'uniform' // 默认统一速度
   }
 
   update() {
@@ -212,20 +299,86 @@ export default class Plants {
     const phaseOffset = phaseOffsets[planetIndex]
 
     // 使用星体特定的速度
-    const ellipseAngle = time * planetSpeed + phaseOffset
+    const baseAngle = time * planetSpeed + phaseOffset
 
-    const localX = ellipseParams.a * Math.cos(ellipseAngle)
-    const localY = ellipseParams.b * Math.sin(ellipseAngle)
+    // 计算谐波调制后的角度与尺度
+    const harmonicInfluence = this.getHarmonicInfluence(planetIndex, baseAngle)
+    const modulatedAngle = baseAngle + harmonicInfluence.angleOffset
+
+    // 计算基于谐波的尺度变化并限制极值，避免轨迹过度扭曲
+    const baseScale = 1 + harmonicInfluence.radialOffset
+    const clampedBaseScale = Math.min(Math.max(baseScale, 0.2), 3.0)
+    const skewOffset = Math.min(Math.max(harmonicInfluence.skewOffset, -0.9), 0.9)
+
+    const axisX = ellipseParams.a * Math.max(0.15, clampedBaseScale + skewOffset)
+    const axisY = ellipseParams.b * Math.max(0.15, clampedBaseScale - skewOffset)
+
+    const localX = axisX * Math.cos(modulatedAngle)
+    const localY = axisY * Math.sin(modulatedAngle)
 
     const x = localX * Math.cos(orbitRotation) - localY * Math.sin(orbitRotation)
     const z = localX * Math.sin(orbitRotation) + localY * Math.cos(orbitRotation)
 
     // 基础Y轴偏移 + 少量垂直运动
     const baseYOffset = ellipseParams.yOffset
-    const verticalMotion = Math.sin(ellipseAngle * 2 + phaseOffset) * this.motionParams.verticalAmplitude * 0.1
-    const y = baseYOffset + verticalMotion
+    const verticalMotion = Math.sin(modulatedAngle * 2 + phaseOffset) * this.motionParams.verticalAmplitude * 0.1
+    const harmonicVertical = Math.min(Math.max(harmonicInfluence.verticalOffset, -3.0), 3.0)
+    const y = baseYOffset + verticalMotion + harmonicVertical
 
     return { x, y, z }
+  }
+
+  // 计算谐波叠加对星体轨道的影响
+  getHarmonicInfluence(planetIndex, baseAngle) {
+    if (!this.harmonicsGlobal.enabled) {
+      return {
+        radialOffset: 0,
+        angleOffset: 0,
+        skewOffset: 0,
+        verticalOffset: 0,
+      }
+    }
+
+    const config = this.harmonicsConfig[planetIndex]
+    if (!config || !config.enabled) {
+      return {
+        radialOffset: 0,
+        angleOffset: 0,
+        skewOffset: 0,
+        verticalOffset: 0,
+      }
+    }
+
+    let radialOffset = 0
+    let angleOffset = 0
+    let skewOffset = 0
+    let verticalOffset = 0
+
+    const globalStrength = this.harmonicsGlobal.strength ?? 1
+
+    config.harmonics.forEach((harmonic) => {
+      if (!harmonic?.enabled)
+        return
+
+      const freqRatio = harmonic.freqRatio ?? 1
+      const phase = harmonic.phase ?? 0
+      const strength = globalStrength * (harmonic.strength ?? 1)
+      const harmonicAngle = baseAngle * freqRatio + phase
+
+      radialOffset += (harmonic.radialStrength ?? 0) * Math.cos(harmonicAngle) * strength
+      angleOffset += (harmonic.angleStrength ?? 0) * Math.sin(harmonicAngle) * strength
+      skewOffset += (harmonic.skewStrength ?? 0) * Math.sin(harmonicAngle) * strength
+
+      const verticalPhase = harmonic.verticalPhase ?? 0
+      verticalOffset += (harmonic.verticalStrength ?? 0) * Math.sin(harmonicAngle + verticalPhase) * strength
+    })
+
+    return {
+      radialOffset,
+      angleOffset,
+      skewOffset,
+      verticalOffset,
+    }
   }
 
   // 记录轨迹点
@@ -662,6 +815,180 @@ export default class Plants {
         this.applySpeedPreset(preset.value)
       })
     })
+
+    // ===== 多频共振调试 =====
+    const harmonicsFolder = this.debugFolder.addFolder({
+      title: '🎼 多频共振',
+      expanded: false,
+    })
+
+    harmonicsFolder.addBinding(
+      this.harmonicsGlobal,
+      'enabled',
+      {
+        label: '启用共振',
+      },
+    ).on('change', () => {
+      this.clearTrajectories()
+    })
+
+    harmonicsFolder.addBinding(
+      this.harmonicsGlobal,
+      'strength',
+      {
+        label: '全局强度',
+        min: 0.0,
+        max: 2.0,
+        step: 0.05,
+      },
+    ).on('change', () => {
+      this.clearTrajectories()
+    })
+
+    this.harmonicsConfig.forEach((config, planetIndex) => {
+      const planetFolder = harmonicsFolder.addFolder({
+        title: `${config.label || `Planet ${planetIndex + 1}`}`,
+        expanded: false,
+      })
+
+      planetFolder.addBinding(
+        config,
+        'enabled',
+        {
+          label: '启用星体谐波',
+        },
+      ).on('change', () => {
+        this.clearTrajectories()
+      })
+
+      config.harmonics.forEach((harmonic, harmonicIndex) => {
+        const harmonicFolder = planetFolder.addFolder({
+          title: `谐波 ${harmonicIndex + 1}`,
+          expanded: harmonicIndex === 0,
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'enabled',
+          {
+            label: '启用',
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'freqRatio',
+          {
+            label: '频率比',
+            min: 0.5,
+            max: 4.0,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'radialStrength',
+          {
+            label: '径向强度',
+            min: -0.6,
+            max: 0.6,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'angleStrength',
+          {
+            label: '角向强度',
+            min: -0.6,
+            max: 0.6,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'skewStrength',
+          {
+            label: '椭圆偏置',
+            min: -0.6,
+            max: 0.6,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'verticalStrength',
+          {
+            label: '垂直强度',
+            min: -0.4,
+            max: 0.4,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'phase',
+          {
+            label: '相位',
+            min: 0,
+            max: Math.PI * 2,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+
+        harmonicFolder.addBinding(
+          harmonic,
+          'verticalPhase',
+          {
+            label: '垂直相位',
+            min: 0,
+            max: Math.PI * 2,
+            step: 0.01,
+          },
+        ).on('change', () => {
+          this.clearTrajectories()
+        })
+      })
+    })
+
+    const harmonicPresetFolder = harmonicsFolder.addFolder({
+      title: '共振预设',
+      expanded: false,
+    })
+
+    const harmonicPresets = [
+      { text: '黄金共振', value: 'golden' },
+      { text: '李萨如舞步', value: 'lissajous' },
+      { text: '曼陀罗花瓣', value: 'mandala' },
+      { text: '随机共振', value: 'chaotic' },
+    ]
+
+    harmonicPresets.forEach((preset) => {
+      harmonicPresetFolder.addButton({
+        title: preset.text,
+      }).on('click', () => {
+        this.applyHarmonicPreset(preset.value)
+      })
+    })
   }
 
   // 清空轨迹
@@ -769,6 +1096,99 @@ export default class Plants {
     return configs[index]
   }
 
+  // 应用谐波预设，快速生成具有特色的多频共振轨道
+  applyHarmonicPreset(presetName) {
+    const TWO_PI = Math.PI * 2
+
+    const applyConfig = (updater) => {
+      this.harmonicsConfig.forEach((config, planetIndex) => {
+        if (!config)
+          return
+        config.enabled = true
+
+        config.harmonics.forEach((harmonic, harmonicIndex) => {
+          if (!harmonic)
+            return
+
+          updater(harmonic, {
+            planetIndex,
+            harmonicIndex,
+          })
+        })
+      })
+    }
+
+    switch (presetName) {
+      case 'golden':
+        this.harmonicsGlobal.strength = 1.0
+        applyConfig((harmonic, context) => {
+          const baseRatios = [1.618, 2.618, 3.618]
+          const baseStrength = 0.14 + context.planetIndex * 0.03
+          harmonic.enabled = true
+          harmonic.freqRatio = baseRatios[Math.min(context.harmonicIndex, baseRatios.length - 1)]
+          harmonic.radialStrength = baseStrength
+          harmonic.angleStrength = 0.12 - context.harmonicIndex * 0.02
+          harmonic.skewStrength = (context.planetIndex % 2 ? -0.12 : 0.12) * (1 - context.harmonicIndex * 0.3)
+          harmonic.verticalStrength = 0.05 + context.harmonicIndex * 0.02
+          harmonic.phase = (Math.PI / 6) * (context.planetIndex + context.harmonicIndex * 0.8)
+          harmonic.verticalPhase = Math.PI / 2 * (0.4 + context.harmonicIndex * 0.3)
+        })
+        break
+
+      case 'lissajous':
+        this.harmonicsGlobal.strength = 1.1
+        applyConfig((harmonic, context) => {
+          const ratioSet = [1, 2, 3, 5]
+          const ratio = ratioSet[(context.planetIndex + context.harmonicIndex) % ratioSet.length]
+          harmonic.enabled = true
+          harmonic.freqRatio = ratio
+          harmonic.radialStrength = 0.10 + 0.03 * context.harmonicIndex
+          harmonic.angleStrength = 0.18 - 0.05 * context.harmonicIndex
+          harmonic.skewStrength = 0.08 * Math.sin((context.planetIndex + 1) * Math.PI / 3)
+          harmonic.verticalStrength = 0.06 * Math.cos(context.harmonicIndex * Math.PI / 4)
+          harmonic.phase = TWO_PI * (context.planetIndex * 0.15 + context.harmonicIndex * 0.22)
+          harmonic.verticalPhase = Math.PI * (0.25 + context.harmonicIndex * 0.3)
+        })
+        break
+
+      case 'mandala':
+        this.harmonicsGlobal.strength = 1.3
+        applyConfig((harmonic, context) => {
+          const radialBase = 0.16 + context.planetIndex * 0.02
+          harmonic.enabled = true
+          harmonic.freqRatio = 1.2 + context.harmonicIndex * 0.9
+          harmonic.radialStrength = radialBase
+          harmonic.angleStrength = -0.20 + context.harmonicIndex * 0.06
+          harmonic.skewStrength = 0.18 - context.harmonicIndex * 0.05
+          harmonic.verticalStrength = 0.07 + Math.sin(context.planetIndex + context.harmonicIndex) * 0.03
+          harmonic.phase = Math.PI / 3 * (context.planetIndex + context.harmonicIndex * 1.2)
+          harmonic.verticalPhase = Math.PI / 2 * (0.3 + context.harmonicIndex * 0.5)
+        })
+        break
+
+      case 'chaotic':
+        this.harmonicsGlobal.strength = 1.35
+        applyConfig((harmonic) => {
+          harmonic.enabled = true
+          harmonic.freqRatio = 0.8 + Math.random() * 3.8
+          harmonic.radialStrength = 0.05 + Math.random() * 0.2
+          harmonic.angleStrength = -0.25 + Math.random() * 0.5
+          harmonic.skewStrength = -0.2 + Math.random() * 0.4
+          harmonic.verticalStrength = 0.02 + Math.random() * 0.12
+          harmonic.phase = Math.random() * TWO_PI
+          harmonic.verticalPhase = Math.random() * TWO_PI
+        })
+        break
+
+      default:
+        // 默认回落至黄金比例的温和模式
+        this.applyHarmonicPreset('golden')
+        return
+    }
+
+    this.clearTrajectories()
+  }
+
   // 随机化运动参数
   randomizeMotionParameters() {
     this.motionParams.perturbationRadius = 0.5 + Math.random() * 2.5
@@ -780,6 +1200,22 @@ export default class Plants {
     this.motionParams.verticalFreq = 0.2 + Math.random() * 1.5
     this.motionParams.harmonicCount = Math.floor(1 + Math.random() * 4)
     this.motionParams.yOffsetScale = 0.5 + Math.random() * 3.0 // 随机Y轴错开程度
+
+    // 同步随机化谐波参数，探索更多多频共振组合
+    this.harmonicsConfig.forEach((config) => {
+      config.harmonics.forEach((harmonic) => {
+        if (!harmonic.enabled)
+          return
+
+        harmonic.freqRatio = 1 + Math.random() * 3.5
+        harmonic.radialStrength = 0.05 + Math.random() * 0.25
+        harmonic.angleStrength = -0.2 + Math.random() * 0.4
+        harmonic.skewStrength = -0.18 + Math.random() * 0.36
+        harmonic.verticalStrength = 0.02 + Math.random() * 0.12
+        harmonic.phase = Math.random() * Math.PI * 2
+        harmonic.verticalPhase = Math.random() * Math.PI * 2
+      })
+    })
 
     this.clearTrajectories()
   }

@@ -8,7 +8,7 @@ import planetVertexShader from '../../shaders/planet/vertex.glsl'
 import Experience from '../experience.js'
 
 // 构建单个星球
-export default class Plant {
+export default class Planet {
   constructor(options = {}) {
     // 获取 Experience 单例实例
     this.experience = new Experience()
@@ -78,15 +78,15 @@ export default class Plant {
     // 设置主纹理 & 各项异性过滤
     const texture = this.resources.items[this.textureName]
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 16
+    texture.anisotropy = 8
 
     // 设置法线贴图 & 各项异性过滤
     const normalMap = this.resources.items.planetNormal
-    normalMap.anisotropy = 16
+    normalMap.anisotropy = 8
 
     // 设置置换贴图 & 各项异性过滤
     const displacementMap = this.resources.items.planetDisplacement
-    displacementMap.anisotropy = 16
+    displacementMap.anisotropy = 8
     // 创建着色器材质，模拟光照
     this.material = new THREE.ShaderMaterial({
       vertexShader: planetVertexShader,
@@ -222,7 +222,7 @@ export default class Plant {
 
   // 调试控制面板
   debugInit() {
-    // 星球控制改由 Plants 统一管理，此处不再创建星球控制面板
+    // 星球控制改由 Planets 统一管理，此处不再创建星球控制面板
   }
 
   // 更新几何体
@@ -272,13 +272,13 @@ export default class Plant {
     // ===== 大气层调节（光照共享，局部仅保留大气颜色） =====
     this.lightingDebugFolder = this.debug.ui.addFolder({
       title: '🌫️ 大气层调节',
-      expanded: true,
+      expanded: false,
     })
 
     // ----- 大气层控制（仅颜色） -----
     const atmosphereFolder = this.lightingDebugFolder.addFolder({
       title: '大气层颜色',
-      expanded: true,
+      expanded: false,
     })
 
     // 大气层颜色
@@ -310,7 +310,7 @@ export default class Plant {
     })
   }
 
-  // 与上层共享光照参数同步（由 Plants 统一调控）
+  // 与上层共享光照参数同步（由 Planets 统一调控）
   syncLighting(shared) {
     if (!shared)
       return

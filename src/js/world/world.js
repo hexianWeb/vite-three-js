@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import Experience from '../experience.js'
 import Environment from './environment.js'
 import Galaxy from './galaxy.js'
-import Plants from './plants.js'
+import Planets from './planets.js'
 
 export default class World {
   constructor() {
@@ -24,7 +24,7 @@ export default class World {
       this.galaxy = new Galaxy()
 
       // 创建三星系统
-      this.plants = new Plants()
+      this.planets = new Planets()
     })
 
     // 添加调试器
@@ -48,8 +48,8 @@ export default class World {
     }
 
     // 更新三星系统
-    if (this.plants) {
-      this.plants.update()
+    if (this.planets) {
+      this.planets.update()
     }
   }
 }

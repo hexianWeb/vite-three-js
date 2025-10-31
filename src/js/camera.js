@@ -52,7 +52,9 @@ export default class Camera {
   setControls() {
     // OrbitControls 设置
     this.orbitControls = new OrbitControls(this.instance, this.canvas)
-    this.orbitControls.enableDamping = true
+    this.orbitControls.enableRotate = false
+    this.orbitControls.enablePan = false
+    this.orbitControls.enableDamping = false
     this.orbitControls.enableZoom = false // 禁用缩放
     this.orbitControls.target.copy(this.target)
 
@@ -61,7 +63,9 @@ export default class Camera {
     this.trackballControls.noRotate = true // 禁用旋转
     this.trackballControls.noPan = true // 禁用平移
     this.trackballControls.noZoom = false // 启用缩放
-    this.trackballControls.zoomSpeed = 1 // 设置缩放速度
+    this.trackballControls.zoomSpeed = 0.5 // 设置缩放速度
+    this.trackballControls.minDistance = 5
+    this.trackballControls.maxDistance = 50
 
     // 同步两个控制器的目标点
     this.trackballControls.target.copy(this.target)
