@@ -22,6 +22,20 @@ export default class Camera {
     this.setDebug()
   }
 
+  // 添加 throttle 函数（优化延迟）
+  throttle(func, limit) {
+    let inThrottle
+    return function (...args) {
+      const context = this
+      if (!inThrottle) {
+        func.apply(context, args)
+        inThrottle = true
+        setTimeout(() => inThrottle = false, limit)
+      }
+    }
+  }
+
+  // 添加平滑插值相机位置的属性
   setInstance() {
     if (this.orthographic) {
       const aspect = this.sizes.aspect
@@ -47,6 +61,9 @@ export default class Camera {
     this.instance.position.copy(this.position)
     this.instance.lookAt(this.target)
     this.scene.add(this.instance)
+
+    // 初始化目标位置用于平滑插值
+    this.targetPosition = this.position.clone()
   }
 
   setControls() {
@@ -120,7 +137,40 @@ export default class Camera {
   }
 
   update() {
+    // 原有控制器更新
     this.orbitControls.update()
     this.trackballControls.update()
+
+    // 平滑插值相机位置（减少卡顿）
+    if (this.targetPosition && !this.targetPosition.equals(this.instance.position)) {
+      this.instance.position.lerp(this.targetPosition, 0.1) // 平滑因子0.1
+      this.instance.lookAt(this.target)
+    }
+
+    // 添加滚动事件监听（仅首次绑定）
+    if (!this.scrollHandler) {
+      this.scrollHandler = this.throttle((event) => {
+        // 根据滚动方向调整相机距离
+        const delta = event.deltaY || event.wheelDelta || -event.detail
+        const scrollDirection = delta > 0 ? 1 : -1
+
+        // 提高缩放灵敏度
+        const zoomFactor = 5 // 增强缩放灵敏度
+        const currentDistance = this.instance.position.distanceTo(this.target)
+        const newDistance = Math.max(5, Math.min(50, currentDistance + scrollDirection * zoomFactor))
+
+        // 计算新的目标位置（沿视向移动）
+        const direction = new THREE.Vector3()
+        direction.subVectors(this.instance.position, this.target).normalize()
+        this.targetPosition.copy(this.target).add(direction.multiplyScalar(newDistance))
+
+        // 更新控制器的目标
+        this.trackballControls.target.copy(this.target)
+        this.orbitControls.target.copy(this.target)
+      }, 16) // 增加延迟到32ms，约30fps，更平滑
+
+      // 绑定滚动事件到window而不是canvas
+      window.addEventListener('wheel', this.scrollHandler, { passive: true })
+    }
   }
 }

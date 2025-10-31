@@ -7,12 +7,6 @@ const threeCanvas = ref(null)
 
 // Header 导航处理函数
 function handleNavigation(section, event) {
-  // 这里可以添加具体的导航逻辑
-  // 例如：路由跳转、滚动到指定区域、打开弹窗等
-
-  // 示例：可以通过 mitt 事件总线通知其他组件
-  // emitter.emit('navigation', { section })
-
   // 添加点击反馈动效
   if (event) {
     const button = event.target.closest('.nav-button')

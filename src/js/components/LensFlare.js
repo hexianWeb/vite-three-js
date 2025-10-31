@@ -139,8 +139,8 @@ export default class LensFlare {
 
       if (this.params.followMouse) {
         // 跟随鼠标 (NDC 坐标)，使用 lerp 逐渐逼近
-        const targetX = normalizedMouse.x * 0.3
-        const targetY = normalizedMouse.y * 0.3
+        const targetX = normalizedMouse.x * 0.06
+        const targetY = normalizedMouse.y * 0.06
         const targetPosition = new THREE.Vector2(targetX, targetY)
 
         // 使用 lerp 插值逐渐逼近目标位置
