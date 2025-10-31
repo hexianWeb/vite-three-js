@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import TechCursor from './components/TechCursor.vue'
 import Experience from './js/experience.js'
 
 const threeCanvas = ref(null)
@@ -34,8 +35,11 @@ onMounted(() => {
 
 <template>
   <div class=" w-full bg-black overflow-hidden h-screen" style="pointer-events: none;">
+    <!-- 科技风鼠标光标 -->
+    <TechCursor />
+
     <!-- three.js 渲染的 canvas -->
-    <canvas ref="threeCanvas" class="three-canvas relative inset-0 z-0 " style="pointer-events: auto;" />
+    <canvas ref="threeCanvas" class="three-canvas relative inset-0 " style="pointer-events: auto; z-index: -1;" />
 
     <!-- Indigo Cosmos Background with Top Glow -->
     <div
