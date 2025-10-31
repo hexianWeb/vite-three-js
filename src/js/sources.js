@@ -70,4 +70,9 @@ export default [
     type: 'texture',
     path: 'textures/galaxy/red_sand_disp_1k.png',
   },
+  {
+    name: 'lensDirtTexture',
+    type: 'texture',
+    path: 'textures/lensflare/lensDirtTexture.jpg',
+  },
 ]

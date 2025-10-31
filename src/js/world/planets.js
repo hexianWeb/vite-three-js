@@ -406,19 +406,19 @@ export default class Planets {
     // ===== 伪三体运动控制面板 =====
     this.debugFolder = this.debug.ui.addFolder({
       title: '🌟 伪三体运动系统',
-      expanded: true,
+      expanded: false,
     })
 
     // ===== 全局光照（共享） =====
     const lightingFolder = this.debugFolder.addFolder({
       title: '全局光照',
-      expanded: true,
+      expanded: false,
     })
 
     // 环境光设置
     const ambientFolder = lightingFolder.addFolder({
       title: '环境光',
-      expanded: true,
+      expanded: false,
     })
 
     ambientFolder.addBinding(
@@ -449,7 +449,7 @@ export default class Planets {
     // 点光源设置
     const pointFolder = lightingFolder.addFolder({
       title: '点光源',
-      expanded: true,
+      expanded: false,
     })
 
     pointFolder.addBinding(
@@ -480,7 +480,7 @@ export default class Planets {
     // 光源位置
     const lightPosFolder = pointFolder.addFolder({
       title: '光源位置',
-      expanded: true,
+      expanded: false,
     })
 
     lightPosFolder.addBinding(
@@ -499,7 +499,7 @@ export default class Planets {
     // ===== 全局大气（共享） =====
     const atmosFolder = this.debugFolder.addFolder({
       title: '全局大气',
-      expanded: true,
+      expanded: false,
     })
 
     // 大气强度（共享）
@@ -545,7 +545,7 @@ export default class Planets {
     // ===== 基础轨道 =====
     const basicFolder = this.debugFolder.addFolder({
       title: '基础轨道',
-      expanded: true,
+      expanded: false,
     })
 
     basicFolder.addBinding(
@@ -692,7 +692,7 @@ export default class Planets {
     // 控制按钮
     const controlFolder = this.debugFolder.addFolder({
       title: '控制',
-      expanded: true,
+      expanded: false,
     })
 
     controlFolder.addBinding(
@@ -745,7 +745,7 @@ export default class Planets {
     // ===== 速度控制面板 =====
     const speedFolder = this.debugFolder.addFolder({
       title: '🚀 星体运动速度',
-      expanded: true,
+      expanded: false,
     })
 
     // 速度模式选择
@@ -771,7 +771,7 @@ export default class Planets {
     // 个别星体速度控制
     const individualSpeedFolder = speedFolder.addFolder({
       title: '个别星体速度',
-      expanded: true,
+      expanded: false,
     })
 
     // 为每个星体添加速度控制
